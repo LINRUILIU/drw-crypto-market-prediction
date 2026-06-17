@@ -1,0 +1,62 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  target_col: label
+  id_col:
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+feature_selection:
+  top_k: [50, 100, 200, 300, 500]
+  include_full: true
+
+folds:
+  embargo_rows: 0
+  definitions:
+    - name: fold_50_60
+      train_start: 0.0
+      train_end: 0.5
+      valid_start: 0.5
+      valid_end: 0.6
+    - name: fold_60_70
+      train_start: 0.0
+      train_end: 0.6
+      valid_start: 0.6
+      valid_end: 0.7
+    - name: fold_70_80
+      train_start: 0.0
+      train_end: 0.7
+      valid_start: 0.7
+      valid_end: 0.8
+    - name: fold_80_90
+      train_start: 0.0
+      train_end: 0.8
+      valid_start: 0.8
+      valid_end: 0.9
+
+models:
+  ridge:
+    enabled: true
+    alphas: [0.1, 1.0, 10.0, 100.0, 1000.0]
+  lightgbm:
+    enabled: true
+    n_estimators: 1200
+    learning_rate: 0.03
+    num_leaves: 63
+    subsample: 0.85
+    colsample_bytree: 0.85
+    reg_alpha: 0.0
+    reg_lambda: 1.0
+    early_stopping_rounds: 100
+
+ensemble:
+  enabled: true
+  ridge_lgbm_grid_step: 0.05
+
+output:
+  run_dir: runs/03_temporal/rolling_validation
+  figure_dir: reports/figures/03_temporal

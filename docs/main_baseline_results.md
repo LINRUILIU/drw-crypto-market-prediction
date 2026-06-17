@@ -75,3 +75,24 @@ Kaggle result for this optimized submission:
 | Private | 0.06610 |
 
 The leaderboard result is materially below the offline validation Pearson `0.125069`, so the next validation improvement should focus on rolling/time-stability checks rather than trusting a single 80/20 split.
+
+## Rolling Validation Check
+
+After the Kaggle result, a four-fold expanding rolling validation was run for `full`, `top50`, `top100`, `top200`, `top300`, and `top500`.
+
+Ridge + LightGBM ensemble summary:
+
+| Scheme | Mean Pearson | Std | Min | Max |
+| --- | ---: | ---: | ---: | ---: |
+| full | 0.115468 | 0.019837 | 0.098538 | 0.147126 |
+| top50 | 0.121328 | 0.035865 | 0.078946 | 0.170520 |
+| top200 | 0.153862 | 0.073044 | 0.081128 | 0.272860 |
+| top300 | 0.162315 | 0.051951 | 0.103448 | 0.239494 |
+
+Main conclusion: `top200` and `top300` still look strong offline, but their rolling variance is high. The `full` scheme is the most stable reference. Future submissions should not use the single 80/20 top-k validation score as the only selection rule.
+
+Rolling artifacts:
+
+- `runs/03_temporal/rolling_validation/metrics_rolling_validation.csv`
+- `runs/03_temporal/rolling_validation/scheme_stability_summary.csv`
+- `runs/03_temporal/rolling_validation/lightgbm_importance_stability.csv`

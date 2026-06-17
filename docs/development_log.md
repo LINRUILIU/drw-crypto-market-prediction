@@ -242,3 +242,73 @@ Submitted `submissions/01_main/pearson_topk/submission_best.csv`.
 | Private | 0.06610 |
 
 Interpretation: the single chronological 80/20 validation split overestimated leaderboard generalization. The top-k model is useful as a feature-selection result, but the next optimization step should prioritize rolling validation and temporal stability before further leaderboard-oriented feature tuning.
+
+## 2026-06-17: Rolling Validation and Temporal Stability
+
+### Goal
+
+Check whether the main-task validation signal is stable over time after the Pearson top-k submission scored materially lower on Kaggle than on the single 80/20 validation split.
+
+### Implementation
+
+- Added config: `configs/03_temporal_rolling_validation.yaml`.
+- Added script: `scripts/run_rolling_validation.py`.
+- Evaluated four expanding chronological folds:
+  - `fold_50_60`: train 0-50%, validate 50-60%.
+  - `fold_60_70`: train 0-60%, validate 60-70%.
+  - `fold_70_80`: train 0-70%, validate 70-80%.
+  - `fold_80_90`: train 0-80%, validate 80-90%.
+- Recomputed train-only Pearson feature ranking for each fold.
+- Tested `top50`, `top100`, `top200`, `top300`, `top500`, and `full`.
+- For each fold and scheme, fitted imputation, standardization, Ridge, LightGBM, and Ridge + LightGBM ensemble independently.
+- Added feature-set overlap, selection frequency, and LightGBM feature-importance stability outputs.
+
+### Full Rolling Results
+
+Rows below summarize Ridge + LightGBM ensemble Pearson over the four folds.
+
+| Scheme | Mean Pearson | Std | Min | Max | Mean RMSE |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| full | 0.115468 | 0.019837 | 0.098538 | 0.147126 | 1.056822 |
+| top50 | 0.121328 | 0.035865 | 0.078946 | 0.170520 | 1.032792 |
+| top100 | 0.135306 | 0.058504 | 0.079048 | 0.233110 | 1.025695 |
+| top500 | 0.139575 | 0.036829 | 0.090258 | 0.175179 | 1.044568 |
+| top200 | 0.153862 | 0.073044 | 0.081128 | 0.272860 | 1.025452 |
+| top300 | 0.162315 | 0.051951 | 0.103448 | 0.239494 | 1.023193 |
+
+### Target Drift
+
+| Fold | Target Mean | Target Std | q05 | Median | q95 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| fold_50_60 | 0.023199 | 0.945710 | -1.305820 | 0.013257 | 1.327380 |
+| fold_60_70 | 0.117703 | 1.044563 | -1.229271 | 0.059195 | 1.611012 |
+| fold_70_80 | 0.054910 | 1.003248 | -1.476842 | 0.042353 | 1.649716 |
+| fold_80_90 | -0.002802 | 1.029727 | -1.430521 | -0.002125 | 1.490496 |
+
+### Artifacts
+
+- Metrics: `runs/03_temporal/rolling_validation/metrics_rolling_validation.csv`
+- Scheme summary: `runs/03_temporal/rolling_validation/scheme_stability_summary.csv`
+- Target distribution: `runs/03_temporal/rolling_validation/target_distribution_by_fold.csv`
+- Feature overlap: `runs/03_temporal/rolling_validation/feature_overlap.csv`
+- Feature selection frequency: `runs/03_temporal/rolling_validation/feature_selection_frequency.csv`
+- LightGBM importance stability: `runs/03_temporal/rolling_validation/lightgbm_importance_stability.csv`
+- Figures:
+  - `reports/figures/03_temporal/rolling_pearson_by_scheme.png`
+  - `reports/figures/03_temporal/target_distribution_by_fold.png`
+
+### Interpretation
+
+- `top200` and `top300` have the strongest mean rolling Pearson, but their fold-to-fold variance is high.
+- `full` has the lowest Pearson standard deviation and the smallest gap to the reported private score `0.06610`, so it is the most conservative stability reference.
+- The target distribution shifts by time segment, especially in `fold_60_70`, where target mean and upper quantiles are higher. This supports treating the task as regime-dependent instead of a static i.i.d. regression problem.
+- The single 80/20 top200 validation result `0.125069` should not be used alone for model selection. Future leaderboard-oriented submissions should prefer rolling-aware selection or blend candidates chosen for stability, not only peak validation Pearson.
+
+### Next Direction
+
+The next main-task optimization should build a robust candidate from this evidence:
+
+- use full or top50 as stability baselines;
+- compare top200/top300 only if the selection rule penalizes rolling variance;
+- consider a weighted blend of stable full-feature Ridge/LightGBM with top-k Ridge signals;
+- generate a new submission only after the rolling criterion is defined.
