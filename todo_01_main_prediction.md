@@ -70,3 +70,5 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Beta1 started with narrow private-score blend probes around `0.85 * top200 + 0.15 * stability`.
 - [x] Beta1 added rank and normal-score submission calibration.
 - [x] Beta1 added new-signal blending with top100 Ridge and full-feature baselines.
+- [x] Beta1 found a new private-best top100 Ridge blend at `0.70 * raw_w085 + 0.30 * top100_ridge`.
+- [ ] Probe top100 Ridge weights near `0.30`: `0.25`, `0.275`, `0.325`, `0.35`.

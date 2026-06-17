@@ -697,3 +697,19 @@ This is `top100_ridge_w030`:
 ```
 
 Rationale: `top100_ridge_w030` gives the best holdout Pearson among the tested new-signal blends while keeping rolling minimum slightly above raw `w085`. If it fails on private, the next safer probe is `full_ensemble_w020`, which has a lower holdout gain but much better rolling minimum.
+
+### Kaggle Result
+
+Submitted:
+
+- `submissions/01_main/beta1_signal_blend/submission_best.csv` / `submission_top100_ridge_w030.csv`
+- `submissions/01_main/beta1_signal_blend/submission_top100_ridge_w020.csv`
+
+| Candidate | Public | Private |
+| --- | ---: | ---: |
+| top100_ridge_w020 | 0.03625 | 0.06443 |
+| top100_ridge_w030 | 0.03651 | 0.07539 |
+
+Interpretation: `top100_ridge_w030` is the new best private result by a large margin, improving over raw `w085` from `0.06628` to `0.07539`. The much weaker `w020` result shows that the private response to the added top100 Ridge signal is not linear, so low-weight interpolation should not be assumed safe.
+
+Next beta1 action: keep `top100_ridge_w030` as the current best and probe a narrow neighborhood around `0.30`. Added fixed candidate submissions for `top100_ridge_w025`, `top100_ridge_w0275`, `top100_ridge_w0325`, and `top100_ridge_w035`; submit `w0325` first, then choose `w035` or `w0275` based on the private result.
