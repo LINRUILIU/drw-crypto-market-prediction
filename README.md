@@ -38,3 +38,11 @@ D:\PythonEnvs\envs\py313-science\Scripts\python.exe scripts/run_main_baseline.py
 ```
 
 The runner always supports a NumPy Ridge baseline. ElasticNet, LightGBM, XGBoost, and CatBoost are enabled when their packages are installed.
+
+## Pearson Top-k Optimization
+
+```powershell
+D:\PythonEnvs\envs\py313-science\Scripts\python.exe scripts/run_pearson_topk.py --config configs/01_main_pearson_topk.yaml
+```
+
+This trains Ridge, LightGBM, and their weighted ensemble on train-only Pearson top-k feature sets.

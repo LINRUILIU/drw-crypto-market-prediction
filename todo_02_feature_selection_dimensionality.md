@@ -6,16 +6,16 @@ Study how to build lower-dimensional and more stable predictive features under h
 
 ## Checkpoints
 
-- [ ] Establish the full-feature baseline
-  - [ ] Reuse the main-task validation split.
-  - [ ] Train Ridge and LightGBM using all valid features.
-  - [ ] Save full-feature Pearson, RMSE, training time, and feature count.
+- [x] Establish the full-feature baseline
+  - [x] Reuse the main-task validation split.
+  - [x] Train Ridge and LightGBM using all valid features.
+  - [x] Save full-feature Pearson, RMSE, training time, and feature count.
 
-- [ ] Pearson correlation feature selection
-  - [ ] Compute feature-target correlation using training split only.
-  - [ ] Test top 50, top 100, top 200, and top 300 features.
-  - [ ] Train Ridge and LightGBM for each feature set.
-  - [ ] Save selected feature lists and metrics.
+- [x] Pearson correlation feature selection
+  - [x] Compute feature-target correlation using training split only.
+  - [x] Test top 50, top 100, top 200, top 300, and top 500 features.
+  - [x] Train Ridge and LightGBM for each feature set.
+  - [x] Save selected feature lists and metrics.
 
 - [ ] Low-variance and missing-rate filtering
   - [ ] Measure missing ratio per feature.
@@ -59,4 +59,3 @@ Study how to build lower-dimensional and more stable predictive features under h
 - [ ] The report can discuss the tradeoff between dimension reduction, speed, and Pearson score.
 - [ ] All feature selection methods are fitted on training data only.
 - [ ] At least one method provides a clear modeling insight, even if it does not beat the full-feature model.
-

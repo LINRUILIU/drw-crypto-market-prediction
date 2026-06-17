@@ -47,3 +47,22 @@ The selected first submission model is `ensemble_ridge_lgbm` with Ridge weight `
 ## Reference
 
 - First-place writeup for later study: https://www.kaggle.com/competitions/drw-crypto-market-prediction/writeups/drw-solution-1st
+
+## Main Optimization Result: Pearson Top-k
+
+After the full-feature baseline, a train-only Pearson top-k feature selection experiment was run with Ridge, LightGBM, and their weighted ensemble.
+
+| Scheme | Model | Features | Pearson | RMSE |
+| --- | --- | ---: | ---: | ---: |
+| top200 | Ridge + LightGBM weighted ensemble | 200 | 0.125069 | 1.079047 |
+| top200 | Ridge | 200 | 0.124899 | 1.081521 |
+| top100 | Ridge + LightGBM weighted ensemble | 100 | 0.114977 | 1.071005 |
+| full | Ridge + LightGBM weighted ensemble | 785 | 0.100263 | 1.126039 |
+
+Selected optimized submission:
+
+```text
+submissions/01_main/pearson_topk/submission_best.csv
+```
+
+This file has 538,150 rows and columns `ID`, `prediction`.

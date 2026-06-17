@@ -1,0 +1,45 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  validation_fraction: 0.2
+  max_train_rows:
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+feature_selection:
+  top_k: [50, 100, 200, 300, 500]
+  include_full: true
+  baseline_pearson: 0.100263
+
+models:
+  ridge:
+    enabled: true
+    alphas: [0.1, 1.0, 10.0, 100.0, 1000.0]
+  lightgbm:
+    enabled: true
+    n_estimators: 1200
+    learning_rate: 0.03
+    num_leaves: 63
+    subsample: 0.85
+    colsample_bytree: 0.85
+    reg_alpha: 0.0
+    reg_lambda: 1.0
+    early_stopping_rounds: 100
+
+ensemble:
+  enabled: true
+  ridge_lgbm_grid_step: 0.05
+
+output:
+  run_dir: runs/01_main/pearson_topk
+  submission_dir: submissions/01_main/pearson_topk
+  prediction_col: prediction
+

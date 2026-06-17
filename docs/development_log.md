@@ -190,3 +190,44 @@ https://github.com/LINRUILIU/drw-crypto-market-prediction.git
 - The repository metadata reported default branch `main`, so the first push was sent to `main`.
 - The branch was then corrected back to `master` for this project.
 - HTTPS push succeeded through the available Git credential flow.
+
+## 2026-06-17: Pearson Top-k Main-Task Optimization
+
+### Goal
+
+Add a reproducible optimization line for the main Kaggle prediction task using train-only Pearson top-k feature selection with Ridge, LightGBM, and their weighted ensemble.
+
+### Implementation
+
+- Added config: `configs/01_main_pearson_topk.yaml`.
+- Added script: `scripts/run_pearson_topk.py`.
+- Added shared feature-ranking utility: `src/drw_crypto/feature_selection.py`.
+- Default top-k values: `50`, `100`, `200`, `300`, `500`, plus `full` as a control.
+- Feature ranking uses absolute Pearson correlation with `label`, fitted on the training split only.
+- Each feature set independently fits missing-value imputation, standardization, Ridge, and LightGBM.
+- LightGBM keeps Pearson-based early stopping.
+- Ensemble searches Ridge weight from `0.00` to `1.00` with step `0.05`.
+
+### Validation Results
+
+Compared against the previous full-feature ensemble baseline Pearson `0.100263`.
+
+| Scheme | Model | Features | Pearson | RMSE | Notes |
+| --- | --- | ---: | ---: | ---: | --- |
+| top200 | Ridge + LightGBM | 200 | 0.125069 | 1.079047 | Ridge weight `0.95` |
+| top200 | Ridge | 200 | 0.124899 | 1.081521 | alpha `1000.0` |
+| top100 | Ridge + LightGBM | 100 | 0.114977 | 1.071005 | Ridge weight `0.95` |
+| full | Ridge + LightGBM | 785 | 0.100263 | 1.126039 | Ridge weight `0.60` |
+
+### Artifacts
+
+- Metrics: `runs/01_main/pearson_topk/metrics_pearson_topk.csv`
+- Feature ranking: `runs/01_main/pearson_topk/pearson_feature_ranking.csv`
+- Best submission: `submissions/01_main/pearson_topk/submission_best.csv`
+- Final summary: `runs/01_main/pearson_topk/final_summary.json`
+
+### Outcome
+
+- Best validation model: `top200` Ridge + LightGBM ensemble.
+- Pearson improved from `0.100263` to `0.125069`.
+- A new Kaggle submission file was generated because the top-k model beat the full-feature baseline.
