@@ -67,6 +67,22 @@ submissions/01_main/pearson_topk/submission_best.csv
 
 This file has 538,150 rows and columns `ID`, `prediction`.
 
+Kaggle result:
+
+| Split | Score |
+| --- | ---: |
+| Public | 0.06237 |
+| Private | 0.05589 |
+
+Comparison with the previous submission:
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Pearson top200 | 0.02826 | 0.06610 | Current best private score |
+| stability blend | 0.06237 | 0.05589 | Better public, worse private |
+
+Conclusion: the stability blend is useful evidence, but it is not the best final candidate by private score. The next optimization should investigate why public and private prefer different candidates before adding more model families.
+
 Kaggle result for this optimized submission:
 
 | Split | Score |

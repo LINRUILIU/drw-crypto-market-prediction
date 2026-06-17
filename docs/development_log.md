@@ -398,3 +398,16 @@ Submission shape was verified as `538150 x 2` with columns `ID,prediction`.
 ### Interpretation
 
 This is a more defensible next submission candidate than the pure top200 80/20 winner. It does not maximize the optimistic single-split score, but it directly addresses the stability problem observed after the Kaggle result.
+
+### Kaggle Result
+
+Submitted `submissions/01_main/stability_blend/submission_best.csv`.
+
+| Split | Score |
+| --- | ---: |
+| Public | 0.06237 |
+| Private | 0.05589 |
+
+Interpretation: the stability blend substantially improved public score versus the previous top200 submission (`0.06237` vs `0.02826`), but private score decreased (`0.05589` vs `0.06610`). The rolling-stability objective improved one kind of robustness, but it did not match the private leaderboard distribution. The current best private result remains the Pearson top200 submission.
+
+Next modeling implication: do not further optimize only for low rolling variance. The next round should compare candidate behavior against public/private-like splits, likely by constructing validation slices that better resemble the private segment, or by using rank/scale post-processing and calibration checks before adding model complexity.
