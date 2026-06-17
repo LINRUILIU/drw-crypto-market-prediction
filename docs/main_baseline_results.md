@@ -234,3 +234,19 @@ Submit `beta1_w090` first. Then use the result to decide the direction:
 
 - If private improves, test `beta1_w0925` or `beta1_w095`.
 - If private falls, test `beta1_w080`.
+
+Kaggle result for `beta1_w090`:
+
+| Split | Score |
+| --- | ---: |
+| Public | 0.03182 |
+| Private | 0.06627 |
+
+Current Beta1 comparison:
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| submission blend private_safe / beta1_w085 | 0.03365 | 0.06628 | Current best private score |
+| beta1_w090 | 0.03182 | 0.06627 | Essentially tied, slightly worse |
+
+Next action: test `beta1_w080` before trying more top200-heavy weights.

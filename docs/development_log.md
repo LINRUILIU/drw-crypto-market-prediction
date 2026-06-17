@@ -541,3 +541,20 @@ This is `beta1_w090`:
 ```
 
 Rationale: `w090` moves closer to the private-favored top200 endpoint than `w085`, improves holdout Pearson from `0.124352` to `0.124691`, and keeps a small stability correction. If `w090` underperforms private, test `w080`; if it improves, test `w0925` or `w095`.
+
+### Kaggle Result
+
+Submitted `submissions/01_main/beta1_blend_probe/submission_best.csv`, the `beta1_w090` candidate:
+
+```text
+0.90 * Pearson top200 + 0.10 * stability blend
+```
+
+| Split | Score |
+| --- | ---: |
+| Public | 0.03182 |
+| Private | 0.06627 |
+
+Interpretation: `w090` is essentially tied with `w085` but does not beat it (`0.06627` vs `0.06628`). Moving closer to pure top200 did not improve private score despite better holdout Pearson. The best observed private blend remains `w085`.
+
+Next beta1 action: test `beta1_w080`, not `w0925` or `w095`, because the observed private optimum is not moving toward the pure top200 endpoint.
