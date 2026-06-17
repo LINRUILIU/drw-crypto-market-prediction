@@ -730,3 +730,48 @@ Submitted:
 Interpretation: the private score continues to improve from `w030` through pure `top100_ridge`, making `top100_ridge_w100` the new best private result. It improves over raw `w085` from `0.06628` to `0.08901`. The weak `full_ensemble_w020` result confirms that not every diverse signal helps; the useful direction in this round is specifically the top100 Ridge signal.
 
 Conclusion: the one-dimensional `raw_w085` to `top100_ridge` weight axis has reached a local bottleneck. `w095` and `w100` are effectively tied, while `w105`, `w110`, and `w125` all decline. `submission_best.csv` now points to `top100_ridge_w100`. The next improvement should come from a new direction, such as a different top-k Ridge signal, a Ridge-only top-k ensemble, or another feature-selection family, rather than further scanning this same blend axis.
+
+## 2026-06-17: Beta2 Ridge Top-k Family
+
+### Goal
+
+Close Beta1 and move to a new signal direction. Since pure `top100_ridge` became the Beta1 best, Beta2 tests whether neighboring Pearson top-k Ridge models or Ridge-only blends can improve the score.
+
+### Implementation
+
+- Added config: `configs/01_main_beta2_ridge_topk.yaml`.
+- Added script: `scripts/run_beta2_ridge_topk.py`.
+- Generated final Ridge submissions for:
+  - `top50_ridge`
+  - `top100_ridge`
+  - `top200_ridge`
+  - `top300_ridge`
+  - `top500_ridge`
+  - `full_ridge`
+- Generated Ridge-only blends, focusing on `top50_ridge` and `top100_ridge` after `top200_ridge` failed on the leaderboard.
+
+### Kaggle Result
+
+| Candidate | Public | Private |
+| --- | ---: | ---: |
+| top100_ridge | 0.03716 | 0.08901 |
+| ridge_top100_top200_avg | 0.03321 | 0.08099 |
+| top200_ridge | 0.02629 | 0.06625 |
+| top50_ridge | 0.05162 | 0.08821 |
+| ridge_top100_080_top50_020 | 0.04092 | 0.09117 |
+| ridge_top100_070_top50_030 | 0.04275 | 0.09197 |
+| ridge_top100_060_top50_040 | 0.04450 | 0.09253 |
+| ridge_top50_top100_avg | 0.04614 | 0.09278 |
+| ridge_top100_045_top50_055 | 0.04690 | 0.09279 |
+| ridge_top100_040_top50_060 | 0.04763 | 0.09269 |
+| ridge_top100_0475_top50_0525 | 0.04652 | 0.09280 |
+
+Interpretation: `top200_ridge` has the best offline holdout Pearson but fails badly on the leaderboard, confirming another validation mismatch. `top50_ridge` has much better public score and nearly matches `top100_ridge` private score. Blending `top50_ridge` with `top100_ridge` gives a stable improvement, with a broad plateau around `45%` to `50%` top100 weight.
+
+Conclusion: current best is `ridge_top100_0475_top50_0525`:
+
+```text
+0.475 * top100_ridge + 0.525 * top50_ridge
+```
+
+`submission_best.csv` now points to this candidate. The local top50/top100 blend axis is close to saturated because `45/55`, `47.5/52.5`, and `50/50` are nearly tied. The next Beta2 direction should test whether intermediate direct feature widths such as top75/top80/top90 Ridge can replace or improve this blend.

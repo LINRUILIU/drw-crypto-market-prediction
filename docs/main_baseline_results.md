@@ -342,3 +342,31 @@ Kaggle results:
 | top100_ridge_w125 | 0.03407 | 0.08612 | Over-extrapolation hurts |
 
 Conclusion: top100 Ridge is the dominant signal found so far. The best observed private result is pure `top100_ridge_w100`, and the local weight scan has saturated because both smaller and larger nearby weights fail to improve it. The next Beta1 improvement should use a new signal direction rather than further tuning this same blend axis.
+
+## Beta2 Ridge Top-k Family
+
+Beta2 closes the Beta1 submission-level blend axis and starts from the Ridge family directly.
+
+Kaggle results:
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| top100_ridge | 0.03716 | 0.08901 | Beta1 best before Beta2 |
+| ridge_top100_top200_avg | 0.03321 | 0.08099 | Offline looked strong, leaderboard worsened |
+| top200_ridge | 0.02629 | 0.06625 | Validation mismatch; not useful |
+| top50_ridge | 0.05162 | 0.08821 | Strong public, slightly worse private than top100 |
+| ridge_top100_080_top50_020 | 0.04092 | 0.09117 | Better private |
+| ridge_top100_070_top50_030 | 0.04275 | 0.09197 | Better private |
+| ridge_top100_060_top50_040 | 0.04450 | 0.09253 | Better private |
+| ridge_top50_top100_avg | 0.04614 | 0.09278 | Near plateau |
+| ridge_top100_045_top50_055 | 0.04690 | 0.09279 | Near plateau |
+| ridge_top100_040_top50_060 | 0.04763 | 0.09269 | Slightly worse |
+| ridge_top100_0475_top50_0525 | 0.04652 | 0.09280 | Current best private score |
+
+Current best:
+
+```text
+0.475 * top100_ridge + 0.525 * top50_ridge
+```
+
+Conclusion: the useful Ridge window is narrower than top200 and sits between top50 and top100. The next step should test direct intermediate feature widths, such as top75/top80/top90 Ridge, instead of further tuning the top50/top100 blend by one or two percent.

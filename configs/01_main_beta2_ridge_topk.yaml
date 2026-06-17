@@ -1,0 +1,134 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+ridge_signals:
+  top50_ridge:
+    selected_features_path: runs/01_main/pearson_topk/selected_features_top50.txt
+    ridge_alpha_search_path: runs/01_main/pearson_topk/ridge_alpha_search_top50.csv
+    valid_prediction_path: runs/01_main/pearson_topk/valid_predictions/valid_top50_ridge.csv
+    output_submission_path: submissions/01_main/beta2_ridge_topk/signals/submission_top50_ridge.csv
+  top100_ridge:
+    selected_features_path: runs/01_main/pearson_topk/selected_features_top100.txt
+    ridge_alpha_search_path: runs/01_main/pearson_topk/ridge_alpha_search_top100.csv
+    valid_prediction_path: runs/01_main/pearson_topk/valid_predictions/valid_top100_ridge.csv
+    output_submission_path: submissions/01_main/beta2_ridge_topk/signals/submission_top100_ridge.csv
+  top200_ridge:
+    selected_features_path: runs/01_main/pearson_topk/selected_features_top200.txt
+    ridge_alpha_search_path: runs/01_main/pearson_topk/ridge_alpha_search_top200.csv
+    valid_prediction_path: runs/01_main/pearson_topk/valid_predictions/valid_top200_ridge.csv
+    output_submission_path: submissions/01_main/beta2_ridge_topk/signals/submission_top200_ridge.csv
+  top300_ridge:
+    selected_features_path: runs/01_main/pearson_topk/selected_features_top300.txt
+    ridge_alpha_search_path: runs/01_main/pearson_topk/ridge_alpha_search_top300.csv
+    valid_prediction_path: runs/01_main/pearson_topk/valid_predictions/valid_top300_ridge.csv
+    output_submission_path: submissions/01_main/beta2_ridge_topk/signals/submission_top300_ridge.csv
+  top500_ridge:
+    selected_features_path: runs/01_main/pearson_topk/selected_features_top500.txt
+    ridge_alpha_search_path: runs/01_main/pearson_topk/ridge_alpha_search_top500.csv
+    valid_prediction_path: runs/01_main/pearson_topk/valid_predictions/valid_top500_ridge.csv
+    output_submission_path: submissions/01_main/beta2_ridge_topk/signals/submission_top500_ridge.csv
+  full_ridge:
+    selected_features_path: runs/01_main/pearson_topk/selected_features_full.txt
+    ridge_alpha_search_path: runs/01_main/pearson_topk/ridge_alpha_search_full.csv
+    valid_prediction_path: runs/01_main/pearson_topk/valid_predictions/valid_full_ridge.csv
+    output_submission_path: submissions/01_main/beta2_ridge_topk/signals/submission_full_ridge.csv
+
+candidates:
+  default: ridge_top100_0475_top50_0525
+  fixed:
+    - name: top50_ridge
+      weights:
+        top50_ridge: 1.0
+    - name: top100_ridge
+      weights:
+        top100_ridge: 1.0
+    - name: top200_ridge
+      weights:
+        top200_ridge: 1.0
+    - name: top300_ridge
+      weights:
+        top300_ridge: 1.0
+    - name: top500_ridge
+      weights:
+        top500_ridge: 1.0
+    - name: full_ridge
+      weights:
+        full_ridge: 1.0
+    - name: ridge_top50_top100_avg
+      weights:
+        top50_ridge: 0.5
+        top100_ridge: 0.5
+    - name: ridge_top100_top200_avg
+      weights:
+        top100_ridge: 0.5
+        top200_ridge: 0.5
+    - name: ridge_top50_top100_top200_avg
+      weights:
+        top50_ridge: 0.3333333333
+        top100_ridge: 0.3333333333
+        top200_ridge: 0.3333333334
+    - name: ridge_top100_top200_top300_avg
+      weights:
+        top100_ridge: 0.3333333333
+        top200_ridge: 0.3333333333
+        top300_ridge: 0.3333333334
+    - name: ridge_top100_070_top50_030
+      weights:
+        top100_ridge: 0.7
+        top50_ridge: 0.3
+    - name: ridge_top100_090_top50_010
+      weights:
+        top100_ridge: 0.9
+        top50_ridge: 0.1
+    - name: ridge_top100_080_top50_020
+      weights:
+        top100_ridge: 0.8
+        top50_ridge: 0.2
+    - name: ridge_top100_075_top50_025
+      weights:
+        top100_ridge: 0.75
+        top50_ridge: 0.25
+    - name: ridge_top100_065_top50_035
+      weights:
+        top100_ridge: 0.65
+        top50_ridge: 0.35
+    - name: ridge_top100_060_top50_040
+      weights:
+        top100_ridge: 0.6
+        top50_ridge: 0.4
+    - name: ridge_top100_055_top50_045
+      weights:
+        top100_ridge: 0.55
+        top50_ridge: 0.45
+    - name: ridge_top100_045_top50_055
+      weights:
+        top100_ridge: 0.45
+        top50_ridge: 0.55
+    - name: ridge_top100_0475_top50_0525
+      weights:
+        top100_ridge: 0.475
+        top50_ridge: 0.525
+    - name: ridge_top100_040_top50_060
+      weights:
+        top100_ridge: 0.4
+        top50_ridge: 0.6
+    - name: ridge_top100_070_top200_030
+      weights:
+        top100_ridge: 0.7
+        top200_ridge: 0.3
+
+output:
+  run_dir: runs/01_main/beta2_ridge_topk
+  submission_dir: submissions/01_main/beta2_ridge_topk
+  prediction_col: prediction
