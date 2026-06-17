@@ -411,3 +411,60 @@ Submitted `submissions/01_main/stability_blend/submission_best.csv`.
 Interpretation: the stability blend substantially improved public score versus the previous top200 submission (`0.06237` vs `0.02826`), but private score decreased (`0.05589` vs `0.06610`). The rolling-stability objective improved one kind of robustness, but it did not match the private leaderboard distribution. The current best private result remains the Pearson top200 submission.
 
 Next modeling implication: do not further optimize only for low rolling variance. The next round should compare candidate behavior against public/private-like splits, likely by constructing validation slices that better resemble the private segment, or by using rank/scale post-processing and calibration checks before adding model complexity.
+
+## 2026-06-17: Submission Blend Calibration
+
+### Goal
+
+Use the two submitted models as endpoints and search a submission-level blend that can recover some public score without giving up the private-like validation behavior of the Pearson top200 model.
+
+Endpoint leaderboard results:
+
+| Submission | Public | Private |
+| --- | ---: | ---: |
+| Pearson top200 | 0.02826 | 0.06610 |
+| stability blend | 0.06237 | 0.05589 |
+
+### Implementation
+
+- Added config: `configs/01_main_submission_blend.yaml`.
+- Added script: `scripts/run_submission_blend.py`.
+- Inputs:
+  - `submissions/01_main/pearson_topk/submission_best.csv`
+  - `submissions/01_main/stability_blend/submission_best.csv`
+  - matching holdout and rolling validation predictions from prior runs.
+- Evaluated raw and z-score blends on:
+  - `holdout_80_100`
+  - `fold_50_60`
+  - `fold_60_70`
+  - `fold_70_80`
+  - `fold_80_90`
+
+### Findings
+
+- Source submission prediction correlation: `0.782205`.
+- Pure top200 is still best on the private-like 80/20 holdout.
+- A small stability component improves the worst rolling fold with minimal holdout loss.
+- The best balanced validation objective uses a larger stability component, but it sacrifices more holdout Pearson.
+
+### Generated Candidates
+
+| Candidate | Formula | Holdout Pearson | Rolling Mean | Rolling Std | Rolling Min | Linear Public Proxy | Linear Private Proxy |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| private_safe | `0.85 * top200 + 0.15 * stability` | 0.124352 | 0.153129 | 0.062887 | 0.091246 | 0.033377 | 0.064569 |
+| balanced | `0.45 * top200 + 0.55 * stability` | 0.117788 | 0.145881 | 0.036770 | 0.106824 | 0.047021 | 0.060485 |
+| public_probe | `0.20 * top200 + 0.80 * stability` | 0.110363 | 0.138804 | 0.024292 | 0.108925 | 0.055548 | 0.057932 |
+
+Default submission:
+
+```text
+submissions/01_main/submission_blend/submission_best.csv
+```
+
+This is the `private_safe` candidate. It was selected because its holdout Pearson is only about `0.0007` below pure top200 while the rolling minimum improves from `0.081128` to `0.091246`.
+
+Suggested submission order:
+
+1. `submission_best.csv` / `submission_private_safe.csv`
+2. `submission_balanced.csv` only if the first candidate does not improve private score and more public/private tradeoff probing is acceptable.
+3. `submission_public_probe.csv` only as a diagnostic public-heavy probe, not as a final private-score candidate.

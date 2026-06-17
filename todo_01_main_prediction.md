@@ -39,6 +39,7 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
   - [ ] Add CatBoost only if it improves validation or diversity.
   - [x] Search simple weights on validation or OOF predictions.
   - [x] Add rolling-aware stability-constrained blend.
+  - [x] Add submission-level blend calibration for public/private divergence.
   - [x] Compare ensemble performance with single models.
 
 - [ ] Create Kaggle submission artifacts
