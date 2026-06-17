@@ -635,3 +635,19 @@ Suggested submission order:
 1. `submission_best.csv` / `submission_normal_w085.csv`.
 2. If private improves, test `submission_normal_w090.csv`.
 3. If private falls but rolling robustness looks useful, test `submission_normal_w080.csv`.
+
+### Kaggle Result
+
+Submitted:
+
+- `submissions/01_main/beta1_rank_calibration/submission_normal_w085.csv`
+- `submissions/01_main/beta1_rank_calibration/submission_normal_w080.csv`
+
+| Candidate | Public | Private |
+| --- | ---: | ---: |
+| normal_w085 | 0.03707 | 0.06217 |
+| normal_w080 | 0.03902 | 0.06231 |
+
+Interpretation: normal-score calibration improved offline holdout Pearson, but it materially hurt private leaderboard score. This is another validation mismatch and should not be used as the final direction. The current best remains raw `w085` with private `0.06628`.
+
+Next beta1 action: stop rank/normal-score submission calibration for the main score. Move to a genuinely new signal, such as another top-k model family, a time-slice-specific model, or a separate feature-selection/dimensionality-reduction experiment that can add diversity without destroying the private-favored top200 signal.

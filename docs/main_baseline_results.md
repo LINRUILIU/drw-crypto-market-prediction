@@ -274,3 +274,12 @@ submissions/01_main/beta1_rank_calibration/submission_best.csv
 ```
 
 This file is `normal_w085`. It keeps the best observed raw weight while applying rank-to-Gaussian calibration before blending.
+
+Kaggle results:
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| normal_w085 | 0.03707 | 0.06217 | Offline holdout improved, private worsened |
+| normal_w080 | 0.03902 | 0.06231 | Slightly better than normal_w085, still worse than raw w085 |
+
+Conclusion: rank-to-Gaussian calibration is not a good main-score direction. The current best remains raw `beta1_w085` with private `0.06628`.
