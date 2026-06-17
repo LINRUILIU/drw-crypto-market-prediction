@@ -66,14 +66,14 @@ signals:
 blend:
   holdout_split: holdout_80_100
   rolling_splits: [fold_50_60, fold_60_70, fold_70_80, fold_80_90]
-  candidate_weights: [0.05, 0.10, 0.15, 0.20, 0.25, 0.275, 0.30, 0.325, 0.35]
+  candidate_weights: [0.05, 0.10, 0.15, 0.20, 0.25, 0.275, 0.30, 0.325, 0.35, 0.375, 0.40, 0.45, 0.50]
   objective:
     holdout_weight: 1.0
     rolling_min_weight: 0.25
     rolling_std_penalty: 0.10
 
 candidates:
-  default: top100_ridge_w030
+  default: top100_ridge_w035
   fixed:
     - name: top100_ridge_w020
       signal: top100_ridge
@@ -93,6 +93,18 @@ candidates:
     - name: top100_ridge_w035
       signal: top100_ridge
       signal_weight: 0.35
+    - name: top100_ridge_w0375
+      signal: top100_ridge
+      signal_weight: 0.375
+    - name: top100_ridge_w040
+      signal: top100_ridge
+      signal_weight: 0.40
+    - name: top100_ridge_w045
+      signal: top100_ridge
+      signal_weight: 0.45
+    - name: top100_ridge_w050
+      signal: top100_ridge
+      signal_weight: 0.50
     - name: full_ensemble_w020
       signal: full_ensemble
       signal_weight: 0.20

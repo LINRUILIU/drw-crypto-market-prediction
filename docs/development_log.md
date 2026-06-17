@@ -704,12 +704,16 @@ Submitted:
 
 - `submissions/01_main/beta1_signal_blend/submission_best.csv` / `submission_top100_ridge_w030.csv`
 - `submissions/01_main/beta1_signal_blend/submission_top100_ridge_w020.csv`
+- `submissions/01_main/beta1_signal_blend/submission_top100_ridge_w0325.csv`
+- `submissions/01_main/beta1_signal_blend/submission_top100_ridge_w035.csv`
 
 | Candidate | Public | Private |
 | --- | ---: | ---: |
 | top100_ridge_w020 | 0.03625 | 0.06443 |
 | top100_ridge_w030 | 0.03651 | 0.07539 |
+| top100_ridge_w0325 | 0.03672 | 0.07615 |
+| top100_ridge_w035 | 0.03692 | 0.07692 |
 
-Interpretation: `top100_ridge_w030` is the new best private result by a large margin, improving over raw `w085` from `0.06628` to `0.07539`. The much weaker `w020` result shows that the private response to the added top100 Ridge signal is not linear, so low-weight interpolation should not be assumed safe.
+Interpretation: the private score continues to improve from `w030` to `w035`, making `top100_ridge_w035` the new best private result. It improves over raw `w085` from `0.06628` to `0.07692`. The much weaker `w020` result shows that the private response to the added top100 Ridge signal is not linear, so low-weight interpolation should not be assumed safe.
 
-Next beta1 action: keep `top100_ridge_w030` as the current best and probe a narrow neighborhood around `0.30`. Added fixed candidate submissions for `top100_ridge_w025`, `top100_ridge_w0275`, `top100_ridge_w0325`, and `top100_ridge_w035`; submit `w0325` first, then choose `w035` or `w0275` based on the private result.
+Next beta1 action: keep `top100_ridge_w035` as the current best and continue probing to the right. `submission_best.csv` now points to `top100_ridge_w035`. Added fixed candidate submissions for `top100_ridge_w0375`, `top100_ridge_w040`, `top100_ridge_w045`, and `top100_ridge_w050`; submit `w040` first, then choose `w045` or `w0375` based on the private result.

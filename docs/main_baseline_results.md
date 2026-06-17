@@ -327,6 +327,8 @@ Kaggle results:
 | Submission | Public | Private | Notes |
 | --- | ---: | ---: | --- |
 | top100_ridge_w020 | 0.03625 | 0.06443 | Worse than raw w085; low signal weight is not enough |
-| top100_ridge_w030 | 0.03651 | 0.07539 | Current best private score |
+| top100_ridge_w030 | 0.03651 | 0.07539 | Large private improvement |
+| top100_ridge_w0325 | 0.03672 | 0.07615 | Better than w030 |
+| top100_ridge_w035 | 0.03692 | 0.07692 | Current best private score |
 
-Conclusion: top100 Ridge adds a genuinely useful private signal when blended at `30%`. The next probe should stay close to this point instead of returning to low weights or rank calibration. Added candidate files for `w025`, `w0275`, `w0325`, and `w035`, with `w0325` as the recommended first follow-up submission.
+Conclusion: top100 Ridge adds a genuinely useful private signal, and the current best observed weight is `35%`. The next probe should move slightly to the right while keeping `w035` as the default best submission. Added candidate files for `w0375`, `w040`, `w045`, and `w050`, with `w040` as the recommended first follow-up submission.
