@@ -485,3 +485,59 @@ Submitted `submissions/01_main/submission_blend/submission_best.csv`, the `priva
 Interpretation: public score stayed low, but private score slightly improved over pure Pearson top200 (`0.06628` vs `0.06610`). This confirms that the private split prefers a model very close to top200, while a small stability component can still help. Public score should not be used as the main selection signal for the final report.
 
 Next modeling implication: probe a narrow neighborhood around the private-safe blend, such as top200 weights `0.80`, `0.90`, and `0.95`, rather than moving toward public-heavy blends.
+
+## 2026-06-17: Beta1 Narrow Blend Probe
+
+### Stage Decision
+
+Baseline1 is closed. The main task now enters Beta1, focused on small, submission-level private-score probes around the current best blend.
+
+Current private best before Beta1:
+
+```text
+0.85 * Pearson top200 + 0.15 * stability blend
+```
+
+Leaderboard:
+
+| Split | Score |
+| --- | ---: |
+| Public | 0.03365 |
+| Private | 0.06628 |
+
+### Implementation
+
+- Added config: `configs/01_main_beta1_blend_probe.yaml`.
+- Reused script: `scripts/run_submission_blend.py`.
+- No retraining was performed.
+- Input endpoints:
+  - Pearson top200 submission
+  - stability blend submission
+- Output directory:
+  - `runs/01_main/beta1_blend_probe/`
+  - `submissions/01_main/beta1_blend_probe/`
+
+### Candidate Grid
+
+| Candidate | Top200 Weight | Stability Weight | Holdout Pearson | Rolling Mean | Rolling Std | Rolling Min |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| beta1_w080 | 0.800 | 0.200 | 0.123910 | 0.152618 | 0.059448 | 0.094150 |
+| beta1_w085 | 0.850 | 0.150 | 0.124352 | 0.153129 | 0.062887 | 0.091246 |
+| beta1_w0875 | 0.875 | 0.125 | 0.124534 | 0.153335 | 0.064603 | 0.089698 |
+| beta1_w090 | 0.900 | 0.100 | 0.124691 | 0.153508 | 0.066314 | 0.088091 |
+| beta1_w0925 | 0.925 | 0.075 | 0.124822 | 0.153647 | 0.068016 | 0.086426 |
+| beta1_w095 | 0.950 | 0.050 | 0.124928 | 0.153753 | 0.069708 | 0.084709 |
+
+Default Beta1 submission:
+
+```text
+submissions/01_main/beta1_blend_probe/submission_best.csv
+```
+
+This is `beta1_w090`:
+
+```text
+0.90 * Pearson top200 + 0.10 * stability blend
+```
+
+Rationale: `w090` moves closer to the private-favored top200 endpoint than `w085`, improves holdout Pearson from `0.124352` to `0.124691`, and keeps a small stability correction. If `w090` underperforms private, test `w080`; if it improves, test `w0925` or `w095`.

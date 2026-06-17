@@ -1,0 +1,62 @@
+sources:
+  top200:
+    name: pearson_top200
+    submission_path: submissions/01_main/pearson_topk/submission_best.csv
+    public_score: 0.02826
+    private_score: 0.06610
+    valid_predictions:
+      holdout_80_100: runs/01_main/pearson_topk/valid_predictions/valid_top200_ensemble_ridge_lgbm.csv
+      fold_50_60: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_50_60_top200_ensemble_ridge_lgbm.csv
+      fold_60_70: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_60_70_top200_ensemble_ridge_lgbm.csv
+      fold_70_80: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_70_80_top200_ensemble_ridge_lgbm.csv
+      fold_80_90: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_80_90_top200_ensemble_ridge_lgbm.csv
+  stability:
+    name: stability_blend
+    submission_path: submissions/01_main/stability_blend/submission_best.csv
+    public_score: 0.06237
+    private_score: 0.05589
+    valid_predictions:
+      holdout_80_100: runs/01_main/stability_blend/valid_predictions/valid_holdout_80_100_stability_blend.csv
+      fold_50_60: runs/01_main/stability_blend/valid_predictions/valid_fold_50_60_stability_blend.csv
+      fold_60_70: runs/01_main/stability_blend/valid_predictions/valid_fold_60_70_stability_blend.csv
+      fold_70_80: runs/01_main/stability_blend/valid_predictions/valid_fold_70_80_stability_blend.csv
+      fold_80_90: runs/01_main/stability_blend/valid_predictions/valid_fold_80_90_stability_blend.csv
+
+blend:
+  top200_weight_grid: [0.75, 0.80, 0.825, 0.85, 0.875, 0.90, 0.925, 0.95, 0.975, 1.00]
+  modes: [raw]
+  holdout_split: holdout_80_100
+  rolling_splits: [fold_50_60, fold_60_70, fold_70_80, fold_80_90]
+  private_safe_holdout_drop_limit: 0.0005
+  private_safe_mode: raw
+  balanced_objective:
+    holdout_weight: 1.0
+    rolling_min_weight: 0.5
+    rolling_std_penalty: 0.25
+
+candidates:
+  default: beta1_w090
+  fixed:
+    - name: beta1_w080
+      mode: raw
+      top200_weight: 0.80
+    - name: beta1_w085
+      mode: raw
+      top200_weight: 0.85
+    - name: beta1_w0875
+      mode: raw
+      top200_weight: 0.875
+    - name: beta1_w090
+      mode: raw
+      top200_weight: 0.90
+    - name: beta1_w0925
+      mode: raw
+      top200_weight: 0.925
+    - name: beta1_w095
+      mode: raw
+      top200_weight: 0.95
+
+output:
+  run_dir: runs/01_main/beta1_blend_probe
+  submission_dir: submissions/01_main/beta1_blend_probe
+  prediction_col: prediction

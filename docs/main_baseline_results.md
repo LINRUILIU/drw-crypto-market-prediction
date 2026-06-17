@@ -196,3 +196,41 @@ Current leaderboard comparison:
 | submission blend private_safe | 0.03365 | 0.06628 | Current best private score |
 
 Conclusion: public score is not a reliable proxy for the private split in this project. The small `15%` stability component slightly improved private score while keeping behavior close to Pearson top200.
+
+## Beta1 Narrow Blend Probe
+
+Baseline1 is closed. Beta1 starts from the current private-best blend and probes nearby weights.
+
+Current best before Beta1:
+
+```text
+0.85 * Pearson top200 + 0.15 * stability blend
+```
+
+Beta1 candidates:
+
+| Candidate | Top200 Weight | Stability Weight | Holdout Pearson | Rolling Min |
+| --- | ---: | ---: | ---: | ---: |
+| beta1_w080 | 0.800 | 0.200 | 0.123910 | 0.094150 |
+| beta1_w085 | 0.850 | 0.150 | 0.124352 | 0.091246 |
+| beta1_w0875 | 0.875 | 0.125 | 0.124534 | 0.089698 |
+| beta1_w090 | 0.900 | 0.100 | 0.124691 | 0.088091 |
+| beta1_w0925 | 0.925 | 0.075 | 0.124822 | 0.086426 |
+| beta1_w095 | 0.950 | 0.050 | 0.124928 | 0.084709 |
+
+Default Beta1 submission:
+
+```text
+submissions/01_main/beta1_blend_probe/submission_best.csv
+```
+
+This file is `beta1_w090`:
+
+```text
+0.90 * Pearson top200 + 0.10 * stability blend
+```
+
+Submit `beta1_w090` first. Then use the result to decide the direction:
+
+- If private improves, test `beta1_w0925` or `beta1_w095`.
+- If private falls, test `beta1_w080`.

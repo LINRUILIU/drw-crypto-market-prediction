@@ -63,3 +63,8 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Ridge and LightGBM baselines both run end to end.
 - [x] Final report can explain why the current submission candidate was selected.
 - [x] No validation preprocessing step uses validation target information.
+
+## Stage Notes
+
+- [x] Baseline1 closed after full-feature baseline, Pearson top-k, rolling validation, stability blend, and submission blend calibration.
+- [x] Beta1 started with narrow private-score blend probes around `0.85 * top200 + 0.15 * stability`.
