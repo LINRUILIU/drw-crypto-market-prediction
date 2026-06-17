@@ -468,3 +468,20 @@ Suggested submission order:
 1. `submission_best.csv` / `submission_private_safe.csv`
 2. `submission_balanced.csv` only if the first candidate does not improve private score and more public/private tradeoff probing is acceptable.
 3. `submission_public_probe.csv` only as a diagnostic public-heavy probe, not as a final private-score candidate.
+
+### Kaggle Result
+
+Submitted `submissions/01_main/submission_blend/submission_best.csv`, the `private_safe` candidate:
+
+```text
+0.85 * Pearson top200 + 0.15 * stability blend
+```
+
+| Split | Score |
+| --- | ---: |
+| Public | 0.03365 |
+| Private | 0.06628 |
+
+Interpretation: public score stayed low, but private score slightly improved over pure Pearson top200 (`0.06628` vs `0.06610`). This confirms that the private split prefers a model very close to top200, while a small stability component can still help. Public score should not be used as the main selection signal for the final report.
+
+Next modeling implication: probe a narrow neighborhood around the private-safe blend, such as top200 weights `0.80`, `0.90`, and `0.95`, rather than moving toward public-heavy blends.

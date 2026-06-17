@@ -67,56 +67,7 @@ submissions/01_main/pearson_topk/submission_best.csv
 
 This file has 538,150 rows and columns `ID`, `prediction`.
 
-Kaggle result:
-
-| Split | Score |
-| --- | ---: |
-| Public | 0.06237 |
-| Private | 0.05589 |
-
-Comparison with the previous submission:
-
-| Submission | Public | Private | Notes |
-| --- | ---: | ---: | --- |
-| Pearson top200 | 0.02826 | 0.06610 | Current best private score |
-| stability blend | 0.06237 | 0.05589 | Better public, worse private |
-
-Conclusion: the stability blend is useful evidence, but it is not the best final candidate by private score. The next optimization should investigate why public and private prefer different candidates before adding more model families.
-
-## Submission Blend Calibration
-
-The next optimization blended the two submitted endpoints directly:
-
-```text
-Pearson top200 submission
-Stability blend submission
-```
-
-The source submission prediction correlation is `0.782205`, so they are related but still different enough to justify blend probing.
-
-Generated candidates:
-
-| Candidate | Top200 Weight | Stability Weight | Holdout Pearson | Rolling Mean | Rolling Std | Rolling Min |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| private_safe | 0.85 | 0.15 | 0.124352 | 0.153129 | 0.062887 | 0.091246 |
-| balanced | 0.45 | 0.55 | 0.117788 | 0.145881 | 0.036770 | 0.106824 |
-| public_probe | 0.20 | 0.80 | 0.110363 | 0.138804 | 0.024292 | 0.108925 |
-
-Default next submission:
-
-```text
-submissions/01_main/submission_blend/submission_best.csv
-```
-
-This file is the `private_safe` candidate:
-
-```text
-0.85 * Pearson top200 + 0.15 * stability blend
-```
-
-It is designed to keep the private-like holdout behavior close to top200 while adding a small public-favorable component.
-
-Kaggle result for this optimized submission:
+Kaggle result for Pearson top200:
 
 | Split | Score |
 | --- | ---: |
@@ -188,3 +139,60 @@ submissions/01_main/stability_blend/submission_best.csv
 ```
 
 This file has 538,150 rows and columns `ID`, `prediction`.
+
+Kaggle result for stability blend:
+
+| Split | Score |
+| --- | ---: |
+| Public | 0.06237 |
+| Private | 0.05589 |
+
+Conclusion: the stability blend improved public score but reduced private score, so it is not the best final candidate by private score.
+
+## Submission Blend Calibration
+
+The next optimization blended the two submitted endpoints directly:
+
+```text
+Pearson top200 submission
+Stability blend submission
+```
+
+The source submission prediction correlation is `0.782205`, so they are related but still different enough to justify blend probing.
+
+Generated candidates:
+
+| Candidate | Top200 Weight | Stability Weight | Holdout Pearson | Rolling Mean | Rolling Std | Rolling Min |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| private_safe | 0.85 | 0.15 | 0.124352 | 0.153129 | 0.062887 | 0.091246 |
+| balanced | 0.45 | 0.55 | 0.117788 | 0.145881 | 0.036770 | 0.106824 |
+| public_probe | 0.20 | 0.80 | 0.110363 | 0.138804 | 0.024292 | 0.108925 |
+
+Default submission:
+
+```text
+submissions/01_main/submission_blend/submission_best.csv
+```
+
+This file is the `private_safe` candidate:
+
+```text
+0.85 * Pearson top200 + 0.15 * stability blend
+```
+
+Kaggle result for submission blend `private_safe`:
+
+| Split | Score |
+| --- | ---: |
+| Public | 0.03365 |
+| Private | 0.06628 |
+
+Current leaderboard comparison:
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Pearson top200 | 0.02826 | 0.06610 | Previous best private score |
+| stability blend | 0.06237 | 0.05589 | Better public, worse private |
+| submission blend private_safe | 0.03365 | 0.06628 | Current best private score |
+
+Conclusion: public score is not a reliable proxy for the private split in this project. The small `15%` stability component slightly improved private score while keeping behavior close to Pearson top200.
