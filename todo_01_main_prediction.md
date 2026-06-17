@@ -69,3 +69,4 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Baseline1 closed after full-feature baseline, Pearson top-k, rolling validation, stability blend, and submission blend calibration.
 - [x] Beta1 started with narrow private-score blend probes around `0.85 * top200 + 0.15 * stability`.
 - [x] Beta1 added rank and normal-score submission calibration.
+- [x] Beta1 added new-signal blending with top100 Ridge and full-feature baselines.

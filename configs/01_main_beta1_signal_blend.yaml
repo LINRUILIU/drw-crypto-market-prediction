@@ -1,0 +1,97 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+base:
+  name: raw_w085
+  submission_path: submissions/01_main/submission_blend/submission_private_safe.csv
+  components:
+    top200_weight: 0.85
+    stability_weight: 0.15
+  valid_predictions:
+    top200:
+      holdout_80_100: runs/01_main/pearson_topk/valid_predictions/valid_top200_ensemble_ridge_lgbm.csv
+      fold_50_60: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_50_60_top200_ensemble_ridge_lgbm.csv
+      fold_60_70: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_60_70_top200_ensemble_ridge_lgbm.csv
+      fold_70_80: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_70_80_top200_ensemble_ridge_lgbm.csv
+      fold_80_90: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_80_90_top200_ensemble_ridge_lgbm.csv
+    stability:
+      holdout_80_100: runs/01_main/stability_blend/valid_predictions/valid_holdout_80_100_stability_blend.csv
+      fold_50_60: runs/01_main/stability_blend/valid_predictions/valid_fold_50_60_stability_blend.csv
+      fold_60_70: runs/01_main/stability_blend/valid_predictions/valid_fold_60_70_stability_blend.csv
+      fold_70_80: runs/01_main/stability_blend/valid_predictions/valid_fold_70_80_stability_blend.csv
+      fold_80_90: runs/01_main/stability_blend/valid_predictions/valid_fold_80_90_stability_blend.csv
+
+signals:
+  top100_ridge:
+    type: ridge
+    selected_features_path: runs/01_main/pearson_topk/selected_features_top100.txt
+    ridge_alpha_search_path: runs/01_main/pearson_topk/ridge_alpha_search_top100.csv
+    output_submission_path: submissions/01_main/beta1_signal_blend/signals/submission_top100_ridge.csv
+    valid_predictions:
+      holdout_80_100: runs/01_main/pearson_topk/valid_predictions/valid_top100_ridge.csv
+      fold_50_60: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_50_60_top100_ridge.csv
+      fold_60_70: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_60_70_top100_ridge.csv
+      fold_70_80: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_70_80_top100_ridge.csv
+      fold_80_90: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_80_90_top100_ridge.csv
+  full_ensemble:
+    type: existing_submission
+    submission_path: submissions/01_main/baseline_full/submission_ensemble_ridge_lgbm.csv
+    valid_predictions:
+      holdout_80_100: runs/01_main/pearson_topk/valid_predictions/valid_full_ensemble_ridge_lgbm.csv
+      fold_50_60: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_50_60_full_ensemble_ridge_lgbm.csv
+      fold_60_70: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_60_70_full_ensemble_ridge_lgbm.csv
+      fold_70_80: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_70_80_full_ensemble_ridge_lgbm.csv
+      fold_80_90: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_80_90_full_ensemble_ridge_lgbm.csv
+  full_ridge:
+    type: existing_submission
+    submission_path: submissions/01_main/baseline_full/submission_ridge.csv
+    valid_predictions:
+      holdout_80_100: runs/01_main/pearson_topk/valid_predictions/valid_full_ridge.csv
+      fold_50_60: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_50_60_full_ridge.csv
+      fold_60_70: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_60_70_full_ridge.csv
+      fold_70_80: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_70_80_full_ridge.csv
+      fold_80_90: runs/03_temporal/rolling_validation/valid_predictions/valid_fold_80_90_full_ridge.csv
+
+blend:
+  holdout_split: holdout_80_100
+  rolling_splits: [fold_50_60, fold_60_70, fold_70_80, fold_80_90]
+  candidate_weights: [0.05, 0.10, 0.15, 0.20, 0.30]
+  objective:
+    holdout_weight: 1.0
+    rolling_min_weight: 0.25
+    rolling_std_penalty: 0.10
+
+candidates:
+  default: top100_ridge_w030
+  fixed:
+    - name: top100_ridge_w020
+      signal: top100_ridge
+      signal_weight: 0.20
+    - name: top100_ridge_w030
+      signal: top100_ridge
+      signal_weight: 0.30
+    - name: full_ensemble_w020
+      signal: full_ensemble
+      signal_weight: 0.20
+    - name: full_ensemble_w030
+      signal: full_ensemble
+      signal_weight: 0.30
+    - name: full_ridge_w015
+      signal: full_ridge
+      signal_weight: 0.15
+
+output:
+  run_dir: runs/01_main/beta1_signal_blend
+  submission_dir: submissions/01_main/beta1_signal_blend
+  prediction_col: prediction

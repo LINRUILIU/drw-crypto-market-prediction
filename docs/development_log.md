@@ -651,3 +651,49 @@ Submitted:
 Interpretation: normal-score calibration improved offline holdout Pearson, but it materially hurt private leaderboard score. This is another validation mismatch and should not be used as the final direction. The current best remains raw `w085` with private `0.06628`.
 
 Next beta1 action: stop rank/normal-score submission calibration for the main score. Move to a genuinely new signal, such as another top-k model family, a time-slice-specific model, or a separate feature-selection/dimensionality-reduction experiment that can add diversity without destroying the private-favored top200 signal.
+
+## 2026-06-17: Beta1 New Signal Blend
+
+### Goal
+
+Move beyond two-endpoint calibration by introducing a genuinely different signal into the current best raw `w085` submission. Candidate signals were selected from existing validation predictions first, then only the lightweight missing final signal was trained.
+
+Current base:
+
+```text
+raw_w085 = 0.85 * Pearson top200 + 0.15 * stability blend
+```
+
+### Implementation
+
+- Added config: `configs/01_main_beta1_signal_blend.yaml`.
+- Added script: `scripts/run_beta1_signal_blend.py`.
+- Generated a final Ridge submission for `top100_ridge`.
+- Reused existing final submissions for:
+  - `full_ensemble`
+  - `full_ridge`
+- Blended each signal into the raw `w085` base with small weights.
+
+### Candidate Results
+
+| Candidate | Signal | Signal Weight | Holdout Pearson | Rolling Mean | Rolling Std | Rolling Min | Mean Corr With Base |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| top100_ridge_w020 | top100_ridge | 0.20 | 0.126226 | 0.151209 | 0.062663 | 0.092158 | 0.778503 |
+| top100_ridge_w030 | top100_ridge | 0.30 | 0.126511 | 0.149044 | 0.061897 | 0.091906 | 0.778503 |
+| full_ensemble_w020 | full_ensemble | 0.20 | 0.125491 | 0.151189 | 0.046383 | 0.105264 | 0.711032 |
+| full_ensemble_w030 | full_ensemble | 0.30 | 0.124295 | 0.148130 | 0.038810 | 0.107463 | 0.711032 |
+| full_ridge_w015 | full_ridge | 0.15 | 0.125249 | 0.143882 | 0.042254 | 0.098323 | 0.627808 |
+
+Default submission:
+
+```text
+submissions/01_main/beta1_signal_blend/submission_best.csv
+```
+
+This is `top100_ridge_w030`:
+
+```text
+0.70 * raw_w085 + 0.30 * top100_ridge
+```
+
+Rationale: `top100_ridge_w030` gives the best holdout Pearson among the tested new-signal blends while keeping rolling minimum slightly above raw `w085`. If it fails on private, the next safer probe is `full_ensemble_w020`, which has a lower holdout gain but much better rolling minimum.

@@ -283,3 +283,41 @@ Kaggle results:
 | normal_w080 | 0.03902 | 0.06231 | Slightly better than normal_w085, still worse than raw w085 |
 
 Conclusion: rank-to-Gaussian calibration is not a good main-score direction. The current best remains raw `beta1_w085` with private `0.06628`.
+
+## Beta1 New Signal Blend
+
+After rank/normal-score calibration failed on private score, Beta1 moved to new signal blending. The base remains raw `w085`.
+
+Base:
+
+```text
+0.85 * Pearson top200 + 0.15 * stability blend
+```
+
+Generated candidates:
+
+| Candidate | Added Signal | Signal Weight | Holdout Pearson | Rolling Std | Rolling Min |
+| --- | --- | ---: | ---: | ---: | ---: |
+| top100_ridge_w020 | top100_ridge | 0.20 | 0.126226 | 0.062663 | 0.092158 |
+| top100_ridge_w030 | top100_ridge | 0.30 | 0.126511 | 0.061897 | 0.091906 |
+| full_ensemble_w020 | full_ensemble | 0.20 | 0.125491 | 0.046383 | 0.105264 |
+| full_ensemble_w030 | full_ensemble | 0.30 | 0.124295 | 0.038810 | 0.107463 |
+| full_ridge_w015 | full_ridge | 0.15 | 0.125249 | 0.042254 | 0.098323 |
+
+Default next submission:
+
+```text
+submissions/01_main/beta1_signal_blend/submission_best.csv
+```
+
+This file is:
+
+```text
+0.70 * raw_w085 + 0.30 * top100_ridge
+```
+
+If this fails on private, the next safer candidate is:
+
+```text
+submissions/01_main/beta1_signal_blend/submission_full_ensemble_w020.csv
+```
