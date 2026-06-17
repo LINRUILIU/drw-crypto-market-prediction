@@ -251,3 +251,26 @@ Current Beta1 comparison:
 | beta1_w080 | 0.03551 | 0.06623 | Worse private despite better public |
 
 Conclusion: the narrow endpoint blend probe has likely saturated. The current best remains `beta1_w085`; the next main-task optimization should use a different mechanism rather than continuing to scan this one-dimensional blend.
+
+## Beta1 Rank And Normal-Score Calibration
+
+The next Beta1 optimization keeps the same two endpoints but changes the prediction distribution before blending.
+
+Generated candidates:
+
+| Candidate | Mode | Top200 Weight | Holdout Pearson | Rolling Std | Rolling Min |
+| --- | --- | ---: | ---: | ---: | ---: |
+| raw_w085 | raw | 0.85 | 0.124352 | 0.062887 | 0.091246 |
+| rank_w080 | rank | 0.80 | 0.124315 | 0.026661 | 0.108466 |
+| rank_w085 | rank | 0.85 | 0.124248 | 0.028825 | 0.106015 |
+| normal_w080 | normal_score | 0.80 | 0.126394 | 0.043338 | 0.103557 |
+| normal_w085 | normal_score | 0.85 | 0.126615 | 0.045816 | 0.101175 |
+| normal_w090 | normal_score | 0.90 | 0.126724 | 0.048224 | 0.098691 |
+
+Default next submission:
+
+```text
+submissions/01_main/beta1_rank_calibration/submission_best.csv
+```
+
+This file is `normal_w085`. It keeps the best observed raw weight while applying rank-to-Gaussian calibration before blending.

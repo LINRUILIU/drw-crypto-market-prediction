@@ -38,6 +38,29 @@ def zscore(values: np.ndarray) -> np.ndarray:
     return (values - float(np.mean(values))) / std
 
 
+def percentile_rank(values: np.ndarray) -> np.ndarray:
+    values = np.asarray(values, dtype=np.float64)
+    ranks = pd.Series(values).rank(method="average").to_numpy(dtype=np.float64)
+    return (ranks - 0.5) / len(ranks)
+
+
+def rank_score(values: np.ndarray) -> np.ndarray:
+    return zscore(percentile_rank(values))
+
+
+def normal_score(values: np.ndarray) -> np.ndarray:
+    from scipy.special import ndtri
+
+    pct = np.clip(percentile_rank(values), 1e-6, 1.0 - 1e-6)
+    return zscore(ndtri(pct))
+
+
+def restore_top200_scale(top200: np.ndarray, values: np.ndarray) -> np.ndarray:
+    top200 = np.asarray(top200, dtype=np.float64)
+    values = np.asarray(values, dtype=np.float64)
+    return float(np.mean(top200)) + float(np.std(top200)) * zscore(values)
+
+
 def blend_predictions(top200: np.ndarray, stability: np.ndarray, top200_weight: float, mode: str) -> np.ndarray:
     top200 = np.asarray(top200, dtype=np.float64)
     stability = np.asarray(stability, dtype=np.float64)
@@ -46,6 +69,12 @@ def blend_predictions(top200: np.ndarray, stability: np.ndarray, top200_weight: 
     if mode == "zscore":
         blended = top200_weight * zscore(top200) + (1.0 - top200_weight) * zscore(stability)
         return float(np.mean(top200)) + float(np.std(top200)) * blended
+    if mode == "rank":
+        blended = top200_weight * rank_score(top200) + (1.0 - top200_weight) * rank_score(stability)
+        return restore_top200_scale(top200, blended)
+    if mode == "normal_score":
+        blended = top200_weight * normal_score(top200) + (1.0 - top200_weight) * normal_score(stability)
+        return restore_top200_scale(top200, blended)
     raise ValueError(f"Unsupported blend mode: {mode}")
 
 

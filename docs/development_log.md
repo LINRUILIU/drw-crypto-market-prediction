@@ -583,3 +583,55 @@ Interpretation: adding more stability weight than `w085` also fails to improve p
 Conclusion: the useful one-dimensional blend region is exhausted for now. The best observed point remains `w085`, and further probing on this axis is unlikely to give meaningful gain unless submission budget is very loose.
 
 Next beta1 action: move from endpoint-weight probing to a different optimization mechanism, such as prediction distribution calibration, rank-based blending, or a new model signal.
+
+## 2026-06-17: Beta1 Rank and Normal-Score Calibration
+
+### Goal
+
+Test a different optimization mechanism after raw endpoint-weight probing saturated. Instead of changing only the endpoint weights, transform prediction distributions before blending:
+
+- `rank`: percentile rank scores, standardized.
+- `normal_score`: rank-to-Gaussian normal scores, standardized.
+- outputs are restored to the top200 submission scale for submission sanity.
+
+### Implementation
+
+- Extended `scripts/run_submission_blend.py` with `rank` and `normal_score` modes.
+- Added config: `configs/01_main_beta1_rank_calibration.yaml`.
+- No model retraining was performed.
+- Output directory:
+  - `runs/01_main/beta1_rank_calibration/`
+  - `submissions/01_main/beta1_rank_calibration/`
+
+### Candidate Results
+
+| Candidate | Mode | Top200 Weight | Holdout Pearson | Rolling Mean | Rolling Std | Rolling Min |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| raw_w085 | raw | 0.85 | 0.124352 | 0.153129 | 0.062887 | 0.091246 |
+| zscore_w085 | zscore | 0.85 | 0.124345 | 0.153701 | 0.065089 | 0.089119 |
+| rank_w080 | rank | 0.80 | 0.124315 | 0.145268 | 0.026661 | 0.108466 |
+| rank_w085 | rank | 0.85 | 0.124248 | 0.145012 | 0.028825 | 0.106015 |
+| rank_w090 | rank | 0.90 | 0.124061 | 0.144629 | 0.030960 | 0.103448 |
+| normal_w080 | normal_score | 0.80 | 0.126394 | 0.152866 | 0.043338 | 0.103557 |
+| normal_w085 | normal_score | 0.85 | 0.126615 | 0.152885 | 0.045816 | 0.101175 |
+| normal_w090 | normal_score | 0.90 | 0.126724 | 0.152782 | 0.048224 | 0.098691 |
+
+Default submission:
+
+```text
+submissions/01_main/beta1_rank_calibration/submission_best.csv
+```
+
+This is `normal_w085`:
+
+```text
+normal_score(0.85 * top200_rank_signal + 0.15 * stability_rank_signal), restored to top200 scale
+```
+
+Rationale: `normal_w085` keeps the empirically best raw weight `0.85`, improves holdout Pearson from `0.124352` to `0.126615`, and keeps rolling behavior stronger than the raw blend. `normal_w090` has slightly higher holdout, but prior raw `w090` did not improve private score, so `normal_w085` is the safer first probe.
+
+Suggested submission order:
+
+1. `submission_best.csv` / `submission_normal_w085.csv`.
+2. If private improves, test `submission_normal_w090.csv`.
+3. If private falls but rolling robustness looks useful, test `submission_normal_w080.csv`.
