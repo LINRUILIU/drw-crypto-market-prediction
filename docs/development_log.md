@@ -166,7 +166,6 @@ Do not commit:
 ### Local Versioning
 
 - Initialized a local git repository in `D:\final-modeling`.
-- Renamed the initial branch from `master` to `main` to match the GitHub repository default branch.
 - Created initial baseline checkpoint:
 
 ```text
@@ -182,11 +181,12 @@ c7ec08d Initialize DRW crypto baseline pipeline
 https://github.com/LINRUILIU/drw-crypto-market-prediction.git
 ```
 
-- Local branch `main` now tracks `origin/main`.
+- Intended project branch: `master`.
 
 ### Push Notes
 
 - SSH push first failed because no usable GitHub SSH public key was configured on this machine.
 - Switched `origin` to HTTPS.
+- The repository metadata reported default branch `main`, so the first push was sent to `main`.
+- The branch was then corrected back to `master` for this project.
 - HTTPS push succeeded through the available Git credential flow.
-
