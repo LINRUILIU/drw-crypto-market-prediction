@@ -312,3 +312,89 @@ The next main-task optimization should build a robust candidate from this eviden
 - compare top200/top300 only if the selection rule penalizes rolling variance;
 - consider a weighted blend of stable full-feature Ridge/LightGBM with top-k Ridge signals;
 - generate a new submission only after the rolling criterion is defined.
+
+## 2026-06-17: Rolling-Aware Stability Blend
+
+### Goal
+
+Build a new main-task submission candidate that trades some peak validation Pearson for lower fold-to-fold variance. This is a direct response to the previous top200 submission, where single-split validation looked strong but Kaggle generalization was weaker.
+
+### Implementation
+
+- Added config: `configs/01_main_stability_blend.yaml`.
+- Added script: `scripts/run_stability_blend.py`.
+- Candidate components:
+  - `full_ridge`
+  - `full_lightgbm`
+  - `top50_ridge`
+  - `top50_lightgbm`
+  - `top200_ridge`
+  - `top300_ridge`
+- Weight search constraints:
+  - stable components (`full` and `top50`) must carry at least `0.70` total weight;
+  - top-k Ridge signal components (`top200`, `top300`) can carry at most `0.30` total weight;
+  - weight step is `0.05`.
+- Selection objective:
+
+```text
+mean rolling Pearson - 1.0 * rolling std + 0.25 * minimum fold Pearson
+```
+
+- Added `--final-only` mode so final submission generation can reuse the saved rolling blend artifacts without rerunning all folds.
+
+### Selected Blend
+
+| Component | Weight |
+| --- | ---: |
+| full Ridge | 0.20 |
+| full LightGBM | 0.25 |
+| top50 Ridge | 0.05 |
+| top50 LightGBM | 0.20 |
+| top200 Ridge | 0.30 |
+| top300 Ridge | 0.00 |
+
+Selected final parameters:
+
+| Scheme | Ridge alpha | LightGBM trees |
+| --- | ---: | ---: |
+| full | 1000.0 | 154 |
+| top50 | 1000.0 | 156 |
+| top200 | 1000.0 | n/a |
+| top300 | 1000.0 | n/a |
+
+### Rolling Results
+
+| Fold | Pearson | RMSE |
+| --- | ---: | ---: |
+| fold_50_60 | 0.108175 | 0.964976 |
+| fold_60_70 | 0.144969 | 1.052979 |
+| fold_70_80 | 0.154487 | 1.010371 |
+| fold_80_90 | 0.122564 | 1.077876 |
+
+Summary:
+
+| Metric | Value |
+| --- | ---: |
+| rolling mean Pearson | 0.132549 |
+| rolling std | 0.018230 |
+| rolling min | 0.108175 |
+| rolling max | 0.154487 |
+| 80/20 holdout Pearson | 0.103034 |
+| 80/20 holdout RMSE | 1.081795 |
+
+Compared with the earlier rolling check, this blend has lower mean Pearson than top200/top300, but it also has much lower variance and a stronger minimum fold.
+
+### Artifacts
+
+- Metrics: `runs/01_main/stability_blend/best_blend_fold_metrics.csv`
+- Candidate grid: `runs/01_main/stability_blend/blend_candidates_top.csv`
+- Selected weights: `runs/01_main/stability_blend/best_blend_weights.csv`
+- Holdout metrics: `runs/01_main/stability_blend/holdout_stability_blend_metrics.csv`
+- Final summary: `runs/01_main/stability_blend/final_summary.json`
+- Submission: `submissions/01_main/stability_blend/submission_best.csv`
+
+Submission shape was verified as `538150 x 2` with columns `ID,prediction`.
+
+### Interpretation
+
+This is a more defensible next submission candidate than the pure top200 80/20 winner. It does not maximize the optimistic single-split score, but it directly addresses the stability problem observed after the Kaggle result.

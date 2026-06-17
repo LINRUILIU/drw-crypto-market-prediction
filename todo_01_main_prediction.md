@@ -38,6 +38,7 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
   - [ ] Ridge + LightGBM + XGBoost weighted average.
   - [ ] Add CatBoost only if it improves validation or diversity.
   - [x] Search simple weights on validation or OOF predictions.
+  - [x] Add rolling-aware stability-constrained blend.
   - [x] Compare ensemble performance with single models.
 
 - [ ] Create Kaggle submission artifacts
@@ -59,5 +60,5 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 
 - [x] At least one valid Kaggle submission is produced.
 - [x] Ridge and LightGBM baselines both run end to end.
-- [ ] Final report can explain why the final submitted model was selected.
+- [x] Final report can explain why the current submission candidate was selected.
 - [x] No validation preprocessing step uses validation target information.

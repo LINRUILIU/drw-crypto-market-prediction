@@ -96,3 +96,46 @@ Rolling artifacts:
 - `runs/03_temporal/rolling_validation/metrics_rolling_validation.csv`
 - `runs/03_temporal/rolling_validation/scheme_stability_summary.csv`
 - `runs/03_temporal/rolling_validation/lightgbm_importance_stability.csv`
+
+## Stability Blend Submission Candidate
+
+A rolling-aware blend was built after the leaderboard gap. The blend searches component weights under stability constraints instead of selecting the highest single 80/20 validation score.
+
+Selected weights:
+
+| Component | Weight |
+| --- | ---: |
+| full Ridge | 0.20 |
+| full LightGBM | 0.25 |
+| top50 Ridge | 0.05 |
+| top50 LightGBM | 0.20 |
+| top200 Ridge | 0.30 |
+| top300 Ridge | 0.00 |
+
+Rolling and holdout performance:
+
+| Metric | Value |
+| --- | ---: |
+| rolling mean Pearson | 0.132549 |
+| rolling std | 0.018230 |
+| rolling min Pearson | 0.108175 |
+| rolling max Pearson | 0.154487 |
+| 80/20 holdout Pearson | 0.103034 |
+| 80/20 holdout RMSE | 1.081795 |
+
+This candidate is more stable than the top200 rolling result:
+
+| Candidate | Rolling Mean | Rolling Std | Rolling Min |
+| --- | ---: | ---: | ---: |
+| stability blend | 0.132549 | 0.018230 | 0.108175 |
+| top200 Ridge + LightGBM | 0.153862 | 0.073044 | 0.081128 |
+| top300 Ridge + LightGBM | 0.162315 | 0.051951 | 0.103448 |
+| full Ridge + LightGBM | 0.115468 | 0.019837 | 0.098538 |
+
+Selected submission:
+
+```text
+submissions/01_main/stability_blend/submission_best.csv
+```
+
+This file has 538,150 rows and columns `ID`, `prediction`.
