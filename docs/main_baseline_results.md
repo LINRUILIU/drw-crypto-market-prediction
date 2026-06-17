@@ -66,3 +66,12 @@ submissions/01_main/pearson_topk/submission_best.csv
 ```
 
 This file has 538,150 rows and columns `ID`, `prediction`.
+
+Kaggle result for this optimized submission:
+
+| Split | Score |
+| --- | ---: |
+| Public | 0.02826 |
+| Private | 0.06610 |
+
+The leaderboard result is materially below the offline validation Pearson `0.125069`, so the next validation improvement should focus on rolling/time-stability checks rather than trusting a single 80/20 split.

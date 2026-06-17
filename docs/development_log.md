@@ -231,3 +231,14 @@ Compared against the previous full-feature ensemble baseline Pearson `0.100263`.
 - Best validation model: `top200` Ridge + LightGBM ensemble.
 - Pearson improved from `0.100263` to `0.125069`.
 - A new Kaggle submission file was generated because the top-k model beat the full-feature baseline.
+
+### Kaggle Result
+
+Submitted `submissions/01_main/pearson_topk/submission_best.csv`.
+
+| Split | Score |
+| --- | ---: |
+| Public | 0.02826 |
+| Private | 0.06610 |
+
+Interpretation: the single chronological 80/20 validation split overestimated leaderboard generalization. The top-k model is useful as a feature-selection result, but the next optimization step should prioritize rolling validation and temporal stability before further leaderboard-oriented feature tuning.
