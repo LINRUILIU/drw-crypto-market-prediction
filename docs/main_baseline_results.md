@@ -248,5 +248,6 @@ Current Beta1 comparison:
 | --- | ---: | ---: | --- |
 | submission blend private_safe / beta1_w085 | 0.03365 | 0.06628 | Current best private score |
 | beta1_w090 | 0.03182 | 0.06627 | Essentially tied, slightly worse |
+| beta1_w080 | 0.03551 | 0.06623 | Worse private despite better public |
 
-Next action: test `beta1_w080` before trying more top200-heavy weights.
+Conclusion: the narrow endpoint blend probe has likely saturated. The current best remains `beta1_w085`; the next main-task optimization should use a different mechanism rather than continuing to scan this one-dimensional blend.

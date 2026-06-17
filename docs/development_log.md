@@ -558,3 +558,28 @@ Submitted `submissions/01_main/beta1_blend_probe/submission_best.csv`, the `beta
 Interpretation: `w090` is essentially tied with `w085` but does not beat it (`0.06627` vs `0.06628`). Moving closer to pure top200 did not improve private score despite better holdout Pearson. The best observed private blend remains `w085`.
 
 Next beta1 action: test `beta1_w080`, not `w0925` or `w095`, because the observed private optimum is not moving toward the pure top200 endpoint.
+
+### Kaggle Result: beta1_w080
+
+Submitted `submissions/01_main/beta1_blend_probe/submission_beta1_w080.csv`, the `beta1_w080` candidate:
+
+```text
+0.80 * Pearson top200 + 0.20 * stability blend
+```
+
+| Split | Score |
+| --- | ---: |
+| Public | 0.03551 |
+| Private | 0.06623 |
+
+Interpretation: adding more stability weight than `w085` also fails to improve private score. The observed private ordering is:
+
+| Candidate | Public | Private |
+| --- | ---: | ---: |
+| beta1_w080 | 0.03551 | 0.06623 |
+| beta1_w085 | 0.03365 | 0.06628 |
+| beta1_w090 | 0.03182 | 0.06627 |
+
+Conclusion: the useful one-dimensional blend region is exhausted for now. The best observed point remains `w085`, and further probing on this axis is unlikely to give meaningful gain unless submission budget is very loose.
+
+Next beta1 action: move from endpoint-weight probing to a different optimization mechanism, such as prediction distribution calibration, rank-based blending, or a new model signal.
