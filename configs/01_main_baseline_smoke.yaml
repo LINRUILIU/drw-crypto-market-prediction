@@ -1,0 +1,61 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  validation_fraction: 0.2
+  max_train_rows: 20000
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+models:
+  ridge:
+    enabled: true
+    alphas: [0.1, 1.0, 10.0, 100.0, 1000.0]
+  elasticnet:
+    enabled: false
+    alpha: 0.001
+    l1_ratio: 0.2
+    max_iter: 2000
+  lightgbm:
+    enabled: true
+    n_estimators: 300
+    learning_rate: 0.03
+    num_leaves: 63
+    subsample: 0.85
+    colsample_bytree: 0.85
+    reg_alpha: 0.0
+    reg_lambda: 1.0
+    early_stopping_rounds: 100
+  xgboost:
+    enabled: true
+    n_estimators: 300
+    learning_rate: 0.03
+    max_depth: 6
+    subsample: 0.85
+    colsample_bytree: 0.85
+    reg_lambda: 1.0
+    early_stopping_rounds: 100
+  catboost:
+    enabled: true
+    iterations: 300
+    learning_rate: 0.03
+    depth: 6
+    l2_leaf_reg: 3.0
+    early_stopping_rounds: 100
+
+ensemble:
+  enabled: true
+  ridge_lgbm_grid_step: 0.05
+
+output:
+  run_dir: runs/01_main/baseline_smoke_20k
+  submission_dir: submissions/01_main/baseline_smoke_20k
+  prediction_col: prediction
+

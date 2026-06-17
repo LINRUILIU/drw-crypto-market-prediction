@@ -1,0 +1,38 @@
+# Environment
+
+The project uses the shared science environment managed under `D:\PythonEnvs`.
+
+Do not install project dependencies into the system Python environment. Do not create an in-project `.venv` unless the environment policy changes.
+
+```powershell
+D:\PythonEnvs\envs\py313-science\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+Run project scripts through the same interpreter:
+
+```powershell
+D:\PythonEnvs\envs\py313-science\Scripts\python.exe scripts/run_main_baseline.py --config configs/01_main_baseline_full.yaml
+```
+
+Current environment path:
+
+```text
+D:\PythonEnvs\envs\py313-science
+```
+
+Verified core packages:
+
+| Package | Version |
+| --- | --- |
+| Python | 3.13.9 |
+| numpy | 2.2.6 |
+| pandas | 3.0.3 |
+| scipy | 1.17.1 |
+| pyarrow | 24.0.0 |
+| PyYAML | 6.0.3 |
+| scikit-learn | 1.9.0 |
+| lightgbm | 4.6.0 |
+| xgboost | 3.2.0 |
+| catboost | 1.2.10 |
+| matplotlib | 3.11.0 |
+| tqdm | 4.68.2 |
