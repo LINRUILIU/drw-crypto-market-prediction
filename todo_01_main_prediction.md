@@ -73,4 +73,6 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Beta1 found a new private-best top100 Ridge blend at `0.70 * raw_w085 + 0.30 * top100_ridge`.
 - [x] Beta1 improved the top100 Ridge blend through `0.325` and `0.35`; current best is `0.65 * raw_w085 + 0.35 * top100_ridge`.
 - [x] Beta1 improved the top100 Ridge blend through `0.40`, `0.45`, and `0.50`; current best is `0.50 * raw_w085 + 0.50 * top100_ridge`.
-- [ ] Probe whether top100 Ridge should dominate: `0.55`, `0.60`, `0.70`, `0.80`, `1.00`.
+- [x] Probed whether top100 Ridge should dominate; current best is pure `top100_ridge_w100` with private `0.08901`.
+- [x] Confirmed local saturation on the same weight axis: `w095` nearly ties, while `w105`, `w110`, and `w125` are worse.
+- [ ] Switch to a new signal direction, such as other top-k Ridge signals or Ridge-only top-k ensembles.

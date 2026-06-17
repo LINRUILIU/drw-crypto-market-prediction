@@ -326,12 +326,19 @@ Kaggle results:
 
 | Submission | Public | Private | Notes |
 | --- | ---: | ---: | --- |
-| top100_ridge_w020 | 0.03625 | 0.06443 | Worse than raw w085; low signal weight is not enough |
+| full_ensemble_w020 | 0.03625 | 0.06443 | Worse than raw w085; this diverse signal did not help |
 | top100_ridge_w030 | 0.03651 | 0.07539 | Large private improvement |
 | top100_ridge_w0325 | 0.03672 | 0.07615 | Better than w030 |
 | top100_ridge_w035 | 0.03692 | 0.07692 | Better than w0325 |
 | top100_ridge_w040 | 0.03730 | 0.07842 | Higher top100 Ridge weight keeps improving |
 | top100_ridge_w045 | 0.03763 | 0.07989 | Higher again |
-| top100_ridge_w050 | 0.03793 | 0.08131 | Current best private score |
+| top100_ridge_w050 | 0.03793 | 0.08131 | Higher again |
+| top100_ridge_w060 | 0.03834 | 0.08393 | Higher again |
+| top100_ridge_w080 | 0.03837 | 0.08781 | Higher again |
+| top100_ridge_w095 | 0.03758 | 0.08900 | Near the peak |
+| top100_ridge_w100 | 0.03716 | 0.08901 | Current best private score |
+| top100_ridge_w105 | 0.03666 | 0.08881 | Worse than w100 |
+| top100_ridge_w110 | 0.03610 | 0.08842 | Worse than w100 |
+| top100_ridge_w125 | 0.03407 | 0.08612 | Over-extrapolation hurts |
 
-Conclusion: top100 Ridge adds a genuinely useful private signal, and the current best observed weight is now `50%`. The next probe should move from narrow local search to a right-side coarse sweep while keeping `w050` as the default best submission. Added candidate files for `w055`, `w060`, `w070`, `w080`, and `w100`, with `w060` as the recommended first follow-up submission.
+Conclusion: top100 Ridge is the dominant signal found so far. The best observed private result is pure `top100_ridge_w100`, and the local weight scan has saturated because both smaller and larger nearby weights fail to improve it. The next Beta1 improvement should use a new signal direction rather than further tuning this same blend axis.

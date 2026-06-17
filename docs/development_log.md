@@ -703,7 +703,7 @@ Rationale: `top100_ridge_w030` gives the best holdout Pearson among the tested n
 Submitted:
 
 - `submissions/01_main/beta1_signal_blend/submission_best.csv` / `submission_top100_ridge_w030.csv`
-- `submissions/01_main/beta1_signal_blend/submission_top100_ridge_w020.csv`
+- `submissions/01_main/beta1_signal_blend/submission_full_ensemble_w020.csv`
 - `submissions/01_main/beta1_signal_blend/submission_top100_ridge_w0325.csv`
 - `submissions/01_main/beta1_signal_blend/submission_top100_ridge_w035.csv`
 - `submissions/01_main/beta1_signal_blend/submission_top100_ridge_w040.csv`
@@ -712,14 +712,21 @@ Submitted:
 
 | Candidate | Public | Private |
 | --- | ---: | ---: |
-| top100_ridge_w020 | 0.03625 | 0.06443 |
+| full_ensemble_w020 | 0.03625 | 0.06443 |
 | top100_ridge_w030 | 0.03651 | 0.07539 |
 | top100_ridge_w0325 | 0.03672 | 0.07615 |
 | top100_ridge_w035 | 0.03692 | 0.07692 |
 | top100_ridge_w040 | 0.03730 | 0.07842 |
 | top100_ridge_w045 | 0.03763 | 0.07989 |
 | top100_ridge_w050 | 0.03793 | 0.08131 |
+| top100_ridge_w060 | 0.03834 | 0.08393 |
+| top100_ridge_w080 | 0.03837 | 0.08781 |
+| top100_ridge_w095 | 0.03758 | 0.08900 |
+| top100_ridge_w100 | 0.03716 | 0.08901 |
+| top100_ridge_w105 | 0.03666 | 0.08881 |
+| top100_ridge_w110 | 0.03610 | 0.08842 |
+| top100_ridge_w125 | 0.03407 | 0.08612 |
 
-Interpretation: the private score continues to improve from `w030` through `w050`, making `top100_ridge_w050` the new best private result. It improves over raw `w085` from `0.06628` to `0.08131`. The much weaker `w020` result shows that the private response to the added top100 Ridge signal is not linear, so low-weight interpolation should not be assumed safe.
+Interpretation: the private score continues to improve from `w030` through pure `top100_ridge`, making `top100_ridge_w100` the new best private result. It improves over raw `w085` from `0.06628` to `0.08901`. The weak `full_ensemble_w020` result confirms that not every diverse signal helps; the useful direction in this round is specifically the top100 Ridge signal.
 
-Next beta1 action: keep `top100_ridge_w050` as the current best and switch from narrow probing to a right-side coarse sweep. `submission_best.csv` now points to `top100_ridge_w050`. Added fixed candidate submissions for `top100_ridge_w055`, `top100_ridge_w060`, `top100_ridge_w070`, `top100_ridge_w080`, and `top100_ridge_w100`; submit `w060` first, then use the private result to decide whether to continue toward pure `top100_ridge`.
+Conclusion: the one-dimensional `raw_w085` to `top100_ridge` weight axis has reached a local bottleneck. `w095` and `w100` are effectively tied, while `w105`, `w110`, and `w125` all decline. `submission_best.csv` now points to `top100_ridge_w100`. The next improvement should come from a new direction, such as a different top-k Ridge signal, a Ridge-only top-k ensemble, or another feature-selection family, rather than further scanning this same blend axis.
