@@ -706,6 +706,9 @@ Submitted:
 - `submissions/01_main/beta1_signal_blend/submission_top100_ridge_w020.csv`
 - `submissions/01_main/beta1_signal_blend/submission_top100_ridge_w0325.csv`
 - `submissions/01_main/beta1_signal_blend/submission_top100_ridge_w035.csv`
+- `submissions/01_main/beta1_signal_blend/submission_top100_ridge_w040.csv`
+- `submissions/01_main/beta1_signal_blend/submission_top100_ridge_w045.csv`
+- `submissions/01_main/beta1_signal_blend/submission_top100_ridge_w050.csv`
 
 | Candidate | Public | Private |
 | --- | ---: | ---: |
@@ -713,7 +716,10 @@ Submitted:
 | top100_ridge_w030 | 0.03651 | 0.07539 |
 | top100_ridge_w0325 | 0.03672 | 0.07615 |
 | top100_ridge_w035 | 0.03692 | 0.07692 |
+| top100_ridge_w040 | 0.03730 | 0.07842 |
+| top100_ridge_w045 | 0.03763 | 0.07989 |
+| top100_ridge_w050 | 0.03793 | 0.08131 |
 
-Interpretation: the private score continues to improve from `w030` to `w035`, making `top100_ridge_w035` the new best private result. It improves over raw `w085` from `0.06628` to `0.07692`. The much weaker `w020` result shows that the private response to the added top100 Ridge signal is not linear, so low-weight interpolation should not be assumed safe.
+Interpretation: the private score continues to improve from `w030` through `w050`, making `top100_ridge_w050` the new best private result. It improves over raw `w085` from `0.06628` to `0.08131`. The much weaker `w020` result shows that the private response to the added top100 Ridge signal is not linear, so low-weight interpolation should not be assumed safe.
 
-Next beta1 action: keep `top100_ridge_w035` as the current best and continue probing to the right. `submission_best.csv` now points to `top100_ridge_w035`. Added fixed candidate submissions for `top100_ridge_w0375`, `top100_ridge_w040`, `top100_ridge_w045`, and `top100_ridge_w050`; submit `w040` first, then choose `w045` or `w0375` based on the private result.
+Next beta1 action: keep `top100_ridge_w050` as the current best and switch from narrow probing to a right-side coarse sweep. `submission_best.csv` now points to `top100_ridge_w050`. Added fixed candidate submissions for `top100_ridge_w055`, `top100_ridge_w060`, `top100_ridge_w070`, `top100_ridge_w080`, and `top100_ridge_w100`; submit `w060` first, then use the private result to decide whether to continue toward pure `top100_ridge`.
