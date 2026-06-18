@@ -100,4 +100,5 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Submitted Beta5-B `int240_alpha300000_w0.20`; public `0.06729`, private `0.10214`, below the Beta5-A best.
 - [x] Submitted Beta5-B `int240_alpha100000_w0.20`; public `0.06797`, private `0.10256`, below the Beta5-A best.
 - [x] Kept Beta5-A as the current best: `0.85 * beta4_current_best + 0.15 * ridge_interactions_only`, private `0.10302`.
-- [ ] Decide the next new-signal direction: conservative interaction blend around the 120-feature signal, AE features over selected interactions, or MLP retraining with structured + interaction features.
+- [x] Closed Beta5 with Beta5-A as the selected main-task best; do not continue XGB interactions, int240 widening, or heavier interaction weights without a new hypothesis.
+- [ ] Start Beta6-AE using structured features plus the selected 120 Beta5-A interaction features.

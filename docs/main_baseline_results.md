@@ -564,3 +564,26 @@ Current best remains:
 ```
 
 Conclusion: larger interaction sets and heavier interaction weighting improved holdout/public but did not transfer to private. Keep the Beta5-A 120-feature interaction Ridge blend as the selected main submission.
+
+## Beta5 Closed Summary
+
+Beta5 is closed with the Beta5-A interaction Ridge blend as the selected current best.
+
+Current best:
+
+```text
+0.85 * beta4_current_best + 0.15 * ridge_interactions_only
+```
+
+Leaderboard score:
+
+| Public | Private | Local file |
+| ---: | ---: | --- |
+| 0.06362 | 0.10302 | `submissions/01_main/beta5_interactions/submission_best.csv` |
+
+Final interpretation:
+
+- Interaction features are useful and should be kept in the main narrative.
+- XGB on interaction features is not useful in the current setup.
+- Larger `int240` Ridge variants increased public score but reduced private score.
+- The next stage should use the selected 120 interaction features as structured inputs for AE/MLP work, not continue widening Beta5 interactions.

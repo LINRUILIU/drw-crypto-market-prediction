@@ -1311,3 +1311,63 @@ Current best remains:
 with private score `0.10302`.
 
 Interpretation: Beta5-B confirms the interaction branch is useful, but widening to 240 interactions and increasing the weight to `0.20` overfits the public/holdout direction. The next interaction refinement should be more conservative around the existing `120`-feature signal or use selected interactions as inputs to AE features, rather than pushing larger interaction sets harder.
+
+## 2026-06-18: Beta5 Closure
+
+Beta5 is closed with the Beta5-A Ridge interaction blend as the selected main-task best.
+
+### Final Beta5 Result
+
+| Stage | Candidate | Public | Private | Decision |
+| --- | --- | ---: | ---: | --- |
+| Beta5-A | `0.85 * beta4_current_best + 0.15 * ridge_interactions_only` | 0.06362 | 0.10302 | Selected current best |
+| Beta5-A | `0.95 * beta4_current_best + 0.05 * xgb_core_plus_interactions` | 0.05657 | 0.10044 | Not selected |
+| Beta5-B | `0.80 * beta4_base + 0.20 * int240_alpha300000` | 0.06729 | 0.10214 | Not selected |
+| Beta5-B | `0.80 * beta4_base + 0.20 * int240_alpha100000` | 0.06797 | 0.10256 | Not selected |
+
+Final current best:
+
+```text
+0.85 * beta4_current_best + 0.15 * ridge_interactions_only
+```
+
+where:
+
+```text
+beta4_current_best = 0.75 * beta3_current_best + 0.25 * shap_stable_xgboost
+```
+
+Local selected submission:
+
+```text
+submissions/01_main/beta5_interactions/submission_best.csv
+```
+
+### What Beta5 Proved
+
+- Pairwise symbolic interactions are the first clearly transferable feature-engineering gain after Beta4.
+- The useful interaction signal is linear/Ridge-like, not XGB-like.
+- The interaction model is weak standalone, but complementary enough to improve private score from `0.10043` to `0.10302`.
+- More interaction features and heavier interaction weight improve holdout/public but do not improve private.
+
+### Closed Directions
+
+Do not continue these axes unless there is a new hypothesis:
+
+- XGB on the current interaction set;
+- 240-feature interaction Ridge with `0.20` blend weight;
+- public-score chasing through larger interaction count or heavier interaction weight;
+- SHAP-stable XGB feature-rule or early-stopping refinements.
+
+### Reusable Assets
+
+- 40-feature interaction base pool:
+  - `runs/01_main/beta5_interactions/base_feature_pool.txt`
+- 120 selected Beta5-A interaction definitions:
+  - `runs/01_main/beta5_interactions/selected_interaction_definitions.csv`
+- Interaction score table:
+  - `runs/01_main/beta5_interactions/interaction_candidate_scores.csv`
+- Current best submission:
+  - `submissions/01_main/beta5_interactions/submission_best.csv`
+
+Next direction: move to Beta6 with AE features over structured features plus the selected Beta5-A interactions, or run a very conservative 120-feature interaction calibration only if there is a concrete reason. The default should be AE, not more Beta5 interaction widening.
