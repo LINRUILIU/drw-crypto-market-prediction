@@ -1033,3 +1033,66 @@ submissions/01_main/beta3_spearman_weight_micro/submission_best.csv
 Interpretation: residual-correlation remains useful as evidence of a complementary signal, but direct residual blending overfits the public/holdout direction and does not transfer to private in this grid. The robust gain came from a small Spearman weight fine-tune; `0.225` and `0.235` tie at private `0.10003`, while `0.25` starts to decline. This axis is now close to a local bottleneck.
 
 Next direction: avoid more same-signal weight sweeps. The better next candidates are new signal definitions, such as alternate rank transforms, residual signal regularization, or hypotheses from high-ranking solution writeups.
+
+## 2026-06-18: Beta4 Structured Features, SHAP-Stable XGB, and CPU MLP
+
+### Goal
+
+Move away from same-axis Spearman/Ridge weight sweeps and test the first-place-solution-inspired path:
+
+```text
+correlation-cluster medoid features
+-> purged group CV XGB + SHAP stable features
+-> CPU 3-layer MLP baseline
+```
+
+The comparison baseline before Beta4 was:
+
+```text
+0.765 * beta2_current_best + 0.235 * spearman_top50_ridge
+```
+
+with private score `0.10003`.
+
+### Implementation
+
+- Added CPU PyTorch and SHAP to the documented environment.
+- Added reusable utilities:
+  - correlation clustering with `1 - abs(corr)` distance;
+  - medoid selection by maximum intra-cluster absolute-correlation sum;
+  - low target-correlation filtering;
+  - SHAP-stable feature aggregation;
+  - purged group time split with 6 contiguous groups and `gap=1`.
+- Added Beta4 configs/scripts:
+  - `configs/01_main_beta4_medoid.yaml` and `scripts/run_beta4_medoid.py`;
+  - `configs/01_main_beta4_shap_stable.yaml` and `scripts/run_beta4_shap_stable.py`;
+  - `configs/01_main_beta4_mlp.yaml` and `scripts/run_beta4_mlp.py`.
+- Used XGBoost TreeSHAP contribution values through `pred_contribs=True`.
+- MLP used CPU-only PyTorch, SGD, and `0.6 * MSE + 0.4 * (1 - Pearson)` loss.
+
+### Kaggle Result
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta3 Spearman fine-tune | 0.05456 | 0.10003 | Beta4 comparison baseline |
+| `0.85 * current_best + 0.15 * medoid_t0.6_ridge` | 0.05437 | 0.09565 | Medoid Ridge did not transfer |
+| `0.75 * current_best + 0.25 * shap_stable_xgboost` | 0.05634 | 0.10043 | New best private score |
+| `0.85 * current_best + 0.15 * hybrid_mlp` | pending | pending | Generated but not submitted because Kaggle submission was blocked by Codex usage limit |
+
+Current best:
+
+```text
+0.75 * beta3_current_best + 0.25 * shap_stable_xgboost
+```
+
+where `shap_stable_xgboost` uses 20 features selected by purged-fold XGB TreeSHAP stability from the medoid feature set.
+
+The corresponding local file is:
+
+```text
+submissions/01_main/beta4_shap_stable/submission_best.csv
+```
+
+Interpretation: simple medoid Ridge is not enough as a direct signal, but medoid features are useful as an input to fold-stable XGB feature selection. The successful Beta4 gain is small but meaningful: it improves private from `0.10003` to `0.10043`. The first MLP baseline did not become a strong standalone model; its best holdout behavior came from a small hybrid-feature blend, which remains a pending submission candidate.
+
+Next direction: tune the successful SHAP-stable branch before expanding MLP/AE. Highest-priority next tests are lower XGB blend weights around `0.15-0.30`, alternative SHAP stability thresholds, and a better MLP training recipe only after confirming the SHAP-stable signal is stable.

@@ -1,0 +1,50 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  validation_fraction: 0.2
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+current_best:
+  name: beta3_spearman_weight_micro
+  private_score: 0.10003
+  components:
+    - name: top50_alpha200000
+      selected_features_path: runs/01_main/pearson_topk/selected_features_top50.txt
+      alpha: 200000
+      weight: 0.3825
+    - name: top100_alpha50
+      selected_features_path: runs/01_main/pearson_topk/selected_features_top100.txt
+      alpha: 50
+      weight: 0.3825
+    - name: spearman_top50_alpha50000
+      selected_features_path: runs/01_main/beta3_new_feature_signals/selected_features_spearman_top50.txt
+      alpha: 50000
+      weight: 0.235
+
+medoid:
+  thresholds: [0.6, 0.7]
+  low_target_corr_threshold: 0.0001
+  linkage_method: average
+
+ridge:
+  alphas: [10, 50, 100, 300, 1000, 3000, 10000, 50000, 200000]
+
+blend:
+  signal_weights: [0.05, 0.10, 0.15, 0.20, 0.25]
+  holdout_tolerance: 0.003
+  max_std_ratio_current_best: 1.15
+  max_selected_submissions: 3
+
+output:
+  run_dir: runs/01_main/beta4_medoid
+  submission_dir: submissions/01_main/beta4_medoid
+  prediction_col: prediction

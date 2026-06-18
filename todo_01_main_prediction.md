@@ -85,4 +85,9 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Tested residual Pearson, Spearman, and rolling-stability-aware Pearson top-k Ridge signals; current best is `0.80 * beta2_current_best + 0.20 * spearman_top50` with private `0.09998`.
 - [x] Blend the two successful Beta3 signals, `residual_pearson_top100` and `spearman_top50`, with the current best.
 - [x] Confirmed direct residual + Spearman blends do not beat Spearman-only on private; fine-tuned Spearman weight to a `0.225-0.235` plateau with best private `0.10003`.
-- [ ] Study high-ranking solutions for new hypotheses after exhausting the residual/Spearman blend axis.
+- [x] Study high-ranking solutions for new hypotheses after exhausting the residual/Spearman blend axis.
+- [x] Implemented Beta4-A correlation-cluster medoid features; direct medoid Ridge blend did not transfer, private `0.09565`.
+- [x] Implemented Beta4-B purged XGB TreeSHAP stable features; current best is `0.75 * beta3_current_best + 0.25 * shap_stable_xgboost` with private `0.10043`.
+- [x] Implemented Beta4-C CPU MLP baseline with SGD and mixed MSE/Pearson loss.
+- [ ] Submit the generated Beta4-C `0.85 * current_best + 0.15 * hybrid_mlp` candidate when Kaggle CLI submission is available again.
+- [ ] Tune the successful SHAP-stable XGB branch before expanding to AE features.

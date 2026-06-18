@@ -474,3 +474,24 @@ beta2_current_best = 0.5 * top50_ridge(alpha=200000) + 0.5 * top100_ridge(alpha=
 ```
 
 Conclusion: adding residual Pearson directly to the blend did not transfer to private despite stronger holdout and public scores. The current useful region is a narrow Spearman-only plateau around weight `0.225-0.235`; further progress should come from a new signal definition instead of more same-axis weight sweeps.
+
+## Beta4 Structured Features and SHAP-Stable XGB
+
+Beta4 tested the first-place-solution-inspired path: correlation-cluster medoid features, purged-group XGB TreeSHAP stable feature selection, and a CPU MLP baseline.
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta3 Spearman fine-tune | 0.05456 | 0.10003 | Before Beta4 |
+| `0.85 * current_best + 0.15 * medoid_t0.6_ridge` | 0.05437 | 0.09565 | Medoid Ridge did not transfer |
+| `0.75 * current_best + 0.25 * shap_stable_xgboost` | 0.05634 | 0.10043 | Current best private score |
+| `0.85 * current_best + 0.15 * hybrid_mlp` | pending | pending | Generated locally, not submitted due Codex usage limit |
+
+Current best:
+
+```text
+0.75 * beta3_current_best + 0.25 * shap_stable_xgboost
+```
+
+The SHAP-stable branch selects 20 features from medoid-filtered features using purged 6-fold XGBoost TreeSHAP contributions. The MLP baseline is implemented, but the first full run did not produce a strong standalone model; its safest candidate is a small hybrid-feature blend pending submission.
+
+Conclusion: Beta4 confirms that the next useful direction is not another linear top-k weight sweep. The first transferable gain came from a nonlinear XGB/SHAP-stable signal layered onto the strong Beta3 Ridge/Spearman baseline.

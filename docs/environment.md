@@ -36,3 +36,7 @@ Verified core packages:
 | catboost | 1.2.10 |
 | matplotlib | 3.11.0 |
 | tqdm | 4.68.2 |
+| torch | 2.12.1+cpu |
+| shap | 0.52.0 |
+
+Beta4 uses CPU-only PyTorch. The verified environment reports `torch.cuda.is_available() == False`, which is expected for this project.
