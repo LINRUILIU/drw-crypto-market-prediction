@@ -96,4 +96,8 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Implemented Beta5-A interaction-first feature expansion with 5,460 pairwise symbolic candidates and 120 selected interaction features.
 - [x] Submitted Beta5-A XGB interaction probe; public `0.05657`, private `0.10044`, effectively tied with the previous best.
 - [x] Submitted Beta5-A Ridge interaction-only blend; current best is `0.85 * beta4_current_best + 0.15 * ridge_interactions_only`, public `0.06362`, private `0.10302`.
-- [ ] Decide the next new-signal direction: interaction Ridge refinement, AE features over selected interactions, or MLP retraining with structured + interaction features.
+- [x] Implemented Beta5-B interaction Ridge refinement over interaction counts `60-240`, high-alpha Ridge variants, and blend weights `0.10-0.20`.
+- [x] Submitted Beta5-B `int240_alpha300000_w0.20`; public `0.06729`, private `0.10214`, below the Beta5-A best.
+- [x] Submitted Beta5-B `int240_alpha100000_w0.20`; public `0.06797`, private `0.10256`, below the Beta5-A best.
+- [x] Kept Beta5-A as the current best: `0.85 * beta4_current_best + 0.15 * ridge_interactions_only`, private `0.10302`.
+- [ ] Decide the next new-signal direction: conservative interaction blend around the 120-feature signal, AE features over selected interactions, or MLP retraining with structured + interaction features.

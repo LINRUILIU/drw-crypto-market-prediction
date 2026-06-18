@@ -1242,3 +1242,72 @@ submissions/01_main/beta5_interactions/submission_best.csv
 ```
 
 Interpretation: Beta5-A confirms that interaction features are a real new signal source. The standalone interaction models are not strong, but the Ridge interaction-only signal is sufficiently complementary to improve private from `0.10043` to `0.10302`. XGB on the same interaction set did not add useful signal. The next most logical direction is to refine the interaction Ridge branch or use the selected interactions as input for AE features.
+
+## 2026-06-18: Beta5-B Interaction Ridge Refinement
+
+### Goal
+
+Refine the successful Beta5-A `ridge_interactions_only` branch by testing:
+
+- larger pruned interaction sets;
+- higher Ridge alpha values;
+- blend weights around the previous `0.15` interaction weight.
+
+The comparison baseline before Beta5-B was:
+
+```text
+0.85 * beta4_current_best + 0.15 * ridge_interactions_only
+```
+
+with private score `0.10302`.
+
+### Implementation
+
+- Added config: `configs/01_main_beta5_b_interaction_ridge_refine.yaml`.
+- Added script: `scripts/run_beta5_b_interaction_ridge_refine.py`.
+- Reused Beta5-A interaction candidate scores instead of recomputing interaction scoring.
+- Greedily pruned interaction candidates to 240 features using the same abs-correlation threshold `0.985`.
+- Tested interaction counts:
+  - `60, 90, 120, 160, 200, 240`
+- Tested Ridge alphas:
+  - `50000, 100000, 200000, 300000, 500000, 1000000`
+- Tested blend weights against the Beta4 base:
+  - `0.10, 0.125, 0.15, 0.175, 0.20`
+- Included a baseline reproduction candidate:
+  - `120 interactions`, alpha `200000`, interaction weight `0.15`.
+
+### Local Results
+
+Best standalone Ridge interaction signals:
+
+| Feature count | Alpha | Holdout Pearson | Delta vs Beta5-A current best |
+| ---: | ---: | ---: | ---: |
+| 240 | 1000000 | 0.118699 | +0.000265 |
+| 240 | 500000 | 0.118482 | +0.000048 |
+| 240 | 300000 | 0.117046 | -0.001387 |
+
+Best selected blends:
+
+| Candidate | Holdout Pearson | Delta vs Beta5-A current best | Notes |
+| --- | ---: | ---: | --- |
+| `0.80 * beta4_base + 0.20 * int240_alpha300000` | 0.121618 | +0.003185 | Holdout best |
+| `0.80 * beta4_base + 0.20 * int240_alpha100000` | 0.121105 | +0.002671 | Lower-correlation near-best |
+| `0.85 * beta4_base + 0.15 * int120_alpha200000` | 0.118433 | 0.000000 | Baseline reproduction |
+
+### Kaggle Result
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta5-A interaction Ridge | 0.06362 | 0.10302 | Current best before Beta5-B |
+| `0.80 * beta4_base + 0.20 * int240_alpha300000` | 0.06729 | 0.10214 | Public improved, private dropped |
+| `0.80 * beta4_base + 0.20 * int240_alpha100000` | 0.06797 | 0.10256 | Public improved, still below best private |
+
+Current best remains:
+
+```text
+0.85 * beta4_current_best + 0.15 * ridge_interactions_only
+```
+
+with private score `0.10302`.
+
+Interpretation: Beta5-B confirms the interaction branch is useful, but widening to 240 interactions and increasing the weight to `0.20` overfits the public/holdout direction. The next interaction refinement should be more conservative around the existing `120`-feature signal or use selected interactions as inputs to AE features, rather than pushing larger interaction sets harder.

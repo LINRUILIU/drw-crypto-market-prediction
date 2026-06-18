@@ -1,0 +1,80 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  validation_fraction: 0.2
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+beta4_base:
+  name: beta4_shap_stable_xgboost_w025
+  private_score: 0.10043
+  base_weight: 0.75
+  signal_weight: 0.25
+  beta3_components:
+    - name: top50_alpha200000
+      selected_features_path: runs/01_main/pearson_topk/selected_features_top50.txt
+      alpha: 200000
+      weight: 0.3825
+    - name: top100_alpha50
+      selected_features_path: runs/01_main/pearson_topk/selected_features_top100.txt
+      alpha: 50
+      weight: 0.3825
+    - name: spearman_top50_alpha50000
+      selected_features_path: runs/01_main/beta3_new_feature_signals/selected_features_spearman_top50.txt
+      alpha: 50000
+      weight: 0.235
+  shap_stable_features_path: runs/01_main/beta4_shap_stable/selected_features_shap_stable.txt
+  shap_stable_valid_prediction_path: runs/01_main/beta4_shap_stable/valid_predictions/valid_shap_stable_xgboost.csv
+  test_submission_path: submissions/01_main/beta4_shap_stable/submission_best.csv
+
+current_best:
+  name: beta5_interaction_ridge_w015
+  private_score: 0.10302
+  beta4_weight: 0.85
+  interaction_weight: 0.15
+  interaction_valid_prediction_path: runs/01_main/beta5_interactions/valid_predictions/valid_ridge_interactions_only.csv
+  test_submission_path: submissions/01_main/beta5_interactions/submission_best.csv
+
+feature_pool:
+  base_feature_pool_path: runs/01_main/beta5_interactions/base_feature_pool.txt
+  interaction_scores_path: runs/01_main/beta5_interactions/interaction_candidate_scores.csv
+  top_k_each_metric: 300
+
+interactions:
+  eps: 1.0e-6
+  transform_block_size: 128
+  corr_prune_threshold: 0.985
+  max_pruned_features: 240
+  feature_counts: [60, 90, 120, 160, 200, 240]
+
+ridge:
+  alphas: [50000, 100000, 200000, 300000, 500000, 1000000]
+
+xgboost:
+  n_estimators: 800
+  learning_rate: 0.03
+  max_depth: 5
+  subsample: 0.85
+  colsample_bytree: 0.85
+  reg_lambda: 1.0
+  early_stopping_rounds: 80
+
+blend:
+  signal_weights: [0.10, 0.125, 0.15, 0.175, 0.20]
+  holdout_floor_delta: -0.001
+  min_std_ratio_current_best: 0.50
+  max_std_ratio_current_best: 1.35
+  max_selected_submissions: 3
+
+output:
+  run_dir: runs/01_main/beta5_b_interaction_ridge_refine
+  submission_dir: submissions/01_main/beta5_b_interaction_ridge_refine
+  prediction_col: prediction

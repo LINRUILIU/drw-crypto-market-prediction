@@ -546,3 +546,21 @@ beta4_current_best = 0.75 * beta3_current_best + 0.25 * shap_stable_xgboost
 The interaction branch generated 5,460 pairwise candidates, selected 120 after train-only scoring and high-correlation pruning, and produced a complementary Ridge signal. XGB on the same interaction set was not useful as a standalone signal.
 
 Conclusion: interaction features are the first clearly transferable new signal after Beta4. The next step should refine the interaction Ridge branch or feed selected interactions into AE features, rather than returning to SHAP-stable XGB weight tuning.
+
+## Beta5-B Interaction Ridge Refinement
+
+Beta5-B widened and retuned the successful interaction Ridge branch.
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta5-A interaction Ridge | 0.06362 | 0.10302 | Current best before Beta5-B |
+| `0.80 * beta4_base + 0.20 * int240_alpha300000` | 0.06729 | 0.10214 | Holdout best, private below current best |
+| `0.80 * beta4_base + 0.20 * int240_alpha100000` | 0.06797 | 0.10256 | Higher public, still below current best private |
+
+Current best remains:
+
+```text
+0.85 * beta4_current_best + 0.15 * ridge_interactions_only
+```
+
+Conclusion: larger interaction sets and heavier interaction weighting improved holdout/public but did not transfer to private. Keep the Beta5-A 120-feature interaction Ridge blend as the selected main submission.
