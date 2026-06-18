@@ -1162,3 +1162,83 @@ Current best remains:
 with private score `0.10043`.
 
 Interpretation: Beta4.1 did not improve the leaderboard best. The broader `top30_min3` feature rule improves local validation but does not transfer to private, and the fixed-tree tests show that simply disabling early stopping is harmful. Pearson early stopping did not differ from RMSE early stopping in this run, so the next useful step should introduce a genuinely new signal source, such as AE features, better MLP training, interaction features, or a more systematic high-solution feature-structure replication.
+
+## 2026-06-18: Beta5-A Interaction-First Feature Expansion
+
+### Goal
+
+Close the SHAP-stable XGB local axis and test first-place-solution-inspired symbolic interaction features as a new signal source. The comparison baseline before Beta5-A was:
+
+```text
+0.75 * beta3_current_best + 0.25 * shap_stable_xgboost
+```
+
+with private score `0.10043`.
+
+### Implementation
+
+- Added config: `configs/01_main_beta5_interactions.yaml`.
+- Added script: `scripts/run_beta5_interactions.py`.
+- Added shared utilities: `src/drw_crypto/interaction_features.py`.
+- Built a 40-feature core pool from:
+  - Beta4-B SHAP-stable features;
+  - Beta3 Spearman top50 first 20;
+  - Pearson top50 first 20;
+  - Pearson top100 first 20.
+- Generated 5,460 two-way interactions with:
+  - add, subtract, multiply;
+  - both ratio directions with `abs(denominator) + 1e-6`;
+  - pairwise max and min.
+- Used train-only scoring:
+  - `abs Pearson(label)`;
+  - `abs Spearman(label)` on at most 120,000 train rows;
+  - `abs Pearson(current_best_residual)`.
+- Took the top 300 by each score, then greedily removed candidates with train interaction correlation above `0.985`.
+- Selected 120 interaction features after pruning.
+- Trained:
+  - Ridge on interactions only;
+  - Ridge on core plus interactions;
+  - XGB on core plus interactions.
+
+### Local Results
+
+| Signal | Holdout Pearson | Delta vs current best | Notes |
+| --- | ---: | ---: | --- |
+| `ridge_core_plus_interactions` | 0.104675 | -0.013185 | Weak standalone, useful only as blend probe |
+| `ridge_interactions_only` | 0.104468 | -0.013392 | Weak standalone, lower correlation with current best |
+| `xgb_core_plus_interactions` | 0.048220 | -0.069640 | XGB interaction signal is too weak standalone |
+
+Best local blends:
+
+| Candidate | Holdout Pearson | Delta vs current best | Notes |
+| --- | ---: | ---: | --- |
+| `0.85 * current_best + 0.15 * ridge_interactions_only` | 0.118433 | +0.000574 | Best selected low-correlation backup |
+| `0.95 * current_best + 0.05 * xgb_core_plus_interactions` | 0.117568 | -0.000292 | XGB probe, within eligibility threshold |
+
+### Kaggle Result
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta4 SHAP-stable XGB | 0.05634 | 0.10043 | Before Beta5-A |
+| `0.95 * current_best + 0.05 * xgb_core_plus_interactions` | 0.05657 | 0.10044 | Essentially tied with previous best |
+| `0.85 * current_best + 0.15 * ridge_interactions_only` | 0.06362 | 0.10302 | New best private score |
+
+Current best:
+
+```text
+0.85 * beta4_current_best + 0.15 * ridge_interactions_only
+```
+
+where:
+
+```text
+beta4_current_best = 0.75 * beta3_current_best + 0.25 * shap_stable_xgboost
+```
+
+The corresponding local file is:
+
+```text
+submissions/01_main/beta5_interactions/submission_best.csv
+```
+
+Interpretation: Beta5-A confirms that interaction features are a real new signal source. The standalone interaction models are not strong, but the Ridge interaction-only signal is sufficiently complementary to improve private from `0.10043` to `0.10302`. XGB on the same interaction set did not add useful signal. The next most logical direction is to refine the interaction Ridge branch or use the selected interactions as input for AE features.

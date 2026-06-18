@@ -93,4 +93,7 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Implemented Beta4.1 SHAP-stable XGB refinement: feature-rule sweep, XGB training sweep, and blend-weight sweep.
 - [x] Submitted Beta4.1 `top30_min3_fill20` probes at signal weights `0.325` and `0.25`; private scores were `0.09956` and `0.09974`, below the current best.
 - [x] Kept Beta4-B as the current best: `0.75 * beta3_current_best + 0.25 * shap_stable_xgboost`, private `0.10043`.
-- [ ] Decide the next new-signal direction: AE features, stronger MLP training, interaction features, or deeper replication of the first-place feature-structure pipeline.
+- [x] Implemented Beta5-A interaction-first feature expansion with 5,460 pairwise symbolic candidates and 120 selected interaction features.
+- [x] Submitted Beta5-A XGB interaction probe; public `0.05657`, private `0.10044`, effectively tied with the previous best.
+- [x] Submitted Beta5-A Ridge interaction-only blend; current best is `0.85 * beta4_current_best + 0.15 * ridge_interactions_only`, public `0.06362`, private `0.10302`.
+- [ ] Decide the next new-signal direction: interaction Ridge refinement, AE features over selected interactions, or MLP retraining with structured + interaction features.

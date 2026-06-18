@@ -520,3 +520,29 @@ Current best remains:
 ```
 
 Conclusion: Beta4.1 closes the first SHAP-stable refinement pass without a new best. The branch remains useful as a component, but further progress likely requires a new signal source rather than narrower SHAP-rule or XGB early-stopping tweaks.
+
+## Beta5-A Interaction-First Feature Expansion
+
+Beta5-A introduced symbolic pairwise interaction features from a 40-feature core pool, then trained Ridge/XGB signals and blended them into the Beta4 best.
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta4 SHAP-stable XGB | 0.05634 | 0.10043 | Before Beta5-A |
+| `0.95 * current_best + 0.05 * xgb_core_plus_interactions` | 0.05657 | 0.10044 | Essentially tied current best |
+| `0.85 * current_best + 0.15 * ridge_interactions_only` | 0.06362 | 0.10302 | Current best private score |
+
+Current best:
+
+```text
+0.85 * beta4_current_best + 0.15 * ridge_interactions_only
+```
+
+where:
+
+```text
+beta4_current_best = 0.75 * beta3_current_best + 0.25 * shap_stable_xgboost
+```
+
+The interaction branch generated 5,460 pairwise candidates, selected 120 after train-only scoring and high-correlation pruning, and produced a complementary Ridge signal. XGB on the same interaction set was not useful as a standalone signal.
+
+Conclusion: interaction features are the first clearly transferable new signal after Beta4. The next step should refine the interaction Ridge branch or feed selected interactions into AE features, rather than returning to SHAP-stable XGB weight tuning.

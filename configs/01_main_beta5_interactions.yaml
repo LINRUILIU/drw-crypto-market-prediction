@@ -1,0 +1,83 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  validation_fraction: 0.2
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+current_best:
+  name: beta4_shap_stable_xgboost_w025
+  private_score: 0.10043
+  base_weight: 0.75
+  signal_weight: 0.25
+  beta3_components:
+    - name: top50_alpha200000
+      selected_features_path: runs/01_main/pearson_topk/selected_features_top50.txt
+      alpha: 200000
+      weight: 0.3825
+    - name: top100_alpha50
+      selected_features_path: runs/01_main/pearson_topk/selected_features_top100.txt
+      alpha: 50
+      weight: 0.3825
+    - name: spearman_top50_alpha50000
+      selected_features_path: runs/01_main/beta3_new_feature_signals/selected_features_spearman_top50.txt
+      alpha: 50000
+      weight: 0.235
+  shap_stable_features_path: runs/01_main/beta4_shap_stable/selected_features_shap_stable.txt
+  shap_stable_valid_prediction_path: runs/01_main/beta4_shap_stable/valid_predictions/valid_shap_stable_xgboost.csv
+  test_submission_path: submissions/01_main/beta4_shap_stable/submission_best.csv
+
+feature_pool:
+  max_features: 40
+  sources:
+    - path: runs/01_main/beta4_shap_stable/selected_features_shap_stable.txt
+      top_n:
+    - path: runs/01_main/beta3_new_feature_signals/selected_features_spearman_top50.txt
+      top_n: 20
+    - path: runs/01_main/pearson_topk/selected_features_top50.txt
+      top_n: 20
+    - path: runs/01_main/pearson_topk/selected_features_top100.txt
+      top_n: 20
+
+interactions:
+  operations: [add, sub, mul, div_l_abs_r, div_r_abs_l, max, min]
+  eps: 1.0e-6
+  clip_quantiles: [0.001, 0.999]
+  score_block_size: 64
+  transform_block_size: 128
+  spearman_sample_rows: 120000
+  top_k_each_metric: 300
+  corr_prune_threshold: 0.985
+  max_selected_features: 120
+
+ridge:
+  alphas: [10, 50, 100, 300, 1000, 3000, 10000, 50000, 200000]
+
+xgboost:
+  n_estimators: 800
+  learning_rate: 0.03
+  max_depth: 5
+  subsample: 0.85
+  colsample_bytree: 0.85
+  reg_lambda: 1.0
+  early_stopping_rounds: 80
+
+blend:
+  signal_weights: [0.05, 0.10, 0.15]
+  holdout_floor_delta: -0.002
+  min_std_ratio_current_best: 0.50
+  max_std_ratio_current_best: 1.30
+  max_selected_submissions: 2
+
+output:
+  run_dir: runs/01_main/beta5_interactions
+  submission_dir: submissions/01_main/beta5_interactions
+  prediction_col: prediction
