@@ -901,3 +901,75 @@ submissions/01_main/beta2_high_alpha_fine/submission_best.csv
 Interpretation: the useful direction was not the highest offline holdout candidate. It came from lower-correlation boundary probes with stronger `top50` regularization. A final high-top50 tail scan showed that increasing `top50_alpha` beyond `200000` reduces holdout along the current best axis, while decreasing `top100_alpha` to `20` also hurts the leaderboard. This suggests the Ridge alpha/weight refinement line is now near a local bottleneck.
 
 Next direction: move away from further alpha/weight micro-tuning. Better candidates are a new feature-selection signal, rolling-stability-aware top-k selection, or studying high-ranking solutions for new assumptions before adding more submissions.
+
+## 2026-06-18: Beta3 New Feature-Selection Signals
+
+### Goal
+
+Move beyond Pearson top-k alpha/weight micro-tuning and test whether different train-only feature-selection criteria can create new Ridge signals that complement the current best:
+
+```text
+0.5 * top50_ridge(alpha=200000) + 0.5 * top100_ridge(alpha=50)
+```
+
+with private score `0.09638`.
+
+### Implementation
+
+- Added config: `configs/01_main_beta3_new_feature_signals.yaml`.
+- Added script: `scripts/run_beta3_new_feature_signals.py`.
+- Extended `src/drw_crypto/feature_selection.py` with reusable ranking utilities:
+  - arbitrary-target Pearson/Spearman ranking;
+  - Spearman top-k ranking;
+  - stable Pearson ranking across train-only time windows.
+- Tested three new signal families:
+  - Spearman top-k Ridge: `top50`, `top100`, `top200`;
+  - rolling-stability-aware Pearson top-k Ridge: `top50`, `top100`, `top200`;
+  - residual-correlation top-k Ridge: residual Pearson `top50/top100/top200` and residual Spearman `top100`.
+- Residual ranking target:
+
+```text
+residual = label - current_best_train_prediction
+```
+
+computed only on the 80% training split.
+- Each signal was blended into the current best with signal weights:
+  - `0.05`, `0.10`, `0.15`, `0.20`.
+- Candidate selection recorded holdout Pearson, RMSE, prediction std, signal correlation with current best, blend correlation, and validation-bin stability.
+
+### Kaggle Result
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: `top50_alpha200000/top100_alpha50` | 0.05160 | 0.09638 | Beta2 best |
+| `0.80 * current_best + 0.20 * residual_pearson_top100` | 0.05835 | 0.09929 | Strong new residual signal |
+| `0.80 * current_best + 0.20 * spearman_top50` | 0.05427 | 0.09998 | Current best |
+| `0.95 * current_best + 0.05 * stable_pearson_top200` | 0.04996 | 0.09408 | Stable ranking did not transfer |
+
+Current best:
+
+```text
+0.80 * beta2_current_best + 0.20 * spearman_top50_ridge
+```
+
+where:
+
+```text
+beta2_current_best = 0.5 * top50_ridge(alpha=200000) + 0.5 * top100_ridge(alpha=50)
+```
+
+The corresponding local file is:
+
+```text
+submissions/01_main/beta3_new_feature_signals/submission_best.csv
+```
+
+Interpretation: the new feature-selection direction works. The useful gains came from feature rankings that are not identical to Pearson top-k: Spearman top50 and residual Pearson top100. Rolling-stability-aware selection, despite being reasonable for analysis, failed on the leaderboard and should not be the next main optimization path.
+
+Next direction: test a controlled blend of the two successful Beta3 signals:
+
+```text
+current_best + residual_pearson_top100 + spearman_top50
+```
+
+with small weight grids, instead of adding more stable-top-k variants.

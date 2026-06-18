@@ -422,3 +422,28 @@ Current best:
 ```
 
 Conclusion: Ridge alpha/weight tuning still improved the private score, but the last tail scan suggests this line is approaching a local bottleneck. Further progress should come from a new signal or selection criterion rather than more small alpha/weight sweeps.
+
+## Beta3 New Feature-Selection Signals
+
+Beta3 tested new train-only feature-selection criteria as complementary Ridge signals.
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: `top50_alpha200000/top100_alpha50` | 0.05160 | 0.09638 | Beta2 best |
+| `0.80 * current_best + 0.20 * residual_pearson_top100` | 0.05835 | 0.09929 | Strong residual signal |
+| `0.80 * current_best + 0.20 * spearman_top50` | 0.05427 | 0.09998 | Current best private score |
+| `0.95 * current_best + 0.05 * stable_pearson_top200` | 0.04996 | 0.09408 | Rolling-stability-aware top-k did not transfer |
+
+Current best:
+
+```text
+0.80 * beta2_current_best + 0.20 * spearman_top50_ridge
+```
+
+where:
+
+```text
+beta2_current_best = 0.5 * top50_ridge(alpha=200000) + 0.5 * top100_ridge(alpha=50)
+```
+
+Conclusion: new feature-selection criteria produced the largest gain since Beta2 started. Spearman and residual-correlation rankings are worth continuing; stable Pearson top-k should be deprioritized as a leaderboard optimization path.

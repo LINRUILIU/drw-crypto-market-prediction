@@ -1,0 +1,79 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  validation_fraction: 0.2
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+current_best:
+  name: beta2_high_alpha_fine_boundary_best
+  private_score: 0.09638
+  submission_path: submissions/01_main/beta2_high_alpha_fine/submission_best.csv
+  components:
+    - name: top50_alpha200000
+      selected_features_path: runs/01_main/pearson_topk/selected_features_top50.txt
+      alpha: 200000
+      weight: 0.5
+    - name: top100_alpha50
+      selected_features_path: runs/01_main/pearson_topk/selected_features_top100.txt
+      alpha: 50
+      weight: 0.5
+
+ranking_families:
+  - name: spearman
+    family: spearman
+    method: spearman
+    top_k: [50, 100, 200]
+  - name: stable_pearson
+    family: stable
+    method: stable_pearson
+    top_k: [50, 100, 200]
+  - name: residual_pearson
+    family: residual
+    method: residual_pearson
+    top_k: [50, 100, 200]
+  - name: residual_spearman
+    family: residual
+    method: residual_spearman
+    top_k: [100]
+
+stable_ranking:
+  stability_penalty: 0.5
+  min_weight: 0.5
+  windows:
+    - name: w0_25
+      start: 0.0
+      end: 0.25
+    - name: w25_50
+      start: 0.25
+      end: 0.50
+    - name: w50_75
+      start: 0.50
+      end: 0.75
+    - name: w75_100
+      start: 0.75
+      end: 1.0
+
+ridge:
+  alphas: [10, 50, 100, 300, 1000, 3000, 10000, 50000, 200000]
+
+blend:
+  signal_weights: [0.05, 0.10, 0.15, 0.20]
+  max_signal_corr_current_best: 0.985
+  holdout_tolerance: 0.002
+  valid_bin_min_tolerance: 0.02
+  valid_bins: 4
+  max_selected_submissions: 3
+
+output:
+  run_dir: runs/01_main/beta3_new_feature_signals
+  submission_dir: submissions/01_main/beta3_new_feature_signals
+  prediction_col: prediction

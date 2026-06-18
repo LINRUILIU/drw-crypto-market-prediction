@@ -81,4 +81,7 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Tested alpha variants for top50/top100 Ridge components; current best is `0.45 * top50_alpha10000 + 0.55 * top100_alpha30` with private `0.09385`.
 - [x] Refine around `top50_alpha10000` and `top100_alpha10/30/100` with top50 weights near `0.40` to `0.50`.
 - [x] Extended high-alpha Ridge refinement; current best is `0.5 * top50_alpha200000 + 0.5 * top100_alpha50` with private `0.09638`.
-- [ ] Move beyond Ridge alpha/weight micro-tuning: test a new feature-selection signal, rolling-stability-aware top-k selection, or study high-ranking solutions for new modeling assumptions.
+- [x] Move beyond Ridge alpha/weight micro-tuning with Beta3 new feature-selection signals.
+- [x] Tested residual Pearson, Spearman, and rolling-stability-aware Pearson top-k Ridge signals; current best is `0.80 * beta2_current_best + 0.20 * spearman_top50` with private `0.09998`.
+- [ ] Blend the two successful Beta3 signals, `residual_pearson_top100` and `spearman_top50`, with the current best.
+- [ ] Study high-ranking solutions for new hypotheses after exhausting the residual/Spearman blend axis.
