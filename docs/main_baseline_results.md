@@ -370,3 +370,14 @@ Current best:
 ```
 
 Conclusion: the useful Ridge window is narrower than top200 and sits between top50 and top100. The next step should test direct intermediate feature widths, such as top75/top80/top90 Ridge, instead of further tuning the top50/top100 blend by one or two percent.
+
+## Beta2 Intermediate Ridge Widths
+
+Direct intermediate top-k Ridge models were trained to test whether a single feature width can replace the top50/top100 blend.
+
+| Submission | Alpha | Public | Private | Notes |
+| --- | ---: | ---: | ---: | --- |
+| top90_ridge | 10 | 0.04789 | 0.09063 | Best offline intermediate width, below blend |
+| top80_ridge | 3000 | 0.05112 | 0.09050 | Stronger public, still below blend private |
+
+Conclusion: direct intermediate widths do not beat the blend. The current main-task best remains `ridge_top100_0475_top50_0525` with private `0.09280`.

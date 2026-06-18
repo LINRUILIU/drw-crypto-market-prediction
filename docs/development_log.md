@@ -775,3 +775,34 @@ Conclusion: current best is `ridge_top100_0475_top50_0525`:
 ```
 
 `submission_best.csv` now points to this candidate. The local top50/top100 blend axis is close to saturated because `45/55`, `47.5/52.5`, and `50/50` are nearly tied. The next Beta2 direction should test whether intermediate direct feature widths such as top75/top80/top90 Ridge can replace or improve this blend.
+
+## 2026-06-18: Beta2 Intermediate Ridge Widths
+
+### Goal
+
+Test whether the `top50_ridge` / `top100_ridge` blend improvement can be replaced by a single direct intermediate feature width.
+
+### Implementation
+
+- Added config: `configs/01_main_beta2_intermediate_ridge.yaml`.
+- Added script: `scripts/run_beta2_intermediate_ridge.py`.
+- Reused the train-split Pearson feature ranking from `runs/01_main/pearson_topk/pearson_feature_ranking.csv`.
+- Trained Ridge-only submissions for `top60`, `top70`, `top75`, `top80`, and `top90`.
+- Searched Ridge alpha over `[10, 100, 1000, 3000, 10000]`.
+
+### Kaggle Result
+
+| Candidate | Alpha | Public | Private |
+| --- | ---: | ---: | ---: |
+| top90_ridge | 10 | 0.04789 | 0.09063 |
+| top80_ridge | 3000 | 0.05112 | 0.09050 |
+
+Offline validation ranked `top90_ridge` highest among the intermediate widths, but both submitted intermediate Ridge models are below the current top50/top100 blend best.
+
+Conclusion: direct intermediate feature width does not replace the blend. The current best remains:
+
+```text
+0.475 * top100_ridge + 0.525 * top50_ridge
+```
+
+Next direction: test whether alpha variants for `top50_ridge` and `top100_ridge`, or a different feature selection criterion, can produce better components before blending.

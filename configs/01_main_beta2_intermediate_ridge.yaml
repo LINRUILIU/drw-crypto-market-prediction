@@ -1,0 +1,27 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  validation_fraction: 0.2
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+feature_selection:
+  ranking_path: runs/01_main/pearson_topk/pearson_feature_ranking.csv
+  top_k: [60, 70, 75, 80, 90]
+
+models:
+  ridge:
+    alphas: [10.0, 100.0, 1000.0, 3000.0, 10000.0]
+
+output:
+  run_dir: runs/01_main/beta2_intermediate_ridge
+  submission_dir: submissions/01_main/beta2_intermediate_ridge
+  prediction_col: prediction
