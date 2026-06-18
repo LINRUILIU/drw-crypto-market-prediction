@@ -447,3 +447,30 @@ beta2_current_best = 0.5 * top50_ridge(alpha=200000) + 0.5 * top100_ridge(alpha=
 ```
 
 Conclusion: new feature-selection criteria produced the largest gain since Beta2 started. Spearman and residual-correlation rankings are worth continuing; stable Pearson top-k should be deprioritized as a leaderboard optimization path.
+
+## Beta3 Signal Combination and Spearman Weight Fine-Tuning
+
+The two successful Beta3 signals were blended together, then the Spearman-only weight was fine-tuned around the previous best.
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: `0.80 * beta2_current_best + 0.20 * spearman_top50` | 0.05427 | 0.09998 | Before signal-combo tuning |
+| `0.65 * beta2_current_best + 0.25 * residual_pearson_top100 + 0.10 * spearman_top50` | 0.05990 | 0.09734 | Holdout/public improved, private worsened |
+| `0.65 * beta2_current_best + 0.175 * residual_pearson_top100 + 0.175 * spearman_top50` | 0.05885 | 0.09872 | Residual still too heavy |
+| `0.775 * beta2_current_best + 0.225 * spearman_top50` | 0.05448 | 0.10003 | New best private score |
+| `0.75 * beta2_current_best + 0.25 * spearman_top50` | 0.05467 | 0.09999 | Slightly beyond the peak |
+| `0.765 * beta2_current_best + 0.235 * spearman_top50` | 0.05456 | 0.10003 | Tied best private score |
+
+Current best:
+
+```text
+0.765 * beta2_current_best + 0.235 * spearman_top50_ridge
+```
+
+where:
+
+```text
+beta2_current_best = 0.5 * top50_ridge(alpha=200000) + 0.5 * top100_ridge(alpha=50)
+```
+
+Conclusion: adding residual Pearson directly to the blend did not transfer to private despite stronger holdout and public scores. The current useful region is a narrow Spearman-only plateau around weight `0.225-0.235`; further progress should come from a new signal definition instead of more same-axis weight sweeps.

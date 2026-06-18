@@ -973,3 +973,63 @@ current_best + residual_pearson_top100 + spearman_top50
 ```
 
 with small weight grids, instead of adding more stable-top-k variants.
+
+## 2026-06-18: Beta3 Signal Combination and Spearman Weight Fine-Tuning
+
+### Goal
+
+Test whether the two successful Beta3 signals, `residual_pearson_top100` and `spearman_top50`, can be combined to beat the Beta3 Spearman-only best:
+
+```text
+0.80 * beta2_current_best + 0.20 * spearman_top50_ridge
+```
+
+with private score `0.09998`.
+
+### Implementation
+
+- Added config: `configs/01_main_beta3_signal_combo.yaml`.
+- Added script: `scripts/run_beta3_signal_combo.py`.
+- Added narrower follow-up configs:
+  - `configs/01_main_beta3_signal_combo_conservative.yaml`
+  - `configs/01_main_beta3_spearman_weight_fine.yaml`
+  - `configs/01_main_beta3_spearman_weight_micro.yaml`
+- Reused precomputed validation predictions and test submissions; this stage only blends existing Ridge signals and does not refit models.
+- Evaluated:
+  - broad residual + Spearman three-way blends;
+  - conservative residual blends with `residual_weight <= 0.10`;
+  - Spearman-only fine weights around the previous best.
+- Kept the same validation target only for metric evaluation. No target information is used in test prediction generation.
+
+### Kaggle Result
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: `0.80 * beta2_current_best + 0.20 * spearman_top50` | 0.05427 | 0.09998 | Beta3 best before this run |
+| `0.65 * beta2_current_best + 0.25 * residual_pearson_top100 + 0.10 * spearman_top50` | 0.05990 | 0.09734 | High public, private dropped |
+| `0.65 * beta2_current_best + 0.175 * residual_pearson_top100 + 0.175 * spearman_top50` | 0.05885 | 0.09872 | Less residual, still below best |
+| `0.775 * beta2_current_best + 0.225 * spearman_top50` | 0.05448 | 0.10003 | New best private score |
+| `0.75 * beta2_current_best + 0.25 * spearman_top50` | 0.05467 | 0.09999 | Slightly too much Spearman |
+| `0.765 * beta2_current_best + 0.235 * spearman_top50` | 0.05456 | 0.10003 | Tied best private score |
+
+Current best:
+
+```text
+0.765 * beta2_current_best + 0.235 * spearman_top50_ridge
+```
+
+where:
+
+```text
+beta2_current_best = 0.5 * top50_ridge(alpha=200000) + 0.5 * top100_ridge(alpha=50)
+```
+
+The corresponding local file is:
+
+```text
+submissions/01_main/beta3_spearman_weight_micro/submission_best.csv
+```
+
+Interpretation: residual-correlation remains useful as evidence of a complementary signal, but direct residual blending overfits the public/holdout direction and does not transfer to private in this grid. The robust gain came from a small Spearman weight fine-tune; `0.225` and `0.235` tie at private `0.10003`, while `0.25` starts to decline. This axis is now close to a local bottleneck.
+
+Next direction: avoid more same-signal weight sweeps. The better next candidates are new signal definitions, such as alternate rank transforms, residual signal regularization, or hypotheses from high-ranking solution writeups.

@@ -1,0 +1,58 @@
+data:
+  target_col: label
+
+current_best:
+  name: beta3_spearman_top50_w020
+  private_score: 0.09998
+  public_score: 0.05427
+  submission_path: submissions/01_main/beta3_new_feature_signals/submission_best.csv
+  valid_formula:
+    beta2_base: 0.80
+    spearman_top50: 0.20
+
+sources:
+  beta2_base:
+    kind: formula
+    submission_path: submissions/01_main/beta2_high_alpha_fine/submission_best.csv
+    valid_formula:
+      beta2_top50_alpha200000: 0.50
+      beta2_top100_alpha50: 0.50
+  beta2_top50_alpha200000:
+    valid_prediction_path: runs/01_main/beta2_high_alpha_fine/valid_predictions/valid_top50_alpha200000.csv
+  beta2_top100_alpha50:
+    valid_prediction_path: runs/01_main/beta2_high_alpha_fine/valid_predictions/valid_top100_alpha50.csv
+  residual_pearson_top100:
+    family: residual
+    signal_submission_path: submissions/01_main/beta3_new_feature_signals/signals/submission_residual_pearson_top100_ridge.csv
+    valid_prediction_path: runs/01_main/beta3_new_feature_signals/valid_predictions/valid_residual_pearson_top100_ridge.csv
+    previous_best_blend:
+      weight: 0.20
+      public_score: 0.05835
+      private_score: 0.09929
+  spearman_top50:
+    family: spearman
+    signal_submission_path: submissions/01_main/beta3_new_feature_signals/signals/submission_spearman_top50_ridge.csv
+    valid_prediction_path: runs/01_main/beta3_new_feature_signals/valid_predictions/valid_spearman_top50_ridge.csv
+    previous_best_blend:
+      weight: 0.20
+      public_score: 0.05427
+      private_score: 0.09998
+
+grid:
+  residual_weights: [0.00, 0.025, 0.05, 0.075, 0.10, 0.125, 0.15, 0.175, 0.20, 0.225, 0.25]
+  spearman_weights: [0.00, 0.025, 0.05, 0.075, 0.10, 0.125, 0.15, 0.175, 0.20, 0.225, 0.25]
+  min_total_signal_weight: 0.15
+  max_total_signal_weight: 0.35
+  require_positive_residual: true
+  require_positive_spearman: true
+
+selection:
+  max_selected_submissions: 3
+  holdout_tolerance: 0.0015
+  max_std_ratio_current_best: 1.15
+  valid_bins: 4
+
+output:
+  run_dir: runs/01_main/beta3_signal_combo
+  submission_dir: submissions/01_main/beta3_signal_combo
+  prediction_col: prediction

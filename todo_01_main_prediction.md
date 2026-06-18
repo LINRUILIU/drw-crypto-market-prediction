@@ -46,7 +46,7 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
   - [x] Train final model on the selected training scope.
   - [x] Generate test predictions.
   - [x] Validate submission column names and row count.
-  - [ ] Submit to Kaggle.
+  - [x] Submit to Kaggle.
   - [ ] Save public or late submission screenshot.
 
 ## Required Outputs
@@ -83,5 +83,6 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Extended high-alpha Ridge refinement; current best is `0.5 * top50_alpha200000 + 0.5 * top100_alpha50` with private `0.09638`.
 - [x] Move beyond Ridge alpha/weight micro-tuning with Beta3 new feature-selection signals.
 - [x] Tested residual Pearson, Spearman, and rolling-stability-aware Pearson top-k Ridge signals; current best is `0.80 * beta2_current_best + 0.20 * spearman_top50` with private `0.09998`.
-- [ ] Blend the two successful Beta3 signals, `residual_pearson_top100` and `spearman_top50`, with the current best.
+- [x] Blend the two successful Beta3 signals, `residual_pearson_top100` and `spearman_top50`, with the current best.
+- [x] Confirmed direct residual + Spearman blends do not beat Spearman-only on private; fine-tuned Spearman weight to a `0.225-0.235` plateau with best private `0.10003`.
 - [ ] Study high-ranking solutions for new hypotheses after exhausting the residual/Spearman blend axis.
