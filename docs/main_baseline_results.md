@@ -381,3 +381,22 @@ Direct intermediate top-k Ridge models were trained to test whether a single fea
 | top80_ridge | 3000 | 0.05112 | 0.09050 | Stronger public, still below blend private |
 
 Conclusion: direct intermediate widths do not beat the blend. The current main-task best remains `ridge_top100_0475_top50_0525` with private `0.09280`.
+
+## Beta2 Alpha Variant Ridge Refinement
+
+Alpha variants were trained for the two strongest components, `top50_ridge` and `top100_ridge`.
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: `top50/top100 alpha1000 blend` | 0.04652 | 0.09280 | Before alpha tuning |
+| `0.45 * top50_alpha10000 + 0.55 * top100_alpha30` | 0.04808 | 0.09385 | Current best private score |
+| `0.45 * top50_alpha10 + 0.55 * top100_alpha10` | 0.04745 | 0.09307 | Lower-correlation backup |
+| `alpha_ensemble_top50w525_top100w475` | 0.04831 | 0.09360 | Smooth alpha ensemble |
+
+Current best:
+
+```text
+0.45 * top50_ridge(alpha=10000) + 0.55 * top100_ridge(alpha=30)
+```
+
+Conclusion: tuning Ridge alpha on the two validated components is useful and improves the private score from `0.09280` to `0.09385`.

@@ -806,3 +806,52 @@ Conclusion: direct intermediate feature width does not replace the blend. The cu
 ```
 
 Next direction: test whether alpha variants for `top50_ridge` and `top100_ridge`, or a different feature selection criterion, can produce better components before blending.
+
+## 2026-06-18: Beta2 Alpha Variant Ridge Refinement
+
+### Goal
+
+Tune the already validated `top50_ridge` and `top100_ridge` components instead of continuing to scan feature widths. The previous best before this run was:
+
+```text
+0.475 * top100_ridge(alpha=1000) + 0.525 * top50_ridge(alpha=1000)
+```
+
+with private score `0.09280`.
+
+### Implementation
+
+- Added config: `configs/01_main_beta2_alpha_variants.yaml`.
+- Added script: `scripts/run_beta2_alpha_variants.py`.
+- Fixed feature sets to the existing Pearson `top50` and `top100` selected features.
+- Trained Ridge alpha variants for each component:
+  - `[10, 30, 100, 300, 1000, 3000, 10000]`
+- Evaluated all `top50_alphaA + top100_alphaB` blends over top50 weights:
+  - `[0.45, 0.475, 0.50, 0.525, 0.55, 0.60]`
+- Also generated an alpha ensemble over `[100, 1000, 10000]` for each component.
+- Materialized only three selected submission files to avoid writing hundreds of large CSVs.
+
+### Kaggle Result
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: `top50/top100 alpha1000 blend` | 0.04652 | 0.09280 | Baseline for this run |
+| `0.45 * top50_alpha10000 + 0.55 * top100_alpha30` | 0.04808 | 0.09385 | New best |
+| `0.45 * top50_alpha10 + 0.55 * top100_alpha10` | 0.04745 | 0.09307 | Lower-correlation backup, improves old best |
+| `alpha_ensemble_top50w525_top100w475` | 0.04831 | 0.09360 | Smoother, improves old best |
+
+Interpretation: alpha tuning is useful. The best result moves away from the previous alpha1000/alpha1000 pair toward a strongly regularized `top50` component and a lightly regularized `top100` component. The alpha ensemble also improves the old best, but does not beat the selected alpha pair.
+
+Current best:
+
+```text
+0.45 * top50_ridge(alpha=10000) + 0.55 * top100_ridge(alpha=30)
+```
+
+The corresponding file is:
+
+```text
+submissions/01_main/beta2_alpha_variants/submission_best.csv
+```
+
+Next direction: refine around this alpha pair and weight region, especially `top50_alpha10000` with `top100_alpha10/30/100` and top50 weights near `0.40` to `0.50`.
