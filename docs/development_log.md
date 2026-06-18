@@ -1096,3 +1096,69 @@ submissions/01_main/beta4_shap_stable/submission_best.csv
 Interpretation: simple medoid Ridge is not enough as a direct signal, but medoid features are useful as an input to fold-stable XGB feature selection. The successful Beta4 gain is small but meaningful: it improves private from `0.10003` to `0.10043`. The first MLP baseline did not become a strong standalone model, and its small hybrid-feature blend did not transfer to private despite better public score.
 
 Next direction: tune the successful SHAP-stable branch before expanding MLP/AE. Highest-priority next tests are lower XGB blend weights around `0.15-0.30`, alternative SHAP stability thresholds, and a better MLP training recipe only after confirming the SHAP-stable signal is stable.
+
+## 2026-06-18: Beta4.1 SHAP-Stable XGB Refinement
+
+### Goal
+
+Refine the only successful Beta4 branch, `SHAP-stable XGB`, without reopening Ridge/Spearman micro-tuning or MLP. The fixed comparison baseline was:
+
+```text
+0.75 * beta3_current_best + 0.25 * shap_stable_xgboost
+```
+
+with private score `0.10043`.
+
+### Implementation
+
+- Added config: `configs/01_main_beta4_1_shap_refine.yaml`.
+- Added script: `scripts/run_beta4_1_shap_refine.py`.
+- Stage A swept SHAP-stable selection rules while fixing XGB training and signal weight `0.25`.
+- Stage B fixed the best Stage A rule and compared RMSE early stopping, fixed tree counts, and Pearson early stopping.
+- Stage C swept blend weights around the previous `0.25` signal weight.
+- Explicitly recorded `fold_top_n`, `min_fold_appearances`, `fill_to_n`, `selected_count`, `stable_count`, and `rank_fill_count` so pure stable selection and rank-filled selection are not conflated.
+
+### Local Results
+
+Stage A feature rules:
+
+| Rule | Selected | Stable | Rank fill | Signal Pearson | Best iteration |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `top20_min3_fill20` | 22 | 22 | 0 | 0.058460 | 5 |
+| `top20_min4_fill20` | 20 | 14 | 6 | 0.068491 | 6 |
+| `top20_min5_fill20` | 20 | 9 | 11 | 0.068491 | 6 |
+| `top30_min3_fill20` | 37 | 37 | 0 | 0.082649 | 5 |
+| `top30_min4_fill20` | 24 | 24 | 0 | 0.055547 | 0 |
+| `top30_min5_fill20` | 20 | 18 | 2 | 0.088024 | 10 |
+| `top30_min3_fill0` | 37 | 37 | 0 | 0.082649 | 5 |
+| `top30_min4_fill0` | 24 | 24 | 0 | 0.055547 | 0 |
+
+Stage B on the selected Stage A blend rule, `top30_min3_fill20`:
+
+| Variant | Signal Pearson | RMSE | Best iteration | Notes |
+| --- | ---: | ---: | ---: | --- |
+| `rmse_es` | 0.072696 | 1.038411 | 2 | Current training style |
+| `fixed_200` | 0.041305 | 1.136410 | n/a | Worse than early stopping |
+| `fixed_400` | 0.038040 | 1.243006 | n/a | Worse than early stopping |
+| `fixed_800` | 0.039919 | 1.361124 | n/a | Worse than early stopping |
+| `pearson_es` | 0.072696 | 1.038411 | 2 | Matched RMSE early stopping |
+
+### Kaggle Result
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta4 SHAP-stable XGB | 0.05634 | 0.10043 | Current best before Beta4.1 |
+| `top30_min3_fill20`, RMSE ES, signal weight `0.325` | 0.05786 | 0.09956 | Higher local blend, private dropped |
+| `top30_min3_fill20`, RMSE ES, signal weight `0.25` | 0.05688 | 0.09974 | Conservative rule change, still below best |
+
+The `0.30` candidate was not submitted because both the conservative `0.25` and boundary `0.325` probes failed to beat the current private best.
+
+Current best remains:
+
+```text
+0.75 * beta3_current_best + 0.25 * shap_stable_xgboost
+```
+
+with private score `0.10043`.
+
+Interpretation: Beta4.1 did not improve the leaderboard best. The broader `top30_min3` feature rule improves local validation but does not transfer to private, and the fixed-tree tests show that simply disabling early stopping is harmful. Pearson early stopping did not differ from RMSE early stopping in this run, so the next useful step should introduce a genuinely new signal source, such as AE features, better MLP training, interaction features, or a more systematic high-solution feature-structure replication.

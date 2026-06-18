@@ -495,3 +495,28 @@ Current best:
 The SHAP-stable branch selects 20 features from medoid-filtered features using purged 6-fold XGBoost TreeSHAP contributions. The MLP baseline is implemented, but the first full run did not produce a strong standalone model, and its safest small hybrid-feature blend did not transfer to private.
 
 Conclusion: Beta4 confirms that the next useful direction is not another linear top-k weight sweep. The first transferable gain came from a nonlinear XGB/SHAP-stable signal layered onto the strong Beta3 Ridge/Spearman baseline.
+
+## Beta4.1 SHAP-Stable XGB Refinement
+
+Beta4.1 refined the successful SHAP-stable XGB branch by separating feature-rule changes, XGB training changes, and final blend weights.
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta4 SHAP-stable XGB | 0.05634 | 0.10043 | Current best before Beta4.1 |
+| `top30_min3_fill20`, RMSE ES, signal weight `0.325` | 0.05786 | 0.09956 | Local best blend did not transfer |
+| `top30_min3_fill20`, RMSE ES, signal weight `0.25` | 0.05688 | 0.09974 | Conservative rule-change probe still below best |
+
+Key local findings:
+
+- `top30_min3_fill20` selected 37 pure-stable features and improved local signal Pearson to `0.082649`, but private score decreased after blending.
+- Fixed XGB tree counts (`200`, `400`, `800`) underperformed RMSE early stopping.
+- Pearson early stopping matched RMSE early stopping in this setup, so the evaluation-metric mismatch was not the limiting factor in this branch.
+- The unsubmitted `0.30` blend was skipped after both `0.25` and `0.325` failed on private.
+
+Current best remains:
+
+```text
+0.75 * beta3_current_best + 0.25 * shap_stable_xgboost
+```
+
+Conclusion: Beta4.1 closes the first SHAP-stable refinement pass without a new best. The branch remains useful as a component, but further progress likely requires a new signal source rather than narrower SHAP-rule or XGB early-stopping tweaks.

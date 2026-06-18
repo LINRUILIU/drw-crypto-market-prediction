@@ -90,4 +90,7 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Implemented Beta4-B purged XGB TreeSHAP stable features; current best is `0.75 * beta3_current_best + 0.25 * shap_stable_xgboost` with private `0.10043`.
 - [x] Implemented Beta4-C CPU MLP baseline with SGD and mixed MSE/Pearson loss.
 - [x] Submitted Beta4-C `0.85 * current_best + 0.15 * hybrid_mlp`; public `0.05959`, private `0.09729`, not selected.
-- [ ] Tune the successful SHAP-stable XGB branch before expanding to AE features.
+- [x] Implemented Beta4.1 SHAP-stable XGB refinement: feature-rule sweep, XGB training sweep, and blend-weight sweep.
+- [x] Submitted Beta4.1 `top30_min3_fill20` probes at signal weights `0.325` and `0.25`; private scores were `0.09956` and `0.09974`, below the current best.
+- [x] Kept Beta4-B as the current best: `0.75 * beta3_current_best + 0.25 * shap_stable_xgboost`, private `0.10043`.
+- [ ] Decide the next new-signal direction: AE features, stronger MLP training, interaction features, or deeper replication of the first-place feature-structure pipeline.

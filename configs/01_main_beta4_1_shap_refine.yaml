@@ -1,0 +1,119 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  validation_fraction: 0.2
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+base_signal:
+  name: beta3_spearman_weight_micro
+  components:
+    - name: top50_alpha200000
+      selected_features_path: runs/01_main/pearson_topk/selected_features_top50.txt
+      alpha: 200000
+      weight: 0.3825
+    - name: top100_alpha50
+      selected_features_path: runs/01_main/pearson_topk/selected_features_top100.txt
+      alpha: 50
+      weight: 0.3825
+    - name: spearman_top50_alpha50000
+      selected_features_path: runs/01_main/beta3_new_feature_signals/selected_features_spearman_top50.txt
+      alpha: 50000
+      weight: 0.235
+
+current_best:
+  name: beta4_shap_stable_xgboost_w025
+  private_score: 0.10043
+  baseline_rule: top20_min4_fill20
+  base_weight: 0.75
+  signal_weight: 0.25
+
+features:
+  medoid_features_path: runs/01_main/beta4_medoid/selected_features_medoid_t0p6.txt
+
+cv:
+  n_groups: 6
+  gap: 1
+
+xgboost:
+  n_estimators: 800
+  learning_rate: 0.03
+  max_depth: 5
+  subsample: 0.85
+  colsample_bytree: 0.85
+  reg_lambda: 1.0
+  early_stopping_rounds: 80
+
+feature_rules:
+  - name: top20_min3_fill20
+    fold_top_n: 20
+    min_fold_appearances: 3
+    fill_to_n: 20
+  - name: top20_min4_fill20
+    fold_top_n: 20
+    min_fold_appearances: 4
+    fill_to_n: 20
+  - name: top20_min5_fill20
+    fold_top_n: 20
+    min_fold_appearances: 5
+    fill_to_n: 20
+  - name: top30_min3_fill20
+    fold_top_n: 30
+    min_fold_appearances: 3
+    fill_to_n: 20
+  - name: top30_min4_fill20
+    fold_top_n: 30
+    min_fold_appearances: 4
+    fill_to_n: 20
+  - name: top30_min5_fill20
+    fold_top_n: 30
+    min_fold_appearances: 5
+    fill_to_n: 20
+  - name: top30_min3_fill0
+    fold_top_n: 30
+    min_fold_appearances: 3
+    fill_to_n: 0
+  - name: top30_min4_fill0
+    fold_top_n: 30
+    min_fold_appearances: 4
+    fill_to_n: 0
+
+training_variants:
+  - name: rmse_es
+    mode: rmse_es
+    n_estimators: 800
+    early_stopping_rounds: 80
+  - name: fixed_200
+    mode: fixed
+    n_estimators: 200
+  - name: fixed_400
+    mode: fixed
+    n_estimators: 400
+  - name: fixed_800
+    mode: fixed
+    n_estimators: 800
+  - name: pearson_es
+    mode: pearson_es
+    n_estimators: 800
+    early_stopping_rounds: 100
+
+blend:
+  stage_a_signal_weight: 0.25
+  stage_b_signal_weight: 0.25
+  stage_c_signal_weights: [0.20, 0.225, 0.25, 0.275, 0.30, 0.325]
+  holdout_tolerance: 0.0015
+  max_std_ratio_current_best: 1.20
+  max_selected_submissions: 3
+
+output:
+  run_dir: runs/01_main/beta4_1_shap_refine
+  submission_dir: submissions/01_main/beta4_1_shap_refine
+  prediction_col: prediction
