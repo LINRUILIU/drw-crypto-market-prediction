@@ -109,6 +109,13 @@ def safe_name(value: float) -> str:
     return text
 
 
+def configured_alphas(component_cfg: dict[str, Any], ridge_cfg: dict[str, Any], component_name: str) -> list[float]:
+    values = component_cfg.get("alphas", ridge_cfg.get("alphas"))
+    if not values:
+        raise ValueError(f"No Ridge alphas configured for {component_name}.")
+    return [float(value) for value in values]
+
+
 def summarize_delta(pred: np.ndarray, reference: np.ndarray) -> dict[str, float]:
     delta = pred - reference
     return {
@@ -170,7 +177,10 @@ def main() -> int:
     y_train = train_part[target_col].to_numpy(dtype=np.float64)
     y_valid = valid_part[target_col].to_numpy(dtype=np.float64)
     y_full = train_df[target_col].to_numpy(dtype=np.float64)
-    alphas = [float(value) for value in ridge_cfg["alphas"]]
+    component_alphas = {
+        component_name: configured_alphas(component_cfg, ridge_cfg, component_name)
+        for component_name, component_cfg in comp_cfg.items()
+    }
 
     valid_preds: dict[tuple[str, float], np.ndarray] = {}
     test_preds: dict[tuple[str, float], np.ndarray] = {}
@@ -200,7 +210,7 @@ def main() -> int:
         x_full = full_preprocessor.transform(train_df)
         x_test = full_preprocessor.transform(test_df)
 
-        for alpha in alphas:
+        for alpha in component_alphas[component_name]:
             valid_pred, valid_seconds = fit_ridge(alpha, x_train, y_train, x_valid)
             test_pred, final_seconds = fit_ridge(alpha, x_full, y_full, x_test)
             key = (component_name, alpha)
@@ -257,8 +267,10 @@ def main() -> int:
     candidate_predictions: dict[str, np.ndarray] = {}
     candidate_valid_predictions: dict[str, np.ndarray] = {}
 
-    for top50_alpha in alphas:
-        for top100_alpha in alphas:
+    top50_alphas = component_alphas["top50"]
+    top100_alphas = component_alphas["top100"]
+    for top50_alpha in top50_alphas:
+        for top100_alpha in top100_alphas:
             for top50_weight in [float(value) for value in blend_cfg["top50_weights"]]:
                 top100_weight = 1.0 - top50_weight
                 name = blend_name(top50_alpha, top100_alpha, top50_weight)
@@ -300,14 +312,22 @@ def main() -> int:
                     }
                 )
 
-    ensemble_alphas = [float(value) for value in blend_cfg["alpha_ensemble"]["alphas"]]
-    ensemble_top50_weight = float(blend_cfg["alpha_ensemble"]["top50_weight"])
+    ensemble_cfg = blend_cfg["alpha_ensemble"]
+    ensemble_top50_alphas = [
+        float(value)
+        for value in ensemble_cfg.get("top50_alphas", ensemble_cfg.get("alphas", []))
+    ]
+    ensemble_top100_alphas = [
+        float(value)
+        for value in ensemble_cfg.get("top100_alphas", ensemble_cfg.get("alphas", []))
+    ]
+    ensemble_top50_weight = float(ensemble_cfg["top50_weight"])
     ensemble_top100_weight = 1.0 - ensemble_top50_weight
-    top50_valid_ensemble = np.mean([valid_preds[("top50", alpha)] for alpha in ensemble_alphas], axis=0)
-    top100_valid_ensemble = np.mean([valid_preds[("top100", alpha)] for alpha in ensemble_alphas], axis=0)
-    top50_test_ensemble = np.mean([test_preds[("top50", alpha)] for alpha in ensemble_alphas], axis=0)
-    top100_test_ensemble = np.mean([test_preds[("top100", alpha)] for alpha in ensemble_alphas], axis=0)
-    ensemble_name = "alpha_ensemble_top50w525_top100w475"
+    top50_valid_ensemble = np.mean([valid_preds[("top50", alpha)] for alpha in ensemble_top50_alphas], axis=0)
+    top100_valid_ensemble = np.mean([valid_preds[("top100", alpha)] for alpha in ensemble_top100_alphas], axis=0)
+    top50_test_ensemble = np.mean([test_preds[("top50", alpha)] for alpha in ensemble_top50_alphas], axis=0)
+    top100_test_ensemble = np.mean([test_preds[("top100", alpha)] for alpha in ensemble_top100_alphas], axis=0)
+    ensemble_name = f"alpha_ensemble_top50w{safe_name(ensemble_top50_weight)}_top100w{safe_name(ensemble_top100_weight)}"
     ensemble_valid_pred = ensemble_top50_weight * top50_valid_ensemble + ensemble_top100_weight * top100_valid_ensemble
     ensemble_test_pred = ensemble_top50_weight * top50_test_ensemble + ensemble_top100_weight * top100_test_ensemble
     candidate_predictions[ensemble_name] = ensemble_test_pred
@@ -318,8 +338,8 @@ def main() -> int:
         {
             "name": ensemble_name,
             "kind": "alpha_ensemble",
-            "top50_alpha": json.dumps(ensemble_alphas),
-            "top100_alpha": json.dumps(ensemble_alphas),
+            "top50_alpha": json.dumps(ensemble_top50_alphas),
+            "top100_alpha": json.dumps(ensemble_top100_alphas),
             "top50_weight": ensemble_top50_weight,
             "top100_weight": ensemble_top100_weight,
             "holdout_pearson": pearson_corr(y_valid, ensemble_valid_pred),
@@ -396,7 +416,7 @@ def main() -> int:
             "default_submission_path": str((submission_dir / "submission_best.csv").relative_to(ROOT)),
             "candidate_count": len(candidates),
             "selected_candidates": selected_names,
-            "alphas": alphas,
+            "alphas": component_alphas,
             "top50_weights": blend_cfg["top50_weights"],
             "leakage_control": "features, preprocessing, and alpha variant validation use row-order 80/20 train split; final submissions fit on full train only after selection metrics are written.",
         },

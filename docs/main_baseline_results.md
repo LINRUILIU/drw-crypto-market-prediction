@@ -400,3 +400,25 @@ Current best:
 ```
 
 Conclusion: tuning Ridge alpha on the two validated components is useful and improves the private score from `0.09280` to `0.09385`.
+
+## Beta2 High-Alpha Local Ridge Refinement
+
+The alpha refinement line was extended with component-specific alpha grids and narrower local blend searches.
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: `top50_alpha10000/top100_alpha30` | 0.04808 | 0.09385 | Before high-alpha refinement |
+| `0.35 * top50_alpha50000 + 0.65 * top100_alpha20` | 0.04779 | 0.09366 | Offline best did not transfer |
+| `0.525 * top50_alpha50000 + 0.475 * top100_alpha300` | 0.05004 | 0.09536 | Boundary probe improved private |
+| `0.525 * top50_alpha100000 + 0.475 * top100_alpha150` | 0.05124 | 0.09619 | Stronger top50 regularization improved again |
+| `0.5 * top50_alpha125000 + 0.5 * top100_alpha50` | 0.05156 | 0.09619 | Public improved, private tied |
+| `0.475 * top50_alpha100000 + 0.525 * top100_alpha20` | 0.05139 | 0.09574 | Too little top100 regularization hurt private |
+| `0.5 * top50_alpha200000 + 0.5 * top100_alpha50` | 0.05160 | 0.09638 | Current best private score |
+
+Current best:
+
+```text
+0.5 * top50_ridge(alpha=200000) + 0.5 * top100_ridge(alpha=50)
+```
+
+Conclusion: Ridge alpha/weight tuning still improved the private score, but the last tail scan suggests this line is approaching a local bottleneck. Further progress should come from a new signal or selection criterion rather than more small alpha/weight sweeps.

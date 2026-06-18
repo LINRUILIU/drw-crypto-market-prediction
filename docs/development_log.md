@@ -855,3 +855,49 @@ submissions/01_main/beta2_alpha_variants/submission_best.csv
 ```
 
 Next direction: refine around this alpha pair and weight region, especially `top50_alpha10000` with `top100_alpha10/30/100` and top50 weights near `0.40` to `0.50`.
+
+## 2026-06-18: Beta2 High-Alpha Local Ridge Refinement
+
+### Goal
+
+Continue the proven Ridge-only direction after `top50_alpha10000/top100_alpha30` improved the private score to `0.09385`. This run tests whether stronger Ridge regularization and narrower blend weights can improve the `top50` / `top100` component pair.
+
+### Implementation
+
+- Extended `scripts/run_beta2_alpha_variants.py` so each component can define its own alpha grid.
+- Added local refinement configs:
+  - `configs/01_main_beta2_local_alpha_refine.yaml`
+  - `configs/01_main_beta2_high_alpha_refine.yaml`
+  - `configs/01_main_beta2_high_alpha_fine.yaml`
+  - `configs/01_main_beta2_low_top100_fine.yaml`
+  - `configs/01_main_beta2_high_top50_tail.yaml`
+- Kept the same row-order 80/20 validation split and train-only preprocessing logic.
+- Materialized only selected submission candidates plus manually selected high-potential candidates around the current best.
+
+### Kaggle Result
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: `0.45 * top50_alpha10000 + 0.55 * top100_alpha30` | 0.04808 | 0.09385 | Baseline for this run |
+| `0.35 * top50_alpha50000 + 0.65 * top100_alpha20` | 0.04779 | 0.09366 | Offline best, did not transfer |
+| `0.525 * top50_alpha50000 + 0.475 * top100_alpha300` | 0.05004 | 0.09536 | Boundary candidate improved |
+| `0.525 * top50_alpha100000 + 0.475 * top100_alpha150` | 0.05124 | 0.09619 | Higher top50 alpha improved |
+| `0.5 * top50_alpha125000 + 0.5 * top100_alpha50` | 0.05156 | 0.09619 | Public improved, private tied |
+| `0.475 * top50_alpha100000 + 0.525 * top100_alpha20` | 0.05139 | 0.09574 | Lower top100 alpha over-correction |
+| `0.5 * top50_alpha200000 + 0.5 * top100_alpha50` | 0.05160 | 0.09638 | Current best |
+
+Current best:
+
+```text
+0.5 * top50_ridge(alpha=200000) + 0.5 * top100_ridge(alpha=50)
+```
+
+The corresponding local file is:
+
+```text
+submissions/01_main/beta2_high_alpha_fine/submission_best.csv
+```
+
+Interpretation: the useful direction was not the highest offline holdout candidate. It came from lower-correlation boundary probes with stronger `top50` regularization. A final high-top50 tail scan showed that increasing `top50_alpha` beyond `200000` reduces holdout along the current best axis, while decreasing `top100_alpha` to `20` also hurts the leaderboard. This suggests the Ridge alpha/weight refinement line is now near a local bottleneck.
+
+Next direction: move away from further alpha/weight micro-tuning. Better candidates are a new feature-selection signal, rolling-stability-aware top-k selection, or studying high-ranking solutions for new assumptions before adding more submissions.

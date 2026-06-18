@@ -1,0 +1,49 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  validation_fraction: 0.2
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+components:
+  top50:
+    selected_features_path: runs/01_main/pearson_topk/selected_features_top50.txt
+    alphas: [30000, 50000, 75000, 100000, 150000, 200000, 300000]
+  top100:
+    selected_features_path: runs/01_main/pearson_topk/selected_features_top100.txt
+    alphas: [150, 300, 500, 750, 1000, 1500, 3000, 5000]
+
+ridge:
+  alphas: [1000]
+
+blend:
+  top50_weights: [0.475, 0.50, 0.525, 0.55, 0.575, 0.60, 0.625, 0.65]
+  current_best:
+    name: beta2_local_alpha_boundary_best
+    submission_path: submissions/01_main/beta2_local_alpha_refine/submission_blend_t50a50000_t100a300_w50_0p525_w100_0p475.csv
+    private_score: 0.09536
+    top50_weight: 0.525
+    top50_alpha: 50000
+    top100_alpha: 300
+  alpha_ensemble:
+    top50_alphas: [50000, 75000, 100000, 150000]
+    top100_alphas: [300, 500, 750, 1000]
+    top50_weight: 0.55
+
+selection:
+  stable_corr_min: 0.98
+  stable_std_ratio_max: 1.20
+  low_corr_holdout_tolerance: 0.004
+
+output:
+  run_dir: runs/01_main/beta2_high_alpha_refine
+  submission_dir: submissions/01_main/beta2_high_alpha_refine
+  prediction_col: prediction
