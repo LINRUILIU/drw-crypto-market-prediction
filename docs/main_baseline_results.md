@@ -587,3 +587,21 @@ Final interpretation:
 - XGB on interaction features is not useful in the current setup.
 - Larger `int240` Ridge variants increased public score but reduced private score.
 - The next stage should use the selected 120 interaction features as structured inputs for AE/MLP work, not continue widening Beta5 interactions.
+
+## Beta6-AE Minimal AutoEncoder Features
+
+Beta6-AE trained an 8-dimensional autoencoder representation from the 40 Beta5 core features plus 120 selected Beta5-A interaction features.
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta5-A interaction Ridge | 0.06362 | 0.10302 | Current best before Beta6 |
+| `0.85 * current_best + 0.15 * ae_ridge` | 0.06488 | 0.10169 | Holdout/public improved, private dropped |
+| `0.90 * current_best + 0.10 * ae_ridge` | 0.06454 | 0.10225 | Conservative AE blend, still below current best |
+
+Current best remains:
+
+```text
+0.85 * beta4_current_best + 0.15 * ridge_interactions_only
+```
+
+Conclusion: the first minimal AE pass did not transfer to private. AE features are not selected for the main submission unless the AE training recipe changes materially.

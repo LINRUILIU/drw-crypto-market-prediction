@@ -1371,3 +1371,68 @@ Do not continue these axes unless there is a new hypothesis:
   - `submissions/01_main/beta5_interactions/submission_best.csv`
 
 Next direction: move to Beta6 with AE features over structured features plus the selected Beta5-A interactions, or run a very conservative 120-feature interaction calibration only if there is a concrete reason. The default should be AE, not more Beta5 interaction widening.
+
+## 2026-06-18: Beta6-AE Minimal AutoEncoder Features
+
+### Goal
+
+Test whether unsupervised AE features can add a new low-dimensional signal on top of the selected Beta5 interaction feature space. The comparison baseline before Beta6 was:
+
+```text
+0.85 * beta4_current_best + 0.15 * ridge_interactions_only
+```
+
+with private score `0.10302`.
+
+### Implementation
+
+- Added config: `configs/01_main_beta6_ae_features.yaml`.
+- Added script: `scripts/run_beta6_ae_features.py`.
+- AE input:
+  - 40 Beta5 core features;
+  - 120 selected Beta5-A interaction features;
+  - total input dimension `160`.
+- AE architecture:
+  - hidden sizes `[128, 64]`;
+  - bottleneck dimension `8`;
+  - reconstruction MSE loss;
+  - Adam optimizer, lr `0.001`, weight decay `1e-5`;
+  - internal train-only validation split for early stopping.
+- Full run selected AE best epoch `12`.
+- Downstream models:
+  - `ae_ridge`;
+  - `input_plus_ae_ridge`;
+  - `input_plus_ae_xgboost`.
+
+### Local Results
+
+| Signal | Holdout Pearson | Delta vs current best | Notes |
+| --- | ---: | ---: | --- |
+| `ae_ridge` | 0.115183 | -0.003251 | Best AE signal |
+| `input_plus_ae_ridge` | 0.108721 | -0.009712 | No improvement over interaction Ridge |
+| `input_plus_ae_xgboost` | 0.045131 | -0.073302 | Not useful |
+
+Best selected blends:
+
+| Candidate | Holdout Pearson | Delta vs current best | Notes |
+| --- | ---: | ---: | --- |
+| `0.85 * current_best + 0.15 * ae_ridge` | 0.120158 | +0.001725 | Holdout best |
+| `0.90 * current_best + 0.10 * ae_ridge` | 0.119695 | +0.001261 | More conservative |
+
+### Kaggle Result
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta5-A interaction Ridge | 0.06362 | 0.10302 | Current best before Beta6 |
+| `0.85 * current_best + 0.15 * ae_ridge` | 0.06488 | 0.10169 | Holdout/public improved, private dropped |
+| `0.90 * current_best + 0.10 * ae_ridge` | 0.06454 | 0.10225 | Conservative AE blend, still below best |
+
+Current best remains:
+
+```text
+0.85 * beta4_current_best + 0.15 * ridge_interactions_only
+```
+
+with private score `0.10302`.
+
+Interpretation: the minimal AE8 features produce a measurable holdout blend improvement but do not transfer to private. The current AE implementation should not be selected as the main submission. If AE is revisited, it needs a new training hypothesis, such as denoising AE, multi-seed AE averaging, different input normalization, or AE features used only as an auxiliary input for a better downstream model.
