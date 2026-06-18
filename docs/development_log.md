@@ -1077,7 +1077,7 @@ with private score `0.10003`.
 | Previous best: Beta3 Spearman fine-tune | 0.05456 | 0.10003 | Beta4 comparison baseline |
 | `0.85 * current_best + 0.15 * medoid_t0.6_ridge` | 0.05437 | 0.09565 | Medoid Ridge did not transfer |
 | `0.75 * current_best + 0.25 * shap_stable_xgboost` | 0.05634 | 0.10043 | New best private score |
-| `0.85 * current_best + 0.15 * hybrid_mlp` | pending | pending | Generated but not submitted because Kaggle submission was blocked by Codex usage limit |
+| `0.85 * current_best + 0.15 * hybrid_mlp` | 0.05959 | 0.09729 | Higher public, private below current best |
 
 Current best:
 
@@ -1093,6 +1093,6 @@ The corresponding local file is:
 submissions/01_main/beta4_shap_stable/submission_best.csv
 ```
 
-Interpretation: simple medoid Ridge is not enough as a direct signal, but medoid features are useful as an input to fold-stable XGB feature selection. The successful Beta4 gain is small but meaningful: it improves private from `0.10003` to `0.10043`. The first MLP baseline did not become a strong standalone model; its best holdout behavior came from a small hybrid-feature blend, which remains a pending submission candidate.
+Interpretation: simple medoid Ridge is not enough as a direct signal, but medoid features are useful as an input to fold-stable XGB feature selection. The successful Beta4 gain is small but meaningful: it improves private from `0.10003` to `0.10043`. The first MLP baseline did not become a strong standalone model, and its small hybrid-feature blend did not transfer to private despite better public score.
 
 Next direction: tune the successful SHAP-stable branch before expanding MLP/AE. Highest-priority next tests are lower XGB blend weights around `0.15-0.30`, alternative SHAP stability thresholds, and a better MLP training recipe only after confirming the SHAP-stable signal is stable.

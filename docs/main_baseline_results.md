@@ -484,7 +484,7 @@ Beta4 tested the first-place-solution-inspired path: correlation-cluster medoid 
 | Previous best: Beta3 Spearman fine-tune | 0.05456 | 0.10003 | Before Beta4 |
 | `0.85 * current_best + 0.15 * medoid_t0.6_ridge` | 0.05437 | 0.09565 | Medoid Ridge did not transfer |
 | `0.75 * current_best + 0.25 * shap_stable_xgboost` | 0.05634 | 0.10043 | Current best private score |
-| `0.85 * current_best + 0.15 * hybrid_mlp` | pending | pending | Generated locally, not submitted due Codex usage limit |
+| `0.85 * current_best + 0.15 * hybrid_mlp` | 0.05959 | 0.09729 | Higher public, private below current best |
 
 Current best:
 
@@ -492,6 +492,6 @@ Current best:
 0.75 * beta3_current_best + 0.25 * shap_stable_xgboost
 ```
 
-The SHAP-stable branch selects 20 features from medoid-filtered features using purged 6-fold XGBoost TreeSHAP contributions. The MLP baseline is implemented, but the first full run did not produce a strong standalone model; its safest candidate is a small hybrid-feature blend pending submission.
+The SHAP-stable branch selects 20 features from medoid-filtered features using purged 6-fold XGBoost TreeSHAP contributions. The MLP baseline is implemented, but the first full run did not produce a strong standalone model, and its safest small hybrid-feature blend did not transfer to private.
 
 Conclusion: Beta4 confirms that the next useful direction is not another linear top-k weight sweep. The first transferable gain came from a nonlinear XGB/SHAP-stable signal layered onto the strong Beta3 Ridge/Spearman baseline.

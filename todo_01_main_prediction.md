@@ -89,5 +89,5 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Implemented Beta4-A correlation-cluster medoid features; direct medoid Ridge blend did not transfer, private `0.09565`.
 - [x] Implemented Beta4-B purged XGB TreeSHAP stable features; current best is `0.75 * beta3_current_best + 0.25 * shap_stable_xgboost` with private `0.10043`.
 - [x] Implemented Beta4-C CPU MLP baseline with SGD and mixed MSE/Pearson loss.
-- [ ] Submit the generated Beta4-C `0.85 * current_best + 0.15 * hybrid_mlp` candidate when Kaggle CLI submission is available again.
+- [x] Submitted Beta4-C `0.85 * current_best + 0.15 * hybrid_mlp`; public `0.05959`, private `0.09729`, not selected.
 - [ ] Tune the successful SHAP-stable XGB branch before expanding to AE features.
