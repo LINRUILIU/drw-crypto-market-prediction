@@ -1,0 +1,113 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  validation_fraction: 0.2
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+current_best:
+  name: beta5_interaction_ridge_w015
+  private_score: 0.10302
+  beta4_base:
+    base_weight: 0.75
+    signal_weight: 0.25
+    beta3_components:
+      - name: top50_alpha200000
+        selected_features_path: runs/01_main/pearson_topk/selected_features_top50.txt
+        alpha: 200000
+        weight: 0.3825
+      - name: top100_alpha50
+        selected_features_path: runs/01_main/pearson_topk/selected_features_top100.txt
+        alpha: 50
+        weight: 0.3825
+      - name: spearman_top50_alpha50000
+        selected_features_path: runs/01_main/beta3_new_feature_signals/selected_features_spearman_top50.txt
+        alpha: 50000
+        weight: 0.235
+    shap_stable_features_path: runs/01_main/beta4_shap_stable/selected_features_shap_stable.txt
+    shap_stable_valid_prediction_path: runs/01_main/beta4_shap_stable/valid_predictions/valid_shap_stable_xgboost.csv
+  beta5_interaction:
+    weight: 0.15
+    valid_prediction_path: runs/01_main/beta5_interactions/valid_predictions/valid_ridge_interactions_only.csv
+  test_submission_path: submissions/01_main/beta5_interactions/submission_best.csv
+
+ae_input:
+  base_feature_pool_path: runs/01_main/beta5_interactions/base_feature_pool.txt
+  interaction_definitions_path: runs/01_main/beta5_interactions/selected_interaction_definitions.csv
+  include_base_features: true
+  include_interactions: true
+
+autoencoder_defaults:
+  activation: relu
+  dropout: 0.0
+  learning_rate: 0.001
+  weight_decay: 1.0e-5
+  batch_size: 4096
+  max_epochs: 55
+  patience: 7
+  internal_validation_fraction: 0.10
+  torch_num_threads: 0
+
+autoencoder_variants:
+  - name: ae8_base
+    bottleneck_dim: 8
+    hidden_sizes: [128, 64]
+    seed: 2026
+    input_noise_std: 0.0
+  - name: ae16_base
+    bottleneck_dim: 16
+    hidden_sizes: [160, 80]
+    seed: 2026
+    input_noise_std: 0.0
+  - name: ae32_base
+    bottleneck_dim: 32
+    hidden_sizes: [192, 96]
+    seed: 2026
+    input_noise_std: 0.0
+  - name: ae16_denoise005
+    bottleneck_dim: 16
+    hidden_sizes: [160, 80]
+    seed: 2026
+    input_noise_std: 0.05
+  - name: ae32_denoise005
+    bottleneck_dim: 32
+    hidden_sizes: [192, 96]
+    seed: 2026
+    input_noise_std: 0.05
+  - name: ae16_seed3026
+    bottleneck_dim: 16
+    hidden_sizes: [160, 80]
+    seed: 3026
+    input_noise_std: 0.0
+
+ridge:
+  alphas: [10, 50, 100, 300, 1000, 3000, 10000, 50000, 200000, 1000000]
+
+blend:
+  signal_weights: [0.05, 0.075, 0.10, 0.125, 0.15]
+  holdout_floor_delta: -0.001
+  min_std_ratio_current_best: 0.50
+  max_std_ratio_current_best: 1.35
+  max_selected_submissions: 3
+
+xgboost_fallback:
+  n_estimators: 800
+  learning_rate: 0.03
+  max_depth: 5
+  subsample: 0.85
+  colsample_bytree: 0.85
+  reg_lambda: 1.0
+  early_stopping_rounds: 80
+
+output:
+  run_dir: runs/01_main/beta6_1_ae_refine
+  submission_dir: submissions/01_main/beta6_1_ae_refine
+  prediction_col: prediction

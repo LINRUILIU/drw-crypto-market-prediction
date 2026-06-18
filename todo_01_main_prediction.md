@@ -105,4 +105,6 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Submitted Beta6-AE `0.85 * current_best + 0.15 * ae_ridge`; public `0.06488`, private `0.10169`, below the Beta5-A best.
 - [x] Submitted Beta6-AE `0.90 * current_best + 0.10 * ae_ridge`; public `0.06454`, private `0.10225`, below the Beta5-A best.
 - [x] Kept Beta5-A as the current best after Beta6-AE: private `0.10302`.
-- [ ] Decide whether to revisit AE with a materially different recipe or switch to MLP/stacking/report consolidation.
+- [x] Tested Beta6.1 AE refinement with bottleneck 8/16/32, light denoising, and a seed probe; conservative AE blend scored public `0.06412`, private `0.10269`, below the Beta5-A best.
+- [ ] Decide whether Beta6.2 should use a materially different AE objective/downstream model or switch to MLP/stacking/report consolidation.
+

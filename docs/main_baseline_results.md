@@ -605,3 +605,20 @@ Current best remains:
 ```
 
 Conclusion: the first minimal AE pass did not transfer to private. AE features are not selected for the main submission unless the AE training recipe changes materially.
+
+## Beta6.1 AE Refinement
+
+Beta6.1 tested wider and lightly denoised AE representations on the same 160 Beta5 structured inputs.
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta5-A interaction Ridge | 0.06362 | 0.10302 | Current best before Beta6.1 |
+| `0.95 * current_best + 0.05 * ae8_base_ridge` | 0.06412 | 0.10269 | Conservative AE blend, still below current best |
+
+Current best remains:
+
+```text
+0.85 * beta4_current_best + 0.15 * ridge_interactions_only
+```
+
+Conclusion: widening the AE bottleneck to 16/32, adding light denoising, and probing another seed did not improve over AE8. AE is not selected for the main submission in its current form.

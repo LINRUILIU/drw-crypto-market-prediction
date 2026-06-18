@@ -1436,3 +1436,15 @@ Current best remains:
 with private score `0.10302`.
 
 Interpretation: the minimal AE8 features produce a measurable holdout blend improvement but do not transfer to private. The current AE implementation should not be selected as the main submission. If AE is revisited, it needs a new training hypothesis, such as denoising AE, multi-seed AE averaging, different input normalization, or AE features used only as an auxiliary input for a better downstream model.
+
+## 2026-06-18: Beta6.1 AE Refinement
+
+Beta6.1 tested whether the Beta6 AE failed because the bottleneck was too small. The input stayed fixed at the 40 Beta5 core features plus 120 selected Beta5-A interaction features, while the AE recipe varied bottleneck width, denoising noise, and seed.
+
+Local summary: `ae8_base` remained the strongest AE signal with holdout Pearson `0.115183`, while wider variants were weaker: `ae16_base` `0.108971`, `ae16_denoise005` `0.107502`, `ae32_denoise005` `0.104848`, `ae16_seed3026` `0.104752`, and `ae32_base` `0.104195`.
+
+Submitted conservative candidate: `0.95 * current_best + 0.05 * ae8_base_ridge`, Public `0.06412`, Private `0.10269`. This is below the Beta5-A best, Public `0.06362`, Private `0.10302`.
+
+Current best remains `0.85 * beta4_current_best + 0.15 * ridge_interactions_only`, private `0.10302`.
+
+Interpretation: the "AE too small" hypothesis is not supported. The original AE8 representation stayed strongest; wider bottlenecks, light denoising, and a seed probe all weakened holdout Pearson and did not improve private score. If AE continues, Beta6.2 should change the AE objective or downstream usage rather than keep widening the bottleneck.
