@@ -32,6 +32,8 @@ def read_prediction(path: str) -> np.ndarray:
 
 def plot_score_ladder(manifest: list[dict[str, str]]) -> None:
     stages = [
+        ("Baseline1\nstability", 0.06628),
+        ("Beta1\ntop100 Ridge", 0.08901),
         ("Beta2\nRidge", 0.09638),
         ("Beta3\nSpearman", 0.10003),
         ("Beta4\nSHAP-XGB", 0.10043),
@@ -41,14 +43,14 @@ def plot_score_ladder(manifest: list[dict[str, str]]) -> None:
     ]
     labels = [s[0] for s in stages]
     scores = [s[1] for s in stages]
-    fig, ax = plt.subplots(figsize=(9, 4.8))
+    fig, ax = plt.subplots(figsize=(11, 4.8))
     ax.plot(labels, scores, marker="o", linewidth=2.4, color="#2563eb")
-    ax.fill_between(labels, scores, min(scores) - 0.001, color="#bfdbfe", alpha=0.45)
+    ax.fill_between(labels, scores, min(scores) - 0.003, color="#bfdbfe", alpha=0.45)
     for idx, value in enumerate(scores):
-        ax.text(idx, value + 0.00025, f"{value:.5f}", ha="center", va="bottom", fontsize=9)
+        ax.text(idx, value + 0.001, f"{value:.5f}", ha="center", va="bottom", fontsize=9)
     ax.set_title("Private Score Ladder")
     ax.set_ylabel("Kaggle private Pearson")
-    ax.set_ylim(min(scores) - 0.001, max(scores) + 0.0015)
+    ax.set_ylim(min(scores) - 0.004, max(scores) + 0.004)
     ax.grid(axis="y", alpha=0.25)
     savefig(
         "score_ladder.png",
@@ -61,6 +63,9 @@ def plot_score_ladder(manifest: list[dict[str, str]]) -> None:
 
 def submission_points() -> pd.DataFrame:
     rows = [
+        ("Baseline1 stability", "Baseline/Beta1", 0.03365, 0.06628),
+        ("Beta1 top100 w050", "Baseline/Beta1", 0.03793, 0.08131),
+        ("Beta1 top100 w100", "Baseline/Beta1", 0.03716, 0.08901),
         ("Beta2 Ridge", "Ridge", 0.05160, 0.09638),
         ("Beta3 Spearman", "Ridge/Spearman", 0.05456, 0.10003),
         ("Beta4 SHAP XGB", "SHAP/XGB", 0.05634, 0.10043),
@@ -84,6 +89,7 @@ def submission_points() -> pd.DataFrame:
 def plot_public_private(manifest: list[dict[str, str]]) -> None:
     data = submission_points()
     colors = {
+        "Baseline/Beta1": "#0f766e",
         "Ridge": "#2563eb",
         "Ridge/Spearman": "#0891b2",
         "SHAP/XGB": "#16a34a",
@@ -97,10 +103,11 @@ def plot_public_private(manifest: list[dict[str, str]]) -> None:
         ax.scatter(group["public"], group["private"], label=family, s=58, alpha=0.85, color=colors.get(family))
     final = data[data["candidate"] == "Beta7 MLP final"].iloc[0]
     ax.scatter([final["public"]], [final["private"]], s=150, facecolors="none", edgecolors="black", linewidths=1.8)
-    ax.annotate("selected", (final["public"], final["private"]), xytext=(8, 8), textcoords="offset points")
+    ax.annotate("selected", (final["public"], final["private"]), xytext=(8, -16), textcoords="offset points")
     ax.set_title("Public vs Private Scores")
     ax.set_xlabel("Public Pearson")
     ax.set_ylabel("Private Pearson")
+    ax.set_ylim(data["private"].min() - 0.001, data["private"].max() + 0.002)
     ax.grid(alpha=0.25)
     ax.legend(frameon=False, fontsize=8)
     savefig(
@@ -113,15 +120,14 @@ def plot_public_private(manifest: list[dict[str, str]]) -> None:
 
 
 def plot_final_pipeline(manifest: list[dict[str, str]]) -> None:
-    fig, ax = plt.subplots(figsize=(10, 5.6))
+    fig, ax = plt.subplots(figsize=(11, 4.8))
     ax.axis("off")
     boxes = [
-        ("Pearson/Spearman\nRidge stack", (0.10, 0.72)),
-        ("SHAP-stable\nXGBoost", (0.35, 0.72)),
-        ("Symbolic\nInteraction Ridge", (0.60, 0.72)),
-        ("Supervised\nAE8 Ridge", (0.35, 0.36)),
-        ("Supervised\nMLP signal", (0.60, 0.36)),
-        ("Final\nprediction", (0.84, 0.54)),
+        ("Beta3\nRidge/Spearman\nstack", (0.10, 0.62)),
+        ("Beta4\n+ SHAP-stable\nXGBoost", (0.30, 0.62)),
+        ("Beta5\n+ Symbolic\nInteraction Ridge", (0.51, 0.62)),
+        ("Beta6.2\n+ Supervised\nAE8 Ridge", (0.72, 0.62)),
+        ("Final\n+ AdamW\nMLP signal", (0.91, 0.62)),
     ]
     for text, (x, y) in boxes:
         ax.text(
@@ -134,16 +140,22 @@ def plot_final_pipeline(manifest: list[dict[str, str]]) -> None:
             bbox={"boxstyle": "round,pad=0.45", "facecolor": "#eff6ff", "edgecolor": "#1d4ed8", "linewidth": 1.2},
         )
     arrows = [
-        ((0.19, 0.72), (0.27, 0.72)),
-        ((0.44, 0.72), (0.52, 0.72)),
-        ((0.69, 0.72), (0.78, 0.57)),
-        ((0.44, 0.36), (0.78, 0.51)),
-        ((0.69, 0.36), (0.78, 0.53)),
-        ((0.22, 0.67), (0.31, 0.41)),
+        ((0.19, 0.62), (0.22, 0.62)),
+        ((0.39, 0.62), (0.42, 0.62)),
+        ((0.60, 0.62), (0.63, 0.62)),
+        ((0.81, 0.62), (0.84, 0.62)),
     ]
     for start, end in arrows:
         ax.annotate("", xy=end, xytext=start, arrowprops={"arrowstyle": "->", "linewidth": 1.5, "color": "#334155"})
-    ax.text(0.50, 0.12, "Final = 0.925 * beta6_2 + 0.075 * AdamW MLP seed2026", ha="center", fontsize=11)
+    ax.text(
+        0.50,
+        0.23,
+        "Each stage keeps the previous best and adds one low-weight complementary signal.",
+        ha="center",
+        fontsize=10,
+        color="#475569",
+    )
+    ax.text(0.50, 0.13, "Final = 0.925 * beta6_2 + 0.075 * AdamW MLP seed2026", ha="center", fontsize=11)
     savefig(
         "final_pipeline.png",
         "Final ensemble pipeline",

@@ -128,7 +128,9 @@ $$
 | top50/top100 Ridge blend      | 0.04652 | 0.09280 | top50 与 top100 互补  |
 | high-alpha top50/top100 blend | 0.05160 | 0.09638 | Beta2 最优线性基线       |
 
-Pearson top-k Ridge 的提升说明，原始 785 个特征中存在大量冗余和噪声。通过简单的相关性筛选，模型不仅更稳定，而且在 private leaderboard 上显著优于未经筛选的模型。
+从 leaderboard 结果看，早期 Baseline1 的 stability blend private 仅为 0.06628，而 Beta1 中单一 top100 Ridge 信号已经提升到 0.08901。这个对比说明，后续提升并不是来自简单模型堆叠，而是来自对高维匿名特征的重新筛选：去掉大量冗余特征后，线性模型反而更容易捕捉可转移信号。
+
+Pearson top-k Ridge 的提升说明，原始 785 个特征中存在大量冗余和噪声。通过简单的相关性筛选，模型不仅更稳定，而且在 private leaderboard 上显著优于未经筛选的模型。Beta1 到 Beta2 的进一步提升则来自 top50/top100 组件互补和 Ridge 正则化强度调节，为后续 Spearman、SHAP-stable、interaction 等信号提供了主干。
 
 ---
 
@@ -373,16 +375,18 @@ $$
 
 | 阶段                      |  Public | Private | 说明                           |
 | ----------------------- | ------: | ------: | ---------------------------- |
-| Beta2 Ridge             | 0.05160 | 0.09638 | strong linear top-k baseline |
-| Beta3 Spearman          | 0.05456 | 0.10003 | rank-based feature selection |
-| Beta4 SHAP-stable XGB   | 0.05634 | 0.10043 | tree-based stable signal     |
-| Beta5 Interaction Ridge | 0.06362 | 0.10302 | largest structural gain      |
-| Beta6.2 Supervised AE   | 0.06454 | 0.10303 | tiny representation gain     |
-| Beta7 MLP               | 0.06553 | 0.10550 | final nonlinear correction   |
+| Baseline1 stability     | 0.03365 | 0.06628 | 早期稳定性融合基准              |
+| Beta1 top100 Ridge      | 0.03716 | 0.08901 | 首个强可转移 top-k Ridge 信号    |
+| Beta2 Ridge             | 0.05160 | 0.09638 | 强线性 top-k 基线              |
+| Beta3 Spearman          | 0.05456 | 0.10003 | 排序相关性特征筛选               |
+| Beta4 SHAP-stable XGB   | 0.05634 | 0.10043 | 树模型稳定特征信号               |
+| Beta5 Interaction Ridge | 0.06362 | 0.10302 | 最大结构性提升                  |
+| Beta6.2 Supervised AE   | 0.06454 | 0.10303 | 极小表征增益                   |
+| Beta7 MLP               | 0.06553 | 0.10550 | 最终低权重非线性修正             |
 
 ![图 4：主任务 private 分数阶梯](figures/01_main/score_ladder.png)
 
-图 4 展示了 private score 从 Beta2 到 Beta7 的逐步提升。该图说明最终结果来自多类信号的持续累积，而不是某一次模型替换带来的偶然提升。
+图 4 展示了 private score 从 Baseline1、Beta1 到 Beta7 的逐步提升。早期 Baseline1 到 Beta1 的跃迁强调了特征筛选带来的强对比；后续 Beta2 到 Beta7 的提升则说明最终结果来自多类互补信号的持续累积，而不是某一次模型替换带来的偶然提升。
 
 ### 8.2 Public/private divergence
 

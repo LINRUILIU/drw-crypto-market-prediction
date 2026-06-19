@@ -1666,3 +1666,14 @@ Changes:
 - Replaced figure-placement placeholders with a formal figure list.
 - Softened unsupported leaderboard-rank wording by tying the approximate rank to the recorded screenshot context.
 - Preserved the main narrative: high-dimensional anonymous features, leakage-controlled validation, strong Ridge top-k baseline, interaction features as the largest structural gain, and low-weight representation/MLP signals under public/private divergence.
+
+## 2026-06-19: Main Report Figure Refinement
+
+Refined the main-task report figures and baseline comparison.
+
+Changes:
+
+- Reworked `final_pipeline.png` into a left-to-right stage diagram to remove unnecessary arrow crossings.
+- Expanded `score_ladder.png` to include Baseline1 stability blend and Beta1 top100 Ridge, making the early gain from feature selection explicit.
+- Added Baseline1/Beta1 points to `public_private_scatter.png` so the figure shows the full trajectory from early leaderboard probes to the frozen final model.
+- Updated `reports/report-draft.md` to contrast Baseline1 private `0.06628`, Beta1 top100 Ridge private `0.08901`, and the final private `0.10550`.
