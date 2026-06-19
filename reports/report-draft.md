@@ -467,7 +467,7 @@ component correlation heatmap 用于观察不同信号族预测之间的相关�
 
 ![图 8：不同信号族的转移效果总结](figures/01_main/signal_family_summary.png)
 
-最终模型在 private leaderboard 上达到 0.10550，private 排名约第 14 名。该结果说明，本文方法虽然未完全复现第一名方案，但已经在隐藏测试集上表现出较强泛化能力。后续若继续扩展，可重点研究更系统的 feature recycling、更复杂但可控的 symbolic regression，以及更稳定的 supervised representation learning。
+**最终模型在 private leaderboard 上达到 0.10550，private 排名约第 14 名。** 该结果说明，本文方法虽然未完全复现第一名方案，但已经在隐藏测试集上表现出较强泛化能力。后续若继续扩展，可重点研究更系统的 feature recycling、更复杂但可控的 symbolic regression，以及更稳定的 supervised representation learning。
 
 ---
 
