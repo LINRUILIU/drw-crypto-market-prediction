@@ -1,0 +1,56 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  validation_fraction: 0.2
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+current_best:
+  name: beta6_2_supervised_ae_w0025
+  private_score: 0.10303
+  beta4_base:
+    base_weight: 0.75
+    signal_weight: 0.25
+    beta3_components:
+      - name: top50_alpha200000
+        selected_features_path: runs/01_main/pearson_topk/selected_features_top50.txt
+        alpha: 200000
+        weight: 0.3825
+      - name: top100_alpha50
+        selected_features_path: runs/01_main/pearson_topk/selected_features_top100.txt
+        alpha: 50
+        weight: 0.3825
+      - name: spearman_top50_alpha50000
+        selected_features_path: runs/01_main/beta3_new_feature_signals/selected_features_spearman_top50.txt
+        alpha: 50000
+        weight: 0.235
+    shap_stable_valid_prediction_path: runs/01_main/beta4_shap_stable/valid_predictions/valid_shap_stable_xgboost.csv
+  beta5_interaction:
+    weight: 0.15
+    valid_prediction_path: runs/01_main/beta5_interactions/valid_predictions/valid_ridge_interactions_only.csv
+  beta6_2_supervised_ae:
+    weight: 0.025
+    valid_prediction_path: runs/01_main/beta6_2_supervised_ae/valid_predictions/valid_ae8_supervised_mse005_ridge.csv
+  test_submission_path: submissions/01_main/beta6_2_supervised_ae/submission_best.csv
+
+signal:
+  name: wide_adamw_lr001_seed2026
+  valid_prediction_path: runs/01_main/beta7_mlp_signal/valid_predictions/valid_wide_adamw_lr001_seed2026.csv
+  test_submission_path: submissions/01_main/beta7_mlp_signal/signals/submission_wide_adamw_lr001_seed2026.csv
+
+weights:
+  grid: [0.05, 0.0625, 0.075, 0.0875, 0.10]
+  submit: [0.05, 0.0625, 0.0875]
+
+output:
+  run_dir: runs/01_main/beta7_1_mlp_weight_refine
+  submission_dir: submissions/01_main/beta7_1_mlp_weight_refine
+  prediction_col: prediction

@@ -659,3 +659,21 @@ Current best:
 ```
 
 Conclusion: the constrained MLP branch produced a real transferable gain, but only at low weight. The `0.075` AdamW signal is useful; `0.10` is too public-facing and should not replace the current best.
+
+## Beta7.1 MLP Weight Calibration
+
+Beta7.1 reused the `wide_adamw_lr001_seed2026` signal and tested a narrow weight grid around the Beta7 best.
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| `0.9500 * beta6_2 + 0.0500 * mlp_seed2026` | 0.06557 | 0.10518 | Below best |
+| `0.9375 * beta6_2 + 0.0625 * mlp_seed2026` | 0.06559 | 0.10539 | Below best |
+| `0.9125 * beta6_2 + 0.0875 * mlp_seed2026` | 0.06539 | 0.10550 | Private tie, lower public |
+
+Current best remains:
+
+```text
+0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026
+```
+
+Conclusion: Beta7.1 confirms a narrow private plateau around `0.075-0.0875`. Keep `0.075` as the selected main submission; further weight-only tuning is unlikely to matter.

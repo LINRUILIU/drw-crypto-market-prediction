@@ -1505,3 +1505,35 @@ Current best becomes:
 with private score `0.10550`.
 
 Interpretation: Beta7 MLP did not produce a strong standalone local signal, but the low-weight AdamW signal transferred well. The `0.075` single-seed AdamW blend is the new best; `0.10` is already too heavy for private despite the higher public score. This validates the Beta7 framing: use MLP as a complementary nonlinear signal generator, not as a replacement model.
+
+## 2026-06-19: Beta7.1 MLP Weight Calibration
+
+Beta7.1 did not retrain MLP models. It reused the successful `wide_adamw_lr001_seed2026` signal and generated a narrow weight grid around the Beta7 best to test whether `0.075` was a local optimum or just one point on a plateau.
+
+### Local Results
+
+| Signal weight | Holdout Pearson | Delta vs Beta6.2 base | Test corr vs Beta6.2 base |
+| ---: | ---: | ---: | ---: |
+| 0.0500 | 0.121054 | +0.001860 | 0.989614 |
+| 0.0625 | 0.121322 | +0.002128 | 0.984150 |
+| 0.0750 | 0.121517 | +0.002322 | 0.977739 |
+| 0.0875 | 0.121642 | +0.002447 | 0.970484 |
+| 0.1000 | 0.121701 | +0.002507 | 0.962490 |
+
+### Kaggle Result
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| `0.9500 * beta6_2 + 0.0500 * mlp_seed2026` | 0.06557 | 0.10518 | Below Beta7 best |
+| `0.9375 * beta6_2 + 0.0625 * mlp_seed2026` | 0.06559 | 0.10539 | Below Beta7 best |
+| `0.9125 * beta6_2 + 0.0875 * mlp_seed2026` | 0.06539 | 0.10550 | Ties private best, lower public |
+
+Current best remains:
+
+```text
+0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026
+```
+
+with private score `0.10550`.
+
+Interpretation: the useful MLP weight region is a narrow private plateau around `0.075-0.0875`. Since `0.0875` only ties private and has lower public, keep the simpler Beta7 `0.075` submission as the selected best. Further weight-only MLP tuning is unlikely to produce material gains.

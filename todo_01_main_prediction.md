@@ -111,6 +111,7 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Submitted Beta7 conservative AdamW seed-mean blend; score was public `0.06588`, private `0.10411`.
 - [x] Submitted Beta7 `0.075` holdout-best probe; current best is `0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026`, public `0.06553`, private `0.10550`.
 - [x] Submitted Beta7 `0.10` low-correlation probe; public `0.06930`, private `0.10304`, not selected.
-- [ ] Decide whether to continue tiny MLP blend refinement or shift to report consolidation.
+- [x] Ran Beta7.1 MLP weight calibration at `0.05`, `0.0625`, and `0.0875`; `0.0875` tied private `0.10550` but had lower public, so `0.075` remains selected.
+- [ ] Revisit first-place solution gap and decide whether there is a realistic sprint opportunity or whether to freeze the main task for report consolidation.
 
 
