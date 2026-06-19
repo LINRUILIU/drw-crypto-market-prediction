@@ -1487,16 +1487,19 @@ Selected blend candidates:
 | `0.925 * current_best + 0.075 * wide_adamw_lr001_seed2026` | 0.121517 | +0.002322 | 0.977739 | Holdout-best low-weight probe |
 | `0.900 * current_best + 0.100 * wide_adamw_lr001_seed3026` | 0.121241 | +0.002047 | 0.960290 | Lowest-correlation candidate |
 
-### Kaggle Status
+### Kaggle Result
 
-Kaggle CLI submission did not complete for Beta7. The first selected candidate was attempted three times, but each `kaggle competitions submit` call timed out and left a residual Kaggle/Python upload process; follow-up `kaggle competitions submissions` queries confirmed no Beta7 submission reached the leaderboard.
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta6.2 supervised AE | 0.06454 | 0.10303 | Current best before Beta7 |
+| `0.975 * current_best + 0.025 * wide_adamw_lr001_seed_mean` | 0.06588 | 0.10411 | New best private score |
 
-Current best therefore remains:
+Current best becomes:
 
 ```text
-0.975 * beta5_current_best + 0.025 * ae8_supervised_mse005_ridge
+0.975 * beta6_2_current_best + 0.025 * wide_adamw_lr001_seed_mean
 ```
 
-with private score `0.10303`.
+with private score `0.10411`.
 
-Interpretation: Beta7 MLP did not produce a strong standalone local signal. The only locally useful candidates rely on low-correlation AdamW predictions at small weights, which may be public/holdout-seeking rather than private-stable. Do not continue MLP tuning unless Kaggle submission is available and the conservative `0.025` probe transfers.
+Interpretation: Beta7 MLP did not produce a strong standalone local signal, but the very low-weight AdamW seed-mean signal transferred well. This validates the Beta7 framing: use MLP as a complementary nonlinear signal generator, not as a replacement model. Larger MLP weights remain risky and should only be probed sparingly.

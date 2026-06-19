@@ -646,16 +646,16 @@ Conclusion: supervised AE features produce a marginal transferable gain, but onl
 
 Beta7 trained six supervised MLP signals on the fixed 160 Beta5 structured inputs, plus seed-mean and multi-model mean ensembles.
 
-| Candidate | Holdout Pearson | Delta vs Current Best | Kaggle Result | Notes |
-| --- | ---: | ---: | --- | --- |
-| `0.975 * current_best + 0.025 * wide_adamw_lr001_seed_mean` | 0.120212 | +0.001018 | Not submitted | Kaggle CLI upload timed out |
-| `0.925 * current_best + 0.075 * wide_adamw_lr001_seed2026` | 0.121517 | +0.002322 | Not submitted | Held for upload recovery |
-| `0.900 * current_best + 0.100 * wide_adamw_lr001_seed3026` | 0.121241 | +0.002047 | Not submitted | Lowest-correlation candidate |
+| Candidate | Holdout Pearson | Delta vs Current Best | Public | Private | Notes |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `0.975 * current_best + 0.025 * wide_adamw_lr001_seed_mean` | 0.120212 | +0.001018 | 0.06588 | 0.10411 | Current best private score |
+| `0.925 * current_best + 0.075 * wide_adamw_lr001_seed2026` | 0.121517 | +0.002322 | - | - | Held for follow-up |
+| `0.900 * current_best + 0.100 * wide_adamw_lr001_seed3026` | 0.121241 | +0.002047 | - | - | Lowest-correlation candidate |
 
-Current best remains:
+Current best:
 
 ```text
-0.975 * beta5_current_best + 0.025 * ae8_supervised_mse005_ridge
+0.975 * beta6_2_current_best + 0.025 * wide_adamw_lr001_seed_mean
 ```
 
-Conclusion: the constrained MLP branch is implemented and locally evaluated, but no Beta7 Kaggle score is available because `kaggle competitions submit` repeatedly timed out during upload. Do not treat Beta7 as a new best unless a later submission proves transfer.
+Conclusion: the constrained MLP branch produced a real transferable gain, but only at very small weight. The MLP should be kept as a complementary signal, not treated as a standalone replacement for the Ridge/interaction/AE stack.
