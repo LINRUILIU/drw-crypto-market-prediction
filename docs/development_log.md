@@ -1654,3 +1654,15 @@ Implemented `scripts/make_main_report_figures.py`, which writes reproducible fig
 - `figure_manifest.csv`
 
 Note: `reports/figures/*` remains ignored by git, so the figures are local report artifacts while the generation script is tracked.
+
+## 2026-06-19: Main Report Draft Cleanup
+
+Polished `reports/report-draft.md` against the development log and the frozen main-task results.
+
+Changes:
+
+- Fixed broken Pearson, MLP loss, final ensemble, and weighted-fusion formulas.
+- Inserted the generated main-task figures directly into the report draft.
+- Replaced figure-placement placeholders with a formal figure list.
+- Softened unsupported leaderboard-rank wording by tying the approximate rank to the recorded screenshot context.
+- Preserved the main narrative: high-dimensional anonymous features, leakage-controlled validation, strong Ridge top-k baseline, interaction features as the largest structural gain, and low-weight representation/MLP signals under public/private divergence.

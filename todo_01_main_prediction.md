@@ -118,5 +118,6 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Freeze the main task for report consolidation because Sprint-A and Sprint-B did not beat private `0.10550`.
 - [x] Drafted the main-task report outline in `docs/main_report_outline.md`.
 - [x] Generated main-task report figures under `reports/figures/01_main/`.
+- [x] Polished `reports/report-draft.md`, fixed formulas, inserted figures, and aligned wording with the development log.
 
 
