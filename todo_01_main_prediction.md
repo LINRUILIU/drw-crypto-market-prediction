@@ -108,7 +108,9 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Tested Beta6.1 AE refinement with bottleneck 8/16/32, light denoising, and a seed probe; conservative AE blend scored public `0.06412`, private `0.10269`, below the Beta5-A best.
 - [x] Implemented Beta6.2 supervised AE with an auxiliary target head; best conservative blend scored public `0.06454`, private `0.10303`, narrowly above the Beta5-A best.
 - [x] Implemented Beta7 supervised MLP signal generator over fixed 160 Beta5 structured inputs with six MLPs, seed-mean ensembles, and low-weight blends.
-- [x] Submitted Beta7 conservative AdamW seed-mean blend; current best is `0.975 * beta6_2_current_best + 0.025 * wide_adamw_lr001_seed_mean`, public `0.06588`, private `0.10411`.
-- [ ] Decide whether to submit the Beta7 `0.075` holdout-best probe or shift to report consolidation.
+- [x] Submitted Beta7 conservative AdamW seed-mean blend; score was public `0.06588`, private `0.10411`.
+- [x] Submitted Beta7 `0.075` holdout-best probe; current best is `0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026`, public `0.06553`, private `0.10550`.
+- [x] Submitted Beta7 `0.10` low-correlation probe; public `0.06930`, private `0.10304`, not selected.
+- [ ] Decide whether to continue tiny MLP blend refinement or shift to report consolidation.
 
 

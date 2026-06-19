@@ -648,14 +648,14 @@ Beta7 trained six supervised MLP signals on the fixed 160 Beta5 structured input
 
 | Candidate | Holdout Pearson | Delta vs Current Best | Public | Private | Notes |
 | --- | ---: | ---: | ---: | ---: | --- |
-| `0.975 * current_best + 0.025 * wide_adamw_lr001_seed_mean` | 0.120212 | +0.001018 | 0.06588 | 0.10411 | Current best private score |
-| `0.925 * current_best + 0.075 * wide_adamw_lr001_seed2026` | 0.121517 | +0.002322 | - | - | Held for follow-up |
-| `0.900 * current_best + 0.100 * wide_adamw_lr001_seed3026` | 0.121241 | +0.002047 | - | - | Lowest-correlation candidate |
+| `0.975 * current_best + 0.025 * wide_adamw_lr001_seed_mean` | 0.120212 | +0.001018 | 0.06588 | 0.10411 | Conservative seed-mean probe |
+| `0.925 * current_best + 0.075 * wide_adamw_lr001_seed2026` | 0.121517 | +0.002322 | 0.06553 | 0.10550 | Current best private score |
+| `0.900 * current_best + 0.100 * wide_adamw_lr001_seed3026` | 0.121241 | +0.002047 | 0.06930 | 0.10304 | Public improved, private dropped |
 
 Current best:
 
 ```text
-0.975 * beta6_2_current_best + 0.025 * wide_adamw_lr001_seed_mean
+0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026
 ```
 
-Conclusion: the constrained MLP branch produced a real transferable gain, but only at very small weight. The MLP should be kept as a complementary signal, not treated as a standalone replacement for the Ridge/interaction/AE stack.
+Conclusion: the constrained MLP branch produced a real transferable gain, but only at low weight. The `0.075` AdamW signal is useful; `0.10` is too public-facing and should not replace the current best.

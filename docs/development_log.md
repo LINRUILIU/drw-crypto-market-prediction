@@ -1492,14 +1492,16 @@ Selected blend candidates:
 | Candidate | Public | Private | Notes |
 | --- | ---: | ---: | --- |
 | Previous best: Beta6.2 supervised AE | 0.06454 | 0.10303 | Current best before Beta7 |
-| `0.975 * current_best + 0.025 * wide_adamw_lr001_seed_mean` | 0.06588 | 0.10411 | New best private score |
+| `0.975 * current_best + 0.025 * wide_adamw_lr001_seed_mean` | 0.06588 | 0.10411 | Conservative seed-mean probe |
+| `0.925 * current_best + 0.075 * wide_adamw_lr001_seed2026` | 0.06553 | 0.10550 | New best private score |
+| `0.900 * current_best + 0.100 * wide_adamw_lr001_seed3026` | 0.06930 | 0.10304 | Public improved, private near Beta6.2 |
 
 Current best becomes:
 
 ```text
-0.975 * beta6_2_current_best + 0.025 * wide_adamw_lr001_seed_mean
+0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026
 ```
 
-with private score `0.10411`.
+with private score `0.10550`.
 
-Interpretation: Beta7 MLP did not produce a strong standalone local signal, but the very low-weight AdamW seed-mean signal transferred well. This validates the Beta7 framing: use MLP as a complementary nonlinear signal generator, not as a replacement model. Larger MLP weights remain risky and should only be probed sparingly.
+Interpretation: Beta7 MLP did not produce a strong standalone local signal, but the low-weight AdamW signal transferred well. The `0.075` single-seed AdamW blend is the new best; `0.10` is already too heavy for private despite the higher public score. This validates the Beta7 framing: use MLP as a complementary nonlinear signal generator, not as a replacement model.
