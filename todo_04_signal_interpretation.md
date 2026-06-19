@@ -2,59 +2,57 @@
 
 ## Goal
 
-Evaluate whether model predictions have directional and ranking meaning, without claiming to build a real trading system.
+Translate the final prediction signal into intuitive financial and presentation-friendly evidence. This extension should show whether higher predicted values correspond to higher realized targets on average, without claiming to build a real tradable strategy.
 
-## Checkpoints
+## Scope
 
-- [ ] Prepare validation predictions
-  - [ ] Use predictions from the selected main model and ensemble.
-  - [ ] Keep validation labels untouched by model fitting.
-  - [ ] Save prediction, target, time index, and model name in one analysis table.
+This is intentionally lightweight. It should support the report and PPT, not reopen the leaderboard sprint.
 
-- [ ] Top-middle-bottom grouping
-  - [ ] Sort validation samples by predicted value.
-  - [ ] Define bottom 10%, middle 80%, and top 10%.
-  - [ ] Compute average prediction and average true target per group.
-  - [ ] Compute top-bottom target spread.
-  - [ ] Plot group-level true target mean.
+## Phase 1: Analysis Table
 
-- [ ] Decile ranking analysis
-  - [ ] Split predictions into 10 deciles.
-  - [ ] Compute mean true target for each decile.
-  - [ ] Compute monotonicity or rank trend.
-  - [ ] Plot decile target curve.
+- [ ] Use validation predictions from the frozen selected main model if available.
+- [ ] If the exact frozen validation prediction must be reconstructed, document the reconstruction formula and component paths.
+- [ ] Save one table with sample index, prediction, target, model name, and chronological segment.
+- [ ] Keep validation labels untouched by fitting or tuning in this analysis.
 
-- [ ] Directional accuracy
-  - [ ] Compute sign agreement between prediction and target.
-  - [ ] Compute directional accuracy for all samples.
-  - [ ] Compute directional accuracy for strong-signal samples only.
-  - [ ] Compare strong-signal and weak-signal groups.
+## Phase 2: Ranking Interpretation
 
-- [ ] Rank correlation and signal strength
-  - [ ] Compute Spearman rank correlation if useful.
-  - [ ] Compute Rank IC by time segment if time grouping is available.
-  - [ ] Compare Pearson and rank-based metrics.
+- [ ] Sort validation samples by predicted value.
+- [ ] Define bottom 10%, middle 80%, and top 10% groups.
+- [ ] Compute average prediction and average true target per group.
+- [ ] Compute top-minus-bottom target spread.
+- [ ] Split predictions into 10 deciles and compute mean target per decile.
+- [ ] Compute Spearman rank correlation as a ranking metric.
 
-- [ ] Simplified theoretical long-short signal
-  - [ ] Define long group as top prediction quantile.
-  - [ ] Define short group as bottom prediction quantile.
-  - [ ] Compute no-cost theoretical spread.
-  - [ ] Report clearly that this is not a real trading backtest.
-  - [ ] Do not include transaction cost, slippage, latency, or risk control unless explicitly modeled.
+## Phase 3: Directional Interpretation
+
+- [ ] Compute sign agreement between prediction and target.
+- [ ] Compare all samples versus strong-signal samples.
+- [ ] Define strong-signal samples by top/bottom prediction quantiles.
+- [ ] Report directional accuracy carefully as signal interpretation, not as trading performance.
+
+## Phase 4: Simplified Long-Short Explanation
+
+- [ ] Define a theoretical long group as the top prediction quantile.
+- [ ] Define a theoretical short group as the bottom prediction quantile.
+- [ ] Compute no-cost top-bottom target spread.
+- [ ] Clearly state that this is not a real backtest.
+- [ ] Do not add transaction cost, slippage, latency, turnover, or risk control unless explicitly modeled.
 
 ## Required Outputs
 
-- [ ] `metrics_signal_interpretation.csv`
-- [ ] Top-middle-bottom target mean plot
-- [ ] Decile target mean plot
-- [ ] Directional accuracy table
-- [ ] Theoretical top-bottom spread table
-- [ ] PPT-friendly signal interpretation figure
+- [ ] `runs/04_signal/signal_interpretation_table.csv`
+- [ ] `runs/04_signal/metrics_signal_interpretation.csv`
+- [ ] Top-middle-bottom target mean plot.
+- [ ] Decile target mean plot.
+- [ ] Directional accuracy table.
+- [ ] Theoretical top-bottom spread table.
+- [ ] PPT-friendly signal interpretation figure.
 
 ## Acceptance Criteria
 
 - [ ] The analysis shows whether higher predictions correspond to higher realized target on average.
-- [ ] The report avoids overclaiming profitability.
 - [ ] Strong-signal and weak-signal groups are compared.
-- [ ] The final PPT has at least one intuitive chart that non-finance readers can understand.
-
+- [ ] The report avoids overclaiming profitability.
+- [ ] The final PPT has at least one chart that non-finance readers can understand quickly.
+- [ ] The section connects Pearson correlation to ranking and directional meaning without changing the official metric.

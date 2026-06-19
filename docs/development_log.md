@@ -1677,3 +1677,48 @@ Changes:
 - Expanded `score_ladder.png` to include Baseline1 stability blend and Beta1 top100 Ridge, making the early gain from feature selection explicit.
 - Added Baseline1/Beta1 points to `public_private_scatter.png` so the figure shows the full trajectory from early leaderboard probes to the frozen final model.
 - Updated `reports/report-draft.md` to contrast Baseline1 private `0.06628`, Beta1 top100 Ridge private `0.08901`, and the final private `0.10550`.
+
+## 2026-06-20: Extension Plan Reframing
+
+After reviewing the frozen main-task report, retrospective, and late-stage experiment artifacts, the extension plan was reframed around clearer deliverables.
+
+Main-task status:
+
+- The selected Kaggle submission remains frozen at public `0.06553` and private `0.10550`.
+- The main task should not be reopened for old-pipeline Ridge width, SHAP rule, interaction count, AE width, MLP weight, or seed-only tuning.
+- Future main-task probes are allowed only if Extension 1 produces a clearly new clean-room signal under stricter validation.
+
+Extension 1 was changed from a broad "feature selection and dimensionality reduction" task into a clean-room stable feature factory:
+
+- Start from all raw numeric features rather than the old Beta5 40-feature pool.
+- Use an outer holdout that is not touched by feature selection, early stopping, architecture selection, or blend-weight selection.
+- Build a stable raw feature bank through train-only Pearson/Spearman ranking, missing/variance checks, and correlation clustering.
+- Generate symbolic interactions from the clean feature bank, not only from the previous SHAP/top-k pool.
+- Add a feature-recycling/residual-scoring pass with out-of-fold residuals.
+- Re-test AE, supervised AE, or MLP signals only on the clean-room feature bank with inner-validation early stopping.
+- Feed back into the main task only through conservative low-weight blends and a pre-declared stop rule.
+
+Rationale:
+
+- The project already reproduced the method-level outline from the first-place solution, but those attempts were attached to the existing Beta pipeline.
+- The current interaction and representation branches are path-dependent because Beta5, Beta6, and Beta7 all use the same 40-feature core and 160-dimensional structured input.
+- Late-stage artifacts also show that standalone signal metrics and blend metrics need clearer separation before using local validation as evidence.
+- A clean-room feature factory is therefore a better extension than another unbounded leaderboard sprint.
+
+Extension 2 remains the temporal stability and distribution-drift analysis:
+
+- The existing rolling-validation outputs are already sufficient for a credible extension.
+- Remaining work is report cleanup, careful wording around "time segments" versus true market regimes, and an optional feature-drift or embargo appendix.
+
+Extension 3 remains the predictive signal interpretation task:
+
+- It should be lightweight and PPT-facing.
+- The priority is decile target curves, top-middle-bottom grouping, directional accuracy, and a no-cost theoretical top-bottom spread.
+- The section must avoid claiming a real trading backtest.
+
+Updated task files:
+
+- `todo_01_main_prediction.md`: main task is now explicitly frozen with a clean-room reopen gate.
+- `todo_02_feature_selection_dimensionality.md`: rewritten as the clean-room stable feature factory.
+- `todo_03_temporal_stability.md`: narrowed to temporal stability, distribution drift, and report cleanup.
+- `todo_04_signal_interpretation.md`: narrowed to ranking/directional signal interpretation for report and PPT.

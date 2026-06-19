@@ -1,74 +1,48 @@
-# TODO 03: Extension Task 2 - Temporal Stability and Market State Analysis
+# TODO 03: Extension Task 2 - Temporal Stability and Distribution Drift
 
 ## Goal
 
-Analyze whether model performance is stable across time and whether performance changes indicate market state shifts or distribution drift.
+Use chronological validation and distribution analysis to support model credibility. This extension should explain why the task is not an i.i.d. regression problem and why the final model selection avoided random K-fold and public-score chasing.
 
-## Checkpoints
+## Completed Scope
 
-- [x] Define time-aware validation protocol
-  - [ ] Confirm whether row order represents chronological order from official metadata.
-  - [x] Check whether an official time column is available in the provided parquet files.
-  - [x] Avoid random K-fold as the main validation method.
-  - [x] Keep the 80/20 time split as the primary validation baseline.
-  - [x] Add expanding rolling validation as a stability check.
+- [x] Define a time-aware validation protocol.
+- [x] Keep the chronological 80/20 split as the primary baseline.
+- [x] Add expanding rolling validation.
+- [x] Evaluate four chronological validation folds.
+- [x] Save fold-level Pearson, RMSE, target statistics, and prediction statistics.
+- [x] Plot rolling Pearson by feature/model scheme.
+- [x] Plot target distribution by time segment.
+- [x] Compare feature-selection stability across folds.
+- [x] Save LightGBM feature-importance stability outputs.
+- [x] Draft market-state and validation-stability notes.
 
-- [x] Rolling validation
-  - [x] Fold 1: train early period, validate next period.
-  - [x] Fold 2: expand training window, validate next period.
-  - [x] Fold 3: expand training window, validate next period.
-  - [x] Fold 4: expand training window, validate next period.
-  - [x] Save fold-level Pearson, RMSE, target std, and prediction std.
+## Remaining Cleanup
 
-- [ ] Optional embargo experiment
-  - [ ] Add a gap between training and validation windows.
-  - [ ] Compare results with and without embargo.
-  - [ ] Use this to discuss look-ahead bias risk.
-
-- [x] Time-segment performance analysis
-  - [x] Split validation predictions into chronological rolling blocks.
-  - [x] Compute Pearson per block.
-  - [x] Plot rolling or block-wise Pearson.
-  - [x] Identify high-performance and low-performance periods.
-
-- [ ] Distribution drift analysis
-  - [x] Compare target mean, std, and quantiles by time segment.
-  - [x] Compare prediction mean, std, and quantiles by time segment.
-  - [ ] Track missing ratio or feature distribution changes over time.
-  - [x] Save drift summary tables.
-
-- [ ] Feature stability analysis
-  - [x] Train LightGBM on different rolling folds.
-  - [x] Compare top feature importance across folds.
-  - [x] Compute overlap ratio of top-k features.
-  - [ ] Plot feature importance changes for selected features.
+- [ ] Confirm report wording says "time segment" or "regime-like shift" rather than overclaiming exact market states.
+- [ ] Add a concise table of rolling mean, standard deviation, minimum, and maximum Pearson by scheme.
+- [ ] Add one paragraph explaining why top rolling mean alone was not enough for final model selection.
+- [ ] Add a short leakage-control note: random splits are not used as main evidence.
+- [ ] If time permits, add a lightweight feature-drift summary for top stable raw features.
+- [ ] If time permits, add an embargo comparison as a robustness appendix, not as a required main result.
 
 ## Required Outputs
 
-- [x] `metrics_rolling_validation.csv`
-- [x] Rolling Pearson line plot
-- [x] Target distribution by time segment
-- [x] Prediction distribution by time segment
-- [x] Feature importance stability table
-- [x] Market-state discussion notes
+- [x] `runs/03_temporal/rolling_validation/metrics_rolling_validation.csv`
+- [x] `runs/03_temporal/rolling_validation/scheme_stability_summary.csv`
+- [x] `runs/03_temporal/rolling_validation/target_distribution_by_fold.csv`
+- [x] `runs/03_temporal/rolling_validation/feature_overlap.csv`
+- [x] `runs/03_temporal/rolling_validation/feature_selection_frequency.csv`
+- [x] `runs/03_temporal/rolling_validation/lightgbm_importance_stability.csv`
+- [x] `reports/figures/03_temporal/rolling_pearson_by_scheme.png`
+- [x] `reports/figures/03_temporal/target_distribution_by_fold.png`
+- [ ] Report-ready rolling-stability summary table.
+- [ ] Report paragraph connecting temporal instability to conservative low-weight ensembling.
 
 ## Acceptance Criteria
 
 - [x] At least four chronological validation folds are evaluated.
-- [x] The report can clearly state whether performance is stable or regime-dependent.
-- [x] The analysis explains score variation using target, prediction, or feature distribution evidence.
+- [x] The report can state whether performance is stable or regime-dependent.
+- [x] The analysis explains score variation using target, prediction, or feature-distribution evidence.
 - [x] The validation design avoids random leakage-prone splits as the main evidence.
-
-## Current Artifacts
-
-- Config: `configs/03_temporal_rolling_validation.yaml`
-- Script: `scripts/run_rolling_validation.py`
-- Metrics: `runs/03_temporal/rolling_validation/metrics_rolling_validation.csv`
-- Stability summary: `runs/03_temporal/rolling_validation/scheme_stability_summary.csv`
-- Feature stability:
-  - `runs/03_temporal/rolling_validation/feature_overlap.csv`
-  - `runs/03_temporal/rolling_validation/feature_selection_frequency.csv`
-  - `runs/03_temporal/rolling_validation/lightgbm_importance_stability.csv`
-- Figures:
-  - `reports/figures/03_temporal/rolling_pearson_by_scheme.png`
-  - `reports/figures/03_temporal/target_distribution_by_fold.png`
+- [ ] Final wording avoids claiming access to real timestamped market regimes if the data only supports row-order time segments.
