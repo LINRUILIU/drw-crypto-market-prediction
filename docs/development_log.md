@@ -1622,3 +1622,35 @@ Current best remains:
 with private score `0.10550`.
 
 Interpretation: the Beta7 MLP gain is seed-sensitive and was not reproduced by nearby AdamW seeds or simple seed means. This closes the bounded sprint plan. The main task should now be frozen for report consolidation rather than continued leaderboard probing.
+
+## 2026-06-19: Main Report Outline and Figures
+
+After freezing the main task, added a detailed Chinese report outline at `docs/main_report_outline.md`.
+
+The outline fixes the main-task report narrative:
+
+```text
+high-dimensional anonymous features
+-> leakage-controlled validation
+-> strong linear top-k baseline
+-> feature-selection variants
+-> symbolic interaction features
+-> low-weight representation / MLP signals
+-> conservative ensemble under public/private divergence
+```
+
+It also defines the main-task figure set and recommended writing order.
+
+Implemented `scripts/make_main_report_figures.py`, which writes reproducible figures to `reports/figures/01_main/`:
+
+- `score_ladder.png`
+- `public_private_scatter.png`
+- `final_pipeline.png`
+- `feature_funnel.png`
+- `interaction_operator_distribution.png`
+- `component_correlation_heatmap.png`
+- `holdout_private_delta.png`
+- `signal_family_summary.png`
+- `figure_manifest.csv`
+
+Note: `reports/figures/*` remains ignored by git, so the figures are local report artifacts while the generation script is tracked.
