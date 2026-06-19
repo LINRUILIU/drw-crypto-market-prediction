@@ -622,3 +622,22 @@ Current best remains:
 ```
 
 Conclusion: widening the AE bottleneck to 16/32, adding light denoising, and probing another seed did not improve over AE8. AE is not selected for the main submission in its current form.
+
+## Beta6.2 Supervised AE Features
+
+Beta6.2 added a supervised auxiliary target head to the AE latent representation while keeping the same 160 Beta5 structured inputs.
+
+| Submission | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta5-A interaction Ridge | 0.06362 | 0.10302 | Current best before Beta6.2 |
+| `0.875 * current_best + 0.125 * ae8_supervised_mse005` | 0.06781 | 0.10269 | Local best, AE weight too high |
+| `0.95 * current_best + 0.05 * ae8_supervised_mse005` | 0.06542 | 0.10300 | Near tie |
+| `0.975 * current_best + 0.025 * ae8_supervised_mse005` | 0.06454 | 0.10303 | Current best private score |
+
+Current best:
+
+```text
+0.975 * beta5_current_best + 0.025 * ae8_supervised_mse005_ridge
+```
+
+Conclusion: supervised AE features produce a marginal transferable gain, but only at very small weight. Larger AE weights improve public/local metrics and reduce private score.

@@ -1448,3 +1448,17 @@ Submitted conservative candidate: `0.95 * current_best + 0.05 * ae8_base_ridge`,
 Current best remains `0.85 * beta4_current_best + 0.15 * ridge_interactions_only`, private `0.10302`.
 
 Interpretation: the "AE too small" hypothesis is not supported. The original AE8 representation stayed strongest; wider bottlenecks, light denoising, and a seed probe all weakened holdout Pearson and did not improve private score. If AE continues, Beta6.2 should change the AE objective or downstream usage rather than keep widening the bottleneck.
+
+## 2026-06-19: Beta6.2 Supervised AE Features
+
+Beta6.2 changed the AE objective instead of widening the bottleneck again. The encoder still reconstructed the 160 Beta5 structured inputs, but an auxiliary head on the latent representation also predicted the standardized target inside the train-only fitting split.
+
+Local summary: `ae8_supervised_mse005` was the best signal, with holdout Pearson `0.121189`, delta `+0.002756` vs current best, Ridge alpha `50000`, and test correlation `0.802822` with the current best. Wider or Pearson-mixed variants were weaker: `ae16_supervised_mse005` `0.118394`, `ae8_supervised_mix` `0.113515`, `ae8_supervised_mse010` `0.110022`, and `ae16_supervised_mix` `0.101189`.
+
+Kaggle results: `0.875 * current_best + 0.125 * ae8_supervised_mse005` scored Public `0.06781`, Private `0.10269`; `0.95 * current_best + 0.05 * ae8_supervised_mse005` scored Public `0.06542`, Private `0.10300`; `0.975 * current_best + 0.025 * ae8_supervised_mse005` scored Public `0.06454`, Private `0.10303`.
+
+Current best becomes `0.975 * beta5_current_best + 0.025 * ae8_supervised_mse005_ridge`, where `beta5_current_best = 0.85 * beta4_current_best + 0.15 * ridge_interactions_only`.
+
+Local selected submission: `submissions/01_main/beta6_2_supervised_ae/submission_best.csv`.
+
+Interpretation: supervised AE features provide a real but tiny transferable signal. The useful region is extremely conservative; heavier AE weights improve local/public but reduce private. Further AE work should focus on stronger supervised representation learning or using AE features inside a broader stack, not on larger AE weight.
