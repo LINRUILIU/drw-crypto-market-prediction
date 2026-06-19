@@ -641,3 +641,21 @@ Current best:
 ```
 
 Conclusion: supervised AE features produce a marginal transferable gain, but only at very small weight. Larger AE weights improve public/local metrics and reduce private score.
+
+## Beta7 Supervised MLP Signal Generator
+
+Beta7 trained six supervised MLP signals on the fixed 160 Beta5 structured inputs, plus seed-mean and multi-model mean ensembles.
+
+| Candidate | Holdout Pearson | Delta vs Current Best | Kaggle Result | Notes |
+| --- | ---: | ---: | --- | --- |
+| `0.975 * current_best + 0.025 * wide_adamw_lr001_seed_mean` | 0.120212 | +0.001018 | Not submitted | Kaggle CLI upload timed out |
+| `0.925 * current_best + 0.075 * wide_adamw_lr001_seed2026` | 0.121517 | +0.002322 | Not submitted | Held for upload recovery |
+| `0.900 * current_best + 0.100 * wide_adamw_lr001_seed3026` | 0.121241 | +0.002047 | Not submitted | Lowest-correlation candidate |
+
+Current best remains:
+
+```text
+0.975 * beta5_current_best + 0.025 * ae8_supervised_mse005_ridge
+```
+
+Conclusion: the constrained MLP branch is implemented and locally evaluated, but no Beta7 Kaggle score is available because `kaggle competitions submit` repeatedly timed out during upload. Do not treat Beta7 as a new best unless a later submission proves transfer.

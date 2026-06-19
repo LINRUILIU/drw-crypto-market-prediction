@@ -107,6 +107,8 @@ Build a reproducible Kaggle submission pipeline for DRW Crypto Market Prediction
 - [x] Kept Beta5-A as the current best after Beta6-AE: private `0.10302`.
 - [x] Tested Beta6.1 AE refinement with bottleneck 8/16/32, light denoising, and a seed probe; conservative AE blend scored public `0.06412`, private `0.10269`, below the Beta5-A best.
 - [x] Implemented Beta6.2 supervised AE with an auxiliary target head; best conservative blend scored public `0.06454`, private `0.10303`, narrowly above the Beta5-A best.
-- [ ] Decide whether to continue supervised representation learning/stacking or shift to report consolidation.
+- [x] Implemented Beta7 supervised MLP signal generator over fixed 160 Beta5 structured inputs with six MLPs, seed-mean ensembles, and low-weight blends.
+- [x] Ran Beta7 smoke and full experiments; selected local candidates, but Kaggle submit timed out repeatedly and no Beta7 leaderboard score was recorded.
+- [ ] Decide whether to retry Beta7 Kaggle submission after CLI/network recovery or shift to report consolidation.
 
 

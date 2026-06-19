@@ -1462,3 +1462,41 @@ Current best becomes `0.975 * beta5_current_best + 0.025 * ae8_supervised_mse005
 Local selected submission: `submissions/01_main/beta6_2_supervised_ae/submission_best.csv`.
 
 Interpretation: supervised AE features provide a real but tiny transferable signal. The useful region is extremely conservative; heavier AE weights improve local/public but reduce private. Further AE work should focus on stronger supervised representation learning or using AE features inside a broader stack, not on larger AE weight.
+
+## 2026-06-19: Beta7 Supervised MLP Signal Generator
+
+Beta7 tested a constrained supervised MLP branch on the same 160 Beta5 structured inputs. The goal was not to replace the current best, but to generate a low-weight nonlinear complementary signal.
+
+### Local Results
+
+Best standalone MLP signals:
+
+| Signal | Optimizer | Seed | Holdout Pearson | Delta vs current best | Test corr vs current best |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `wide_sgd_lr0003_seed3026` | SGD | 3026 | 0.114539 | -0.004655 | 0.878461 |
+| `wide_sgd_lr0003_seed_mean` | SGD mean | - | 0.108111 | -0.011083 | 0.884932 |
+| `all_model_mean` | mixed mean | - | 0.104323 | -0.014871 | 0.744134 |
+| `wide_adamw_lr001_seed2026` | AdamW | 2026 | 0.089807 | -0.029387 | 0.478062 |
+| `wide_adamw_lr001_seed3026` | AdamW | 3026 | 0.076565 | -0.042629 | 0.529948 |
+
+Selected blend candidates:
+
+| Candidate | Holdout Pearson | Delta vs current best | Test corr vs current best | Notes |
+| --- | ---: | ---: | ---: | --- |
+| `0.975 * current_best + 0.025 * wide_adamw_lr001_seed_mean` | 0.120212 | +0.001018 | 0.997501 | Conservative seed-mean probe |
+| `0.925 * current_best + 0.075 * wide_adamw_lr001_seed2026` | 0.121517 | +0.002322 | 0.977739 | Holdout-best low-weight probe |
+| `0.900 * current_best + 0.100 * wide_adamw_lr001_seed3026` | 0.121241 | +0.002047 | 0.960290 | Lowest-correlation candidate |
+
+### Kaggle Status
+
+Kaggle CLI submission did not complete for Beta7. The first selected candidate was attempted three times, but each `kaggle competitions submit` call timed out and left a residual Kaggle/Python upload process; follow-up `kaggle competitions submissions` queries confirmed no Beta7 submission reached the leaderboard.
+
+Current best therefore remains:
+
+```text
+0.975 * beta5_current_best + 0.025 * ae8_supervised_mse005_ridge
+```
+
+with private score `0.10303`.
+
+Interpretation: Beta7 MLP did not produce a strong standalone local signal. The only locally useful candidates rely on low-correlation AdamW predictions at small weights, which may be public/holdout-seeking rather than private-stable. Do not continue MLP tuning unless Kaggle submission is available and the conservative `0.025` probe transfers.

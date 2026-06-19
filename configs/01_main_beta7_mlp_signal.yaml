@@ -1,0 +1,146 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  validation_fraction: 0.2
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+current_best:
+  name: beta6_2_supervised_ae_w0025
+  private_score: 0.10303
+  beta4_base:
+    base_weight: 0.75
+    signal_weight: 0.25
+    beta3_components:
+      - name: top50_alpha200000
+        selected_features_path: runs/01_main/pearson_topk/selected_features_top50.txt
+        alpha: 200000
+        weight: 0.3825
+      - name: top100_alpha50
+        selected_features_path: runs/01_main/pearson_topk/selected_features_top100.txt
+        alpha: 50
+        weight: 0.3825
+      - name: spearman_top50_alpha50000
+        selected_features_path: runs/01_main/beta3_new_feature_signals/selected_features_spearman_top50.txt
+        alpha: 50000
+        weight: 0.235
+    shap_stable_features_path: runs/01_main/beta4_shap_stable/selected_features_shap_stable.txt
+    shap_stable_valid_prediction_path: runs/01_main/beta4_shap_stable/valid_predictions/valid_shap_stable_xgboost.csv
+  beta5_interaction:
+    weight: 0.15
+    valid_prediction_path: runs/01_main/beta5_interactions/valid_predictions/valid_ridge_interactions_only.csv
+  beta6_2_supervised_ae:
+    weight: 0.025
+    valid_prediction_path: runs/01_main/beta6_2_supervised_ae/valid_predictions/valid_ae8_supervised_mse005_ridge.csv
+  test_submission_path: submissions/01_main/beta6_2_supervised_ae/submission_best.csv
+
+input:
+  base_feature_pool_path: runs/01_main/beta5_interactions/base_feature_pool.txt
+  interaction_definitions_path: runs/01_main/beta5_interactions/selected_interaction_definitions.csv
+  include_base_features: true
+  include_interactions: true
+
+mlp_defaults:
+  max_epochs: 80
+  patience: 12
+  batch_size: 4096
+  mse_weight: 0.6
+  pearson_weight: 0.4
+  momentum: 0.9
+  weight_decay: 1.0e-4
+  torch_num_threads: 0
+
+mlp_models:
+  - name: small_sgd_lr001_seed2026
+    family: small_sgd_lr001
+    hidden_sizes: [128, 64, 32]
+    dropout: 0.05
+    optimizer: sgd
+    learning_rate: 0.01
+    seed: 2026
+  - name: small_sgd_lr001_seed3026
+    family: small_sgd_lr001
+    hidden_sizes: [128, 64, 32]
+    dropout: 0.05
+    optimizer: sgd
+    learning_rate: 0.01
+    seed: 3026
+  - name: wide_sgd_lr0003_seed2026
+    family: wide_sgd_lr0003
+    hidden_sizes: [256, 128, 64]
+    dropout: 0.10
+    optimizer: sgd
+    learning_rate: 0.003
+    seed: 2026
+  - name: wide_sgd_lr0003_seed3026
+    family: wide_sgd_lr0003
+    hidden_sizes: [256, 128, 64]
+    dropout: 0.10
+    optimizer: sgd
+    learning_rate: 0.003
+    seed: 3026
+  - name: wide_adamw_lr001_seed2026
+    family: wide_adamw_lr001
+    hidden_sizes: [256, 128, 64]
+    dropout: 0.10
+    optimizer: adamw
+    learning_rate: 0.001
+    seed: 2026
+  - name: wide_adamw_lr001_seed3026
+    family: wide_adamw_lr001
+    hidden_sizes: [256, 128, 64]
+    dropout: 0.10
+    optimizer: adamw
+    learning_rate: 0.001
+    seed: 3026
+
+ensemble_signals:
+  - name: small_sgd_lr001_seed_mean
+    members: [small_sgd_lr001_seed2026, small_sgd_lr001_seed3026]
+  - name: wide_sgd_lr0003_seed_mean
+    members: [wide_sgd_lr0003_seed2026, wide_sgd_lr0003_seed3026]
+  - name: wide_adamw_lr001_seed_mean
+    members: [wide_adamw_lr001_seed2026, wide_adamw_lr001_seed3026]
+  - name: all_sgd_mean
+    members:
+      - small_sgd_lr001_seed2026
+      - small_sgd_lr001_seed3026
+      - wide_sgd_lr0003_seed2026
+      - wide_sgd_lr0003_seed3026
+  - name: all_model_mean
+    members:
+      - small_sgd_lr001_seed2026
+      - small_sgd_lr001_seed3026
+      - wide_sgd_lr0003_seed2026
+      - wide_sgd_lr0003_seed3026
+      - wide_adamw_lr001_seed2026
+      - wide_adamw_lr001_seed3026
+
+blend:
+  signal_weights: [0.025, 0.05, 0.075, 0.10]
+  holdout_floor_delta: -0.001
+  min_std_ratio_current_best: 0.50
+  max_std_ratio_current_best: 1.35
+  max_selected_submissions: 3
+
+xgboost_fallback:
+  n_estimators: 800
+  learning_rate: 0.03
+  max_depth: 5
+  subsample: 0.85
+  colsample_bytree: 0.85
+  reg_lambda: 1.0
+  early_stopping_rounds: 80
+
+output:
+  run_dir: runs/01_main/beta7_mlp_signal
+  submission_dir: submissions/01_main/beta7_mlp_signal
+  prediction_col: prediction
