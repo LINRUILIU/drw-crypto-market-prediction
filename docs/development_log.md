@@ -1537,3 +1537,88 @@ Current best remains:
 with private score `0.10550`.
 
 Interpretation: the useful MLP weight region is a narrow private plateau around `0.075-0.0875`. Since `0.0875` only ties private and has lower public, keep the simpler Beta7 `0.075` submission as the selected best. Further weight-only MLP tuning is unlikely to produce material gains.
+
+## 2026-06-19: Main Task Retrospective and Sprint Decision
+
+Added `docs/main_task_retrospective.md` to consolidate the current main-task state after Beta7.1.
+
+Current selected submission remains:
+
+```text
+0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026
+```
+
+with public `0.06553` and private `0.10550`.
+
+The retrospective closes the following axes unless a new hypothesis changes the setup:
+
+- Ridge top-k, alpha, and weight-only sweeps.
+- Spearman-only and direct residual blend tuning.
+- SHAP-stable XGB feature-rule and early-stopping sweeps.
+- Wider/heavier interaction Ridge variants.
+- Unsupervised or wider AE features.
+- MLP weight-only tuning around the existing seed2026 signal.
+
+The proposed bounded sprint path is:
+
+1. Sprint-A fold-stable interaction selection, because Beta5-A interactions produced the largest structural gain and Beta5-B showed that widening alone is harmful.
+2. Sprint-B AdamW MLP seed-stability check, because Beta7's best improvement came from a single AdamW seed and should be tested for stability before further MLP work.
+
+If neither sprint beats private `0.10550`, the main task should be frozen for report consolidation.
+
+## 2026-06-19: Sprint-A Fold-Stable Interaction Selection
+
+Sprint-A replaced the single train-split interaction ranking with purged fold-stable scoring over the existing 40-feature core pool and the same pairwise symbolic operators.
+
+Implementation artifacts:
+
+- Config: `configs/01_main_sprint_a_interaction_stability.yaml`
+- Script: `scripts/run_sprint_a_interaction_stability.py`
+- Run directory: `runs/01_main/sprint_a_interaction_stability/`
+- Submission directory: `submissions/01_main/sprint_a_interaction_stability/`
+
+The full run tested six feature rules and selected two candidates.
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| `top250_min3_fill120` interaction Ridge, signal weight `0.05` | 0.06637 | 0.10514 | Best Sprint-A private, below current best |
+| `top250_min4_fill120` interaction Ridge, signal weight `0.15` | 0.06766 | 0.10437 | Lower-correlation backup, below current best |
+
+Current best remains:
+
+```text
+0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026
+```
+
+with private score `0.10550`.
+
+Interpretation: fold-stable interaction selection did not improve over the selected Beta5-A interaction signal. Since widening interactions also failed in Beta5-B, interaction selection is closed unless a materially new symbolic-generation hypothesis is introduced.
+
+## 2026-06-19: Sprint-B AdamW MLP Seed Stability
+
+Sprint-B fixed the successful AdamW MLP architecture from Beta7 and tested seed stability on the same 160 Beta5 structured inputs.
+
+Implementation artifacts:
+
+- Config: `configs/01_main_sprint_b_mlp_seed_stability.yaml`
+- Wrapper script: `scripts/run_sprint_b_mlp_seed_stability.py`
+- Run directory: `runs/01_main/sprint_b_mlp_seed_stability/`
+- Submission directory: `submissions/01_main/sprint_b_mlp_seed_stability/`
+
+Submitted candidates:
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| AdamW new-seed mean, signal weight `0.025` | 0.06573 | 0.10376 | Conservative seed-mean probe |
+| AdamW seed4026, signal weight `0.075` | 0.06944 | 0.10321 | Public improved, private dropped |
+| AdamW seed2526, signal weight `0.0875` | 0.06397 | 0.10205 | Low-correlation boundary, below current best |
+
+Current best remains:
+
+```text
+0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026
+```
+
+with private score `0.10550`.
+
+Interpretation: the Beta7 MLP gain is seed-sensitive and was not reproduced by nearby AdamW seeds or simple seed means. This closes the bounded sprint plan. The main task should now be frozen for report consolidation rather than continued leaderboard probing.

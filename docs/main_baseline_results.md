@@ -677,3 +677,40 @@ Current best remains:
 ```
 
 Conclusion: Beta7.1 confirms a narrow private plateau around `0.075-0.0875`. Keep `0.075` as the selected main submission; further weight-only tuning is unlikely to matter.
+
+## Sprint-A Fold-Stable Interaction Selection
+
+Sprint-A tested whether the successful interaction Ridge branch could be improved by selecting pairwise symbolic features through purged fold-stable label/residual correlation instead of a single train-split ranking.
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta7 AdamW MLP blend | 0.06553 | 0.10550 | Current best before Sprint-A |
+| `top250_min3_fill120` interaction Ridge, signal weight `0.05` | 0.06637 | 0.10514 | Best Sprint-A private, below current best |
+| `top250_min4_fill120` interaction Ridge, signal weight `0.15` | 0.06766 | 0.10437 | Public improved, private dropped |
+
+Current best remains:
+
+```text
+0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026
+```
+
+Conclusion: fold-stable interaction selection did not improve over the selected Beta5-A interaction signal. The interaction branch remains important, but this specific stability-screened replacement is not selected.
+
+## Sprint-B AdamW MLP Seed Stability
+
+Sprint-B fixed the Beta7 AdamW MLP recipe and tested whether nearby seeds or seed means could reproduce or improve the `seed2026` gain.
+
+| Candidate | Public | Private | Notes |
+| --- | ---: | ---: | --- |
+| Previous best: Beta7 AdamW MLP blend | 0.06553 | 0.10550 | Current best before Sprint-B |
+| AdamW new-seed mean, signal weight `0.025` | 0.06573 | 0.10376 | Conservative seed-mean probe |
+| AdamW seed4026, signal weight `0.075` | 0.06944 | 0.10321 | Public improved, private dropped |
+| AdamW seed2526, signal weight `0.0875` | 0.06397 | 0.10205 | Low-correlation boundary, below current best |
+
+Current best remains:
+
+```text
+0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026
+```
+
+Final main-task conclusion: Sprint-A and Sprint-B did not beat private `0.10550`. The main task is frozen for report consolidation unless the project explicitly starts a larger first-place-reproduction effort.

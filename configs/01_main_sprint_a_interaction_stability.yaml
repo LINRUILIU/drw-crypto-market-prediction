@@ -1,0 +1,111 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  test_file:
+  sample_submission_file:
+  target_col: label
+  id_col:
+  validation_fraction: 0.2
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+current_best:
+  name: sprint_current_best_mlp_w0075
+  private_score: 0.10550
+  beta4_base:
+    base_weight: 0.75
+    signal_weight: 0.25
+    beta3_components:
+      - name: top50_alpha200000
+        selected_features_path: runs/01_main/pearson_topk/selected_features_top50.txt
+        alpha: 200000
+        weight: 0.3825
+      - name: top100_alpha50
+        selected_features_path: runs/01_main/pearson_topk/selected_features_top100.txt
+        alpha: 50
+        weight: 0.3825
+      - name: spearman_top50_alpha50000
+        selected_features_path: runs/01_main/beta3_new_feature_signals/selected_features_spearman_top50.txt
+        alpha: 50000
+        weight: 0.235
+    shap_stable_features_path: runs/01_main/beta4_shap_stable/selected_features_shap_stable.txt
+    shap_stable_valid_prediction_path: runs/01_main/beta4_shap_stable/valid_predictions/valid_shap_stable_xgboost.csv
+  beta5_interaction:
+    weight: 0.15
+    valid_prediction_path: runs/01_main/beta5_interactions/valid_predictions/valid_ridge_interactions_only.csv
+  beta6_2_supervised_ae:
+    weight: 0.025
+    valid_prediction_path: runs/01_main/beta6_2_supervised_ae/valid_predictions/valid_ae8_supervised_mse005_ridge.csv
+  sprint_mlp:
+    weight: 0.075
+    valid_prediction_path: runs/01_main/beta7_mlp_signal/valid_predictions/valid_wide_adamw_lr001_seed2026.csv
+  test_submission_path: submissions/01_main/beta7_1_mlp_weight_refine/submission_blend_beta6p2_w0p925_wide_adamw_lr001_seed2026_w0p075.csv
+
+input:
+  base_feature_pool_path: runs/01_main/beta5_interactions/base_feature_pool.txt
+
+interactions:
+  operations: [add, sub, mul, div_l_abs_r, div_r_abs_l, max, min]
+  eps: 1.0e-6
+  clip_quantiles: [0.001, 0.999]
+  score_block_size: 64
+  transform_block_size: 128
+  corr_prune_threshold: 0.985
+  max_selected_features: 120
+
+fold_stability:
+  n_groups: 6
+  gap_groups: 1
+  rules:
+    - name: top150_min3_fill120
+      fold_top_n: 150
+      min_fold_appearances: 3
+      fill_to_n: 120
+    - name: top150_min4_fill120
+      fold_top_n: 150
+      min_fold_appearances: 4
+      fill_to_n: 120
+    - name: top250_min3_fill120
+      fold_top_n: 250
+      min_fold_appearances: 3
+      fill_to_n: 120
+    - name: top250_min4_fill120
+      fold_top_n: 250
+      min_fold_appearances: 4
+      fill_to_n: 120
+    - name: top250_min3_fill0
+      fold_top_n: 250
+      min_fold_appearances: 3
+      fill_to_n: 0
+    - name: top250_min4_fill0
+      fold_top_n: 250
+      min_fold_appearances: 4
+      fill_to_n: 0
+
+ridge:
+  alphas: [10, 50, 100, 300, 1000, 3000, 10000, 50000, 200000, 500000, 1000000]
+
+blend:
+  signal_weights: [0.05, 0.10, 0.15]
+  holdout_floor_delta: -0.0015
+  min_std_ratio_current_best: 0.50
+  max_std_ratio_current_best: 1.35
+  max_selected_submissions: 2
+
+xgboost_fallback:
+  n_estimators: 800
+  learning_rate: 0.03
+  max_depth: 5
+  subsample: 0.85
+  colsample_bytree: 0.85
+  reg_lambda: 1.0
+  early_stopping_rounds: 80
+
+output:
+  run_dir: runs/01_main/sprint_a_interaction_stability
+  submission_dir: submissions/01_main/sprint_a_interaction_stability
+  prediction_col: prediction
