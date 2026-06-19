@@ -14,4 +14,6 @@ submissions/*
 
 reports/figures/*
 !reports/figures/.gitkeep
-
+!reports/figures/**/
+!reports/figures/**/*.png
+!reports/figures/**/*.csv
