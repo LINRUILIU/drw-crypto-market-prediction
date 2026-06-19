@@ -91,11 +91,11 @@ Ridge 回归的目标函数为：
 
 $$
 \min_{\mathbf{w}}
-\left{
+\left\{
 \sum_{i=1}^{n}(y_i - \mathbf{x}_i^\top \mathbf{w})^2
 +
-\alpha |\mathbf{w}|_2^2
-\right}
+\alpha \lVert \mathbf{w} \rVert_2^2
+\right\}
 $$
 
 其中，$\alpha$ 为正则化强度。较大的 $\alpha$ 会压缩模型参数，降低过拟合风险。
