@@ -39,7 +39,8 @@ def plot_score_ladder(manifest: list[dict[str, str]]) -> None:
         ("Beta4\nSHAP-XGB", 0.10043),
         ("Beta5\nInteraction", 0.10302),
         ("Beta6.2\nSup-AE", 0.10303),
-        ("Beta7\nMLP", 0.10550),
+        ("Beta7\nlogged", 0.10550),
+        ("Beta7 final\npost-freeze", 0.11043),
     ]
     labels = [s[0] for s in stages]
     scores = [s[1] for s in stages]
@@ -75,13 +76,14 @@ def submission_points() -> pd.DataFrame:
         ("Beta6 AE w0.15", "AE", 0.06488, 0.10169),
         ("Beta6.2 Sup-AE", "AE", 0.06454, 0.10303),
         ("Beta7 MLP mean", "MLP", 0.06588, 0.10411),
-        ("Beta7 MLP final", "MLP", 0.06553, 0.10550),
+        ("Beta7 MLP logged", "MLP", 0.06553, 0.10550),
         ("Beta7 MLP heavy", "MLP", 0.06930, 0.10304),
         ("Sprint-A w0.05", "Sprint", 0.06637, 0.10514),
         ("Sprint-A w0.15", "Sprint", 0.06766, 0.10437),
         ("Sprint-B mean", "Sprint", 0.06573, 0.10376),
         ("Sprint-B seed4026", "Sprint", 0.06944, 0.10321),
         ("Sprint-B seed2526", "Sprint", 0.06397, 0.10205),
+        ("Beta7 final post-freeze", "Post-freeze", 0.06547, 0.11043),
     ]
     return pd.DataFrame(rows, columns=["candidate", "family", "public", "private"])
 
@@ -97,13 +99,14 @@ def plot_public_private(manifest: list[dict[str, str]]) -> None:
         "AE": "#64748b",
         "MLP": "#dc2626",
         "Sprint": "#f59e0b",
+        "Post-freeze": "#111827",
     }
     fig, ax = plt.subplots(figsize=(8, 5.2))
     for family, group in data.groupby("family"):
         ax.scatter(group["public"], group["private"], label=family, s=58, alpha=0.85, color=colors.get(family))
-    final = data[data["candidate"] == "Beta7 MLP final"].iloc[0]
+    final = data[data["candidate"] == "Beta7 final post-freeze"].iloc[0]
     ax.scatter([final["public"]], [final["private"]], s=150, facecolors="none", edgecolors="black", linewidths=1.8)
-    ax.annotate("selected", (final["public"], final["private"]), xytext=(8, -16), textcoords="offset points")
+    ax.annotate("selected file\npost-freeze", (final["public"], final["private"]), xytext=(8, -16), textcoords="offset points")
     ax.set_title("Public vs Private Scores")
     ax.set_xlabel("Public Pearson")
     ax.set_ylabel("Private Pearson")
@@ -268,7 +271,7 @@ def plot_holdout_private_delta(manifest: list[dict[str, str]]) -> None:
     ax.scatter(frame["holdout_delta"], frame["private_delta"], color="#9333ea", s=65)
     for _, row in frame.iterrows():
         ax.annotate(row["candidate"], (row["holdout_delta"], row["private_delta"]), xytext=(5, 5), textcoords="offset points", fontsize=8)
-    ax.set_title("Holdout Delta vs Private Delta")
+    ax.set_title("Development-Time Holdout Delta vs Private Delta")
     ax.set_xlabel("Holdout Pearson delta")
     ax.set_ylabel("Private score delta")
     ax.grid(alpha=0.25)
@@ -276,7 +279,7 @@ def plot_holdout_private_delta(manifest: list[dict[str, str]]) -> None:
         "holdout_private_delta.png",
         "Holdout/private delta comparison",
         "runs/01_main/*/candidate metrics and Kaggle submissions",
-        "Show why local improvements were not always trusted late in the project.",
+        "Show why local improvements were not always trusted during development-time model selection.",
         manifest,
     )
 

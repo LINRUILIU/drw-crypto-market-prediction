@@ -12,7 +12,9 @@ Leaderboard result:
 
 | Public | Private | Status |
 | ---: | ---: | --- |
-| 0.06553 | 0.10550 | Selected current best |
+| 0.06547 | 0.11043 | Best observed post-competition score for the same frozen Beta7 final file |
+
+Post-competition audit note, 2026-06-21: the selected file is `submissions/01_main/beta7_mlp_signal/submission_blend_current_w0p925_wide_adamw_lr001_seed2026_w0p075.csv`. This keeps the same Beta7 formula and does not define a new modeling branch. Because the score was obtained after the competition ended, it should be described as the best observed score, not as an official leaderboard rank. The earlier `0.06553 / 0.10550` result remains the development-time logged score for the same final line.
 
 Beta7.1 found a narrow private plateau around MLP signal weight `0.075-0.0875`. The `0.0875` candidate tied private `0.10550` but had lower public, so the `0.075` Beta7 submission remains selected.
 

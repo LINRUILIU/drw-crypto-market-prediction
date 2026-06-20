@@ -12,9 +12,9 @@ Kaggle 分数：
 
 | Public | Private | 状态 |
 | ---: | ---: | --- |
-| 0.06553 | 0.10550 | 主任务最终选择 |
+| 0.06547 | 0.11043 | 同一冻结 Beta7 最终文件的赛后最佳观测分数 |
 
-其中 private 分数达到公开榜单的第 14 名。
+2026-06-21 复核说明：该分数对应 `submissions/01_main/beta7_mlp_signal/submission_blend_current_w0p925_wide_adamw_lr001_seed2026_w0p075.csv`，不是 `submission_best.csv`，也不是新模型路线。由于提交发生在比赛结束后，报告只能写“最佳观测分数”；若按整理后的最终榜单分数静态插入，private 约第 6、public 约第 514，但不能写作官方排名。
 
 报告不应写成“不断刷榜”的流水账，而应写成一个清晰的建模过程：
 
@@ -42,7 +42,7 @@ Kaggle 分数：
 - 问题：基于订单簿和匿名市场特征预测未来短期收益，评价指标为 Pearson correlation。
 - 数据规模：训练集 `525886` 行、测试集 `538150` 行；特征为 `bid_qty`、`ask_qty`、`buy_qty`、`sell_qty`、`volume` 与 `X1-X780`，目标列为 `label`。
 - 方法：Ridge/LightGBM 基线，Pearson/Spearman top-k，SHAP-stable XGB，symbolic interactions，supervised AE，supervised MLP，小权重融合。
-- 结果：最终 private `0.10550`；最佳模型是多信号 ensemble。
+- 结果：最终冻结文件最佳观测 private `0.11043`；最佳模型是多信号 ensemble。
 - 结论：高维匿名金融预测更依赖稳定特征工程和验证设计，而不是盲目增加模型复杂度。
 
 ## 1. 问题背景与任务定义
@@ -317,7 +317,8 @@ Sprint-A 结果：
 | Candidate | Public | Private | 结论 |
 | --- | ---: | ---: | --- |
 | AdamW seed mean `w0.025` | 0.06588 | 0.10411 | 保守提升 |
-| AdamW seed2026 `w0.075` | 0.06553 | 0.10550 | 最终 best |
+| AdamW seed2026 `w0.075` | 0.06553 | 0.10550 | 开发阶段记录 |
+| AdamW seed2026 `w0.075` | 0.06547 | 0.11043 | 同一冻结文件赛后复核 best |
 | AdamW seed3026 `w0.10` | 0.06930 | 0.10304 | public 高但 private 低 |
 
 Sprint-B seed stability：
@@ -375,7 +376,8 @@ final = 0.925 * beta6_2
 | + SHAP-stable XGB | 0.05634 | 0.10043 |
 | + Interaction Ridge | 0.06362 | 0.10302 |
 | + Supervised AE tiny | 0.06454 | 0.10303 |
-| + Supervised MLP | 0.06553 | 0.10550 |
+| + Supervised MLP logged | 0.06553 | 0.10550 |
+| + Supervised MLP post-freeze | 0.06547 | 0.11043 |
 
 ## 8. 失败实验与建模反思
 

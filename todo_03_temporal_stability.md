@@ -19,12 +19,14 @@ Use chronological validation and distribution analysis to support model credibil
 
 ## Remaining Cleanup
 
-- [ ] Confirm report wording says "time segment" or "regime-like shift" rather than overclaiming exact market states.
-- [ ] Add a concise table of rolling mean, standard deviation, minimum, and maximum Pearson by scheme.
-- [ ] Add one paragraph explaining why top rolling mean alone was not enough for final model selection.
-- [ ] Add a short leakage-control note: random splits are not used as main evidence.
-- [ ] If time permits, add a lightweight feature-drift summary for top stable raw features.
-- [ ] If time permits, add an embargo comparison as a robustness appendix, not as a required main result.
+- [x] Confirm report wording says "time segment" or "regime-like shift" rather than overclaiming exact market states.
+- [x] Add a concise table of rolling mean, standard deviation, minimum, and maximum Pearson by scheme.
+- [x] Add one paragraph explaining why top rolling mean alone was not enough for final model selection.
+- [x] Add a short leakage-control note: random splits are not used as main evidence.
+- [x] Add a lightweight feature-drift summary for top stable raw features.
+- [x] Add an embargo comparison as a robustness appendix, not as a required main result.
+- [x] Add public/private divergence explanation tied to submitted candidates.
+- [x] Add final leaderboard CSV context and distinguish official leaderboard rows from post-competition Beta7 final resubmission.
 
 ## Required Outputs
 
@@ -36,8 +38,25 @@ Use chronological validation and distribution analysis to support model credibil
 - [x] `runs/03_temporal/rolling_validation/lightgbm_importance_stability.csv`
 - [x] `reports/figures/03_temporal/rolling_pearson_by_scheme.png`
 - [x] `reports/figures/03_temporal/target_distribution_by_fold.png`
-- [ ] Report-ready rolling-stability summary table.
-- [ ] Report paragraph connecting temporal instability to conservative low-weight ensembling.
+- [x] `runs/03_temporal/report_artifacts/rolling_stability_report_table.csv`
+- [x] `runs/03_temporal/report_artifacts/target_drift_report_table.csv`
+- [x] `runs/03_temporal/report_artifacts/feature_overlap_report_table.csv`
+- [x] `runs/03_temporal/report_artifacts/stable_feature_frequency_table.csv`
+- [x] `runs/03_temporal/report_artifacts/feature_drift_summary.csv`
+- [x] `runs/03_temporal/report_artifacts/embargo_comparison.csv`
+- [x] `runs/03_temporal/report_artifacts/public_private_submission_table.csv`
+- [x] `runs/03_temporal/report_artifacts/public_private_gap_summary.csv`
+- [x] `runs/03_temporal/report_artifacts/leaderboard_public_private_summary.csv`
+- [x] `runs/03_temporal/report_artifacts/leaderboard_private_desc_clean.csv`
+- [x] `runs/03_temporal/report_artifacts/leaderboard_public_desc_clean.csv`
+- [x] `reports/figures/03_temporal/feature_overlap_summary.png`
+- [x] `reports/figures/03_temporal/stable_feature_drift_heatmap.png`
+- [x] `reports/figures/03_temporal/embargo_comparison.png`
+- [x] `reports/figures/03_temporal/public_private_gap_bar.png`
+- [x] `reports/figures/03_temporal/leaderboard_score_scatter.png`
+- [x] `reports/figures/03_temporal/leaderboard_rank_scatter.png`
+- [x] Report-ready rolling-stability summary table.
+- [x] Report paragraph connecting temporal instability to conservative low-weight ensembling.
 
 ## Acceptance Criteria
 
@@ -45,4 +64,5 @@ Use chronological validation and distribution analysis to support model credibil
 - [x] The report can state whether performance is stable or regime-dependent.
 - [x] The analysis explains score variation using target, prediction, or feature-distribution evidence.
 - [x] The validation design avoids random leakage-prone splits as the main evidence.
-- [ ] Final wording avoids claiming access to real timestamped market regimes if the data only supports row-order time segments.
+- [x] Final wording avoids claiming access to real timestamped market regimes if the data only supports row-order time segments.
+- [x] Post-competition submission scores are used as best observed scores, not as official leaderboard ranks.

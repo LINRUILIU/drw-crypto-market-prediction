@@ -1722,3 +1722,145 @@ Updated task files:
 - `todo_02_feature_selection_dimensionality.md`: rewritten as the clean-room stable feature factory.
 - `todo_03_temporal_stability.md`: narrowed to temporal stability, distribution drift, and report cleanup.
 - `todo_04_signal_interpretation.md`: narrowed to ranking/directional signal interpretation for report and PPT.
+
+## 2026-06-20: Extension 2 Temporal Stability Artifacts and Report Section
+
+Extension 2 was implemented as a report-facing temporal stability and distribution-drift analysis. At this point the main task was treated as frozen at public `0.06553`, private `0.10550`; no new Kaggle submission was generated during this extension round. The post-competition audit on 2026-06-21 below supersedes the final-score wording while preserving the same frozen Beta7 file and formula.
+
+Implementation:
+
+- Added script: `scripts/make_temporal_report_artifacts.py`.
+- Generated report artifacts under `runs/03_temporal/report_artifacts/`.
+- Added additional figures under `reports/figures/03_temporal/`.
+- Updated `reports/report-draft.md` with a new section:
+  - `扩展任务 2：时间稳定性与分布漂移分析`.
+- Updated `todo_03_temporal_stability.md` to reflect completed cleanup, feature drift, embargo, and public/private divergence outputs.
+
+Generated tables:
+
+- `rolling_stability_report_table.csv`
+- `target_drift_report_table.csv`
+- `feature_overlap_report_table.csv`
+- `stable_feature_frequency_table.csv`
+- `feature_drift_summary.csv`
+- `embargo_comparison.csv`
+- `public_private_submission_table.csv`
+- `public_private_gap_summary.csv`
+- `temporal_report_artifacts_summary.json`
+
+Generated figures:
+
+- `feature_overlap_summary.png`
+- `stable_feature_drift_heatmap.png`
+- `embargo_comparison.png`
+- `public_private_gap_bar.png`
+
+Key findings:
+
+- Rolling validation still shows that `top300` has the highest mean Pearson (`0.162315`), but the most stable scheme by standard deviation is `full` (`std = 0.019837`).
+- `top200` and `top300` have stronger mean rolling Pearson but larger fold-to-fold variation, so top rolling mean alone is not a sufficient final-selection rule.
+- Target distribution changes by row-order segment: `fold_60_70` has the highest target mean (`0.117703`) and upper quantile, while `fold_80_90` mean drops near zero (`-0.002802`).
+- Feature selection is partly stable but not fixed: top100 has 63 features selected in all four folds, but its minimum pairwise Jaccard is only `0.587302`.
+- Stable feature drift analysis found up to about `1.15` reference standard deviations of mean shift among the selected stable raw features.
+- Fixed-alpha Ridge embargo comparison with a `1%` row gap did not show a uniform Pearson drop. Top100 dropped slightly (`-0.001322`), while top50 and top300 improved. This suggests validation instability is not explained solely by adjacent-sample leakage.
+- Public/private submission history across 20 representative candidates has a correlation of about `0.674`. Seven candidates had higher public score than the final model but lower private score, supporting a split-level distribution mismatch explanation.
+
+Report wording was kept conservative:
+
+- use "row-order time segment", "distribution drift", "regime-like shift", and "split-level distribution mismatch";
+- avoid claiming that real timestamped market regimes were identified;
+- avoid claiming that public/private splits correspond to specific known market states.
+
+## 2026-06-21: Post-Competition Beta7 Final Submission Audit and Leaderboard Context
+
+The final-score wording was updated after checking the Kaggle CLI submission history and the user-provided final leaderboard CSV files.
+
+Clarification:
+
+- The best observed submission is the frozen Beta7 final file:
+  - `submissions/01_main/beta7_mlp_signal/submission_blend_current_w0p925_wide_adamw_lr001_seed2026_w0p075.csv`
+- It is not `submission_best.csv` and does not define a new modeling branch.
+- The final formula remains:
+  - `0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026`
+- Kaggle CLI showed 50 submissions in the current account history.
+- The post-competition Beta7 final submission scored public `0.06547`, private `0.11043`.
+- Because the submission was made after the competition ended, the report must not claim an official leaderboard rank for it.
+
+Leaderboard context from `docs/leaderboard_private_desc.csv` and `docs/leaderboard_public_desc.csv`:
+
+- The supplied final leaderboard contains 1091 teams.
+- Four rows have invalid score pairs `publicScore=-1` and `privateScore=-1`; score-level plots and score correlation now exclude them.
+- After filtering those invalid score rows, 1087 rows remain for score-level analysis.
+- Public/private score correlation is `0.786`, while public/private rank correlation is `0.771`.
+- Public top 20 teams have mean private rank `228.85`; 13 of those 20 are worse than private rank 100.
+- The official `Not_Null` row in the final leaderboard has public `0.08451`, private `0.06553`, public rank `339`, private rank `323`, and 12 attempts.
+- If the post-competition Beta7 final score were statically inserted by score, it would land around public rank `514` and private rank `6`; this is only a static comparison, not an official rank.
+
+Updates made:
+
+- Updated `scripts/make_main_report_figures.py` so the main figures distinguish the logged Beta7 score (`0.10550`) from the post-freeze Beta7 final score (`0.11043`).
+- Updated `scripts/make_temporal_report_artifacts.py` so the public/private summary uses `Beta7 final post-freeze` as the selected final file.
+- Added final leaderboard score/rank scatter figures to the temporal report artifacts.
+- Updated `reports/report-draft.md` to use private `0.11043` as the best observed score while explicitly avoiding official-rank claims.
+
+## 2026-06-21: Extension 3 Predictive Signal Interpretation
+
+Extension 3 was implemented as a report-facing explanation of what the frozen Beta7 prediction signal means on the chronological 80/20 holdout.
+
+Scope:
+
+- No Kaggle submission was generated.
+- The final model formula remains unchanged:
+  - `0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026`
+- Existing `wide_adamw_lr001_seed2026` validation predictions were not full holdout length, so the script retrained only this single MLP branch for the 105178-row holdout reconstruction.
+- The reconstruction is for interpretation only and does not reopen model selection.
+
+Implementation:
+
+- Added script: `scripts/make_signal_interpretation_artifacts.py`.
+- Generated artifacts under `runs/04_signal/`.
+- Generated figures under `reports/figures/04_signal/`.
+- Updated `reports/report-draft.md` with:
+  - `扩展任务 3：预测信号解释`.
+- Updated `todo_04_signal_interpretation.md`.
+
+Generated tables:
+
+- `signal_interpretation_table.csv`
+- `metrics_signal_interpretation.csv`
+- `top_middle_bottom_summary.csv`
+- `decile_target_summary.csv`
+- `directional_accuracy_summary.csv`
+- `theoretical_top_bottom_spread.csv`
+- `reconstruction_check.csv`
+- `signal_interpretation_summary.json`
+
+Generated figures:
+
+- `top_middle_bottom_target_mean.png`
+- `decile_target_mean.png`
+- `directional_accuracy_summary.png`
+- `signal_interpretation_summary.png`
+
+Reconstruction check:
+
+- Holdout rows: `105178`
+- Global sample index range: `420708` to `525885`
+- Beta6.2 holdout Pearson: `0.119194`
+- MLP signal holdout Pearson: `0.089807`
+- Final reconstructed holdout Pearson: `0.121517`
+- Historical Beta7 `w0.075` holdout Pearson: `0.121517`
+
+Key findings:
+
+- Final prediction Pearson on holdout is `0.121517`; Spearman rank correlation is `0.135729`.
+- Bottom 10% prediction group mean target is `-0.129457`.
+- Middle 80% prediction group mean target is `0.076691`.
+- Top 10% prediction group mean target is `0.296690`.
+- No-cost top-minus-bottom target spread is `0.426147`.
+- Overall sign agreement is `53.41%`; top/bottom 10% strong-signal sign agreement is `55.56%`.
+
+Report wording:
+
+- The section describes these outputs as signal interpretation and no-cost diagnostics only.
+- It explicitly avoids treating the grouping as a deployed strategy or as realized financial performance.
