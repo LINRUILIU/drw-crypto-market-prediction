@@ -1,0 +1,55 @@
+data:
+  raw_dir: data/raw
+  train_file:
+  target_col: label
+  id_col:
+  validation_fraction: 0.2
+  drop_columns: []
+
+preprocessing:
+  numeric_only: true
+  missing_fill: median
+  standardize: true
+
+feature_selection:
+  top_k: [50, 100, 200, 300, 500]
+  high_corr_thresholds: [0.3, 0.5, 0.7, 0.9, 0.95]
+
+pca:
+  dims: [50, 100, 200, 300]
+  svd_solver: randomized
+  random_state: 42
+
+cluster:
+  thresholds: [0.6, 0.7]
+  low_target_corr_threshold: 0.0001
+  linkage_method: average
+
+models:
+  ridge:
+    alphas: [0.1, 1.0, 10.0, 100.0, 1000.0]
+  elasticnet:
+    alpha: 0.0005
+    l1_ratio: 0.2
+    max_iter: 3000
+    tol: 0.0001
+    random_state: 42
+  lightgbm:
+    n_estimators: 1200
+    learning_rate: 0.03
+    num_leaves: 63
+    subsample: 0.85
+    colsample_bytree: 0.85
+    reg_alpha: 0.0
+    reg_lambda: 1.0
+    early_stopping_rounds: 100
+    random_state: 42
+
+model_driven:
+  inner_validation_fraction: 0.2
+  shap_sample_rows: 20000
+  top_k: [50, 100, 200, 300, 500]
+
+output:
+  run_dir: runs/02_feature_dimensionality
+  figure_dir: reports/figures/02_feature_dimensionality

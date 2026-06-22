@@ -467,9 +467,83 @@ component correlation heatmap 用于观察不同信号族预测之间的相关�
 
 ---
 
-## 10. 扩展任务 2：时间稳定性与分布漂移分析
+## 10. 扩展任务 1：高维匿名特征的筛选与降维分析
 
-### 10.1 Rolling validation 设计与结果
+### 10.1 问题定义与边界
+
+扩展任务 1 回答本文的 RQ2：在大量匿名、高相关、可能冗余的特征存在时，如何通过特征筛选或降维，在减少维度和保持预测能力之间取得平衡。
+
+本扩展任务不参与最终 Kaggle 模型选择，也不替换第 7 节中的冻结 Beta7 最终文件。这里的目标是分析高维匿名特征空间的冗余结构，并比较不同压缩策略在特征数量、holdout Pearson、RMSE、训练成本和解释性之间的权衡。所有筛选、PCA、聚类、ElasticNet、LightGBM importance 和 SHAP ranking 均只在 chronological outer train split 上拟合；outer holdout 仅用于最终评估。
+
+### 10.2 匿名特征冗余结构
+
+在 outer train split 上，本文计算了 785 个原始数值特征之间的绝对 Pearson correlation。共有 `307720` 个特征对，绝对相关系数均值为 `0.122248`，中位数为 `0.061925`，但尾部相关性很强：95% 分位数达到 `0.448159`，99% 分位数达到 `0.733853`。其中，绝对相关系数不低于 `0.7` 的特征对有 `3785` 对，不低于 `0.9` 的有 `1071` 对，不低于 `0.95` 的仍有 `425` 对。
+
+![图 8：匿名特征相关性分布](figures/02_feature_dimensionality/correlation_distribution.png)
+
+<p align="center">图 8 匿名特征相关性分布</p>
+
+该结果说明，虽然多数特征对相关性较低，但存在大量高度冗余的局部特征簇。若直接使用全部特征，模型需要同时处理弱信号、噪声和冗余变量；若压缩过强，又可能丢失与目标相关的少量有效信号。因此，扩展任务 1 的核心不是简单追求最低维度，而是寻找压缩率和预测保持能力之间的折中。
+
+![图 9：相关性聚类的簇大小分布](figures/02_feature_dimensionality/cluster_size_distribution.png)
+
+<p align="center">图 9 相关性聚类的簇大小分布</p>
+
+### 10.3 筛选与降维实验
+
+本文比较了 full features、Pearson top-k、Spearman top-k、PCA、相关性聚类代表特征、相关性聚类簇均值、ElasticNet、LightGBM importance top-k 和 SHAP top-k。除 ElasticNet 直接使用自身模型评估外，其余特征方案均使用 Ridge alpha search 在同一 outer holdout 上评估。
+
+各方法的最佳结果如下：
+
+| 方法 | 最佳方案 | 维度 | Holdout Pearson | RMSE |
+| --- | --- | ---: | ---: | ---: |
+| Pearson top-k | top200 | 200 | 0.124899 | 1.081521 |
+| Spearman top-k | top50 | 50 | 0.103647 | 1.051488 |
+| Full features | all features | 785 | 0.097166 | 1.235401 |
+| 相关性聚类代表特征 | threshold 0.6 | 125 | 0.097382 | 1.105280 |
+| 相关性聚类簇均值 | threshold 0.6 | 126 | 0.091806 | 1.115458 |
+| SHAP top-k | top300 | 300 | 0.090262 | 1.184801 |
+| ElasticNet | full features | 785 | 0.088555 | 1.178551 |
+| LightGBM importance top-k | top200 | 200 | 0.086887 | 1.136761 |
+| PCA | 200 components | 200 | 0.085799 | 1.110787 |
+
+![图 10：维度数量与 holdout Pearson 的关系](figures/02_feature_dimensionality/dimension_vs_pearson.png)
+
+<p align="center">图 10 维度数量与 holdout Pearson 的关系</p>
+
+结果显示，Pearson top200 在本实验中取得最高 holdout Pearson，明显高于 full-feature Ridge。这说明原始 785 个特征中确实存在较多冗余和噪声，监督式相关性筛选可以提升线性模型的有效信噪比。Spearman top50 只保留 50 个特征，Pearson 仍超过 full features，也说明排序相关性能够捕捉一部分与 Pearson 不完全相同的信号。
+
+PCA 在 200 个主成分下已保留约 `97.64%` 的训练特征方差信息，但 holdout Pearson 仅为 `0.085799`，低于 Pearson top-k 和 full features。这说明，无监督方差压缩并不一定保留目标相关信号；在弱信号金融预测中，“方差最大”的方向未必就是“预测最有用”的方向。
+
+![图 11：各方法最佳 holdout Pearson 对比](figures/02_feature_dimensionality/method_comparison_bar.png)
+
+<p align="center">图 11 各方法最佳 holdout Pearson 对比</p>
+
+### 10.4 模型驱动筛选对比
+
+为比较模型驱动筛选与简单相关性筛选，本文在 outer train 内部再次划分 inner train/inner validation，训练 full-feature LightGBM，并基于 gain importance 和 TreeSHAP mean absolute value 得到两组特征排名。随后只使用这些排名产生 top-k 特征集，再回到统一的 Ridge outer-holdout 评估口径。
+
+LightGBM importance 的最佳结果为 top200，holdout Pearson 为 `0.086887`；SHAP ranking 的最佳结果为 top300，holdout Pearson 为 `0.090262`。二者都低于 Pearson top200 的 `0.124899`。这并不说明 LightGBM 或 SHAP 没有价值，而是说明在本任务的简单特征筛选层面，树模型重要性排名更容易捕捉 inner split 的局部非线性结构，不一定比 train-only target correlation 更适合作为 Ridge 的基础输入。
+
+![图 12：相关性筛选与模型驱动筛选的 top-k 对比](figures/02_feature_dimensionality/model_driven_topk_comparison.png)
+
+<p align="center">图 12 相关性筛选与模型驱动筛选的 top-k 对比</p>
+
+### 10.5 压缩率与预测能力权衡
+
+从压缩率角度看，Pearson top200 将特征数量从 785 降到 200，压缩约 74.5%，同时 holdout Pearson 从 full-feature Ridge 的 `0.097166` 提升到 `0.124899`。相关性聚类代表特征在 threshold 0.6 下只保留 125 个代表特征，Pearson 为 `0.097382`，与 full-feature Ridge 基本相当，但 RMSE 明显低于 full-feature Ridge。这说明去冗余可以显著压缩输入空间，但未必能最大化 Pearson。
+
+![图 13：特征压缩率与预测能力权衡](figures/02_feature_dimensionality/compression_tradeoff_frontier.png)
+
+<p align="center">图 13 特征压缩率与预测能力权衡</p>
+
+综上，扩展任务 1 支持本文主任务中的两个设计选择。第一，高维匿名特征不能简单全部输入模型，监督式筛选能显著改善 Ridge 的有效信号质量。第二，PCA、聚类、ElasticNet、LightGBM importance 和 SHAP 各自提供了不同视角，但它们更适合作为结构分析和辅助筛选工具，而不是直接替代最终多信号融合模型。最终主任务采用 top-k 线性主干、结构化 interaction 和小权重非线性补充，正是因为特征压缩、冗余控制和预测保持之间存在这种权衡。
+
+---
+
+## 11. 扩展任务 2：时间稳定性与分布漂移分析
+
+### 11.1 Rolling validation 设计与结果
 
 为检验模型在不同时间段上的稳定性，本文在主线建模之外构造了 expanding rolling validation。每个 fold 使用从样本开头开始的连续训练段，并在后续相邻时间段上验证：
 
@@ -493,13 +567,13 @@ Rolling validation 的 Ridge-LightGBM ensemble 汇总如下：
 | top50 | 0.121328 | 0.035865 | 0.078946 | 0.170520 | 1.032792 |
 | full | 0.115468 | 0.019837 | 0.098538 | 0.147126 | 1.056822 |
 
-![图 8：Rolling validation 中不同特征方案的 Pearson 波动](figures/03_temporal/rolling_pearson_by_scheme.png)
+![图 14：Rolling validation 中不同特征方案的 Pearson 波动](figures/03_temporal/rolling_pearson_by_scheme.png)
 
-<p align="center">图 8 Rolling validation 中不同特征方案的 Pearson 波动</p>
+<p align="center">图 14 Rolling validation 中不同特征方案的 Pearson 波动</p>
 
-图 8 和表格说明，top300 的平均 rolling Pearson 最高，但 top200/top300 也有明显 fold-to-fold 波动；full feature 方案平均分最低，但标准差最小。也就是说，最高 rolling mean 并不等于最稳健模型。本文后续采用小权重融合，而不是简单选择 rolling mean 最高的分支，正是因为后期模型排序在不同验证口径下并不稳定。
+图 14 和表格说明，top300 的平均 rolling Pearson 最高，但 top200/top300 也有明显 fold-to-fold 波动；full feature 方案平均分最低，但标准差最小。也就是说，最高 rolling mean 并不等于最稳健模型。本文后续采用小权重融合，而不是简单选择 rolling mean 最高的分支，正是因为后期模型排序在不同验证口径下并不稳定。
 
-### 10.2 目标分布漂移
+### 11.2 目标分布漂移
 
 各验证时间段的目标分布如下：
 
@@ -510,13 +584,13 @@ Rolling validation 的 Ridge-LightGBM ensemble 汇总如下：
 | `fold_70_80` | 0.054910 | 1.003248 | -1.476842 | 0.042353 | 1.649716 |
 | `fold_80_90` | -0.002802 | 1.029727 | -1.430521 | -0.002125 | 1.490496 |
 
-![图 9：不同验证时间段的目标均值与标准差](figures/03_temporal/target_distribution_by_fold.png)
+![图 15：不同验证时间段的目标均值与标准差](figures/03_temporal/target_distribution_by_fold.png)
 
-<p align="center">图 9 不同验证时间段的目标均值与标准差</p>
+<p align="center">图 15 不同验证时间段的目标均值与标准差</p>
 
 `fold_60_70` 的目标均值和上分位数明显抬升，而 `fold_80_90` 的均值回落到接近 0。这说明目标变量本身随时间段变化，数据不能被简单看作同分布随机样本。由于原始数据没有提供可直接解释的真实时间戳，本文只将其表述为 row-order time segment 上的 distribution drift 或 regime-like shift，不声称已经识别具体市场状态。
 
-### 10.3 特征选择稳定性与特征漂移
+### 11.3 特征选择稳定性与特征漂移
 
 不同 rolling folds 中 top-k 特征集存在一定重叠，但并非完全一致：
 
@@ -528,9 +602,9 @@ Rolling validation 的 Ridge-LightGBM ensemble 汇总如下：
 | top300 | 0.746621 | 0.690141 | 0.853889 | 0.816667 |
 | top500 | 0.770395 | 0.703578 | 0.869333 | 0.826000 |
 
-![图 10：Rolling folds 间特征选择重叠度](figures/03_temporal/feature_overlap_summary.png)
+![图 16：Rolling folds 间特征选择重叠度](figures/03_temporal/feature_overlap_summary.png)
 
-<p align="center">图 10 Rolling folds 间特征选择重叠度</p>
+<p align="center">图 16 Rolling folds 间特征选择重叠度</p>
 
 top100 中有 63 个特征在 4 个 folds 中都被选中，说明可用信号并非完全随机。但 top100 的最小 Jaccard 只有 0.587302，top50 的最小 Jaccard 进一步降到 0.492537，说明特征重要性仍会随训练时间段变化。
 
@@ -541,13 +615,13 @@ z_{\text{mean}} =
 \frac{\mu_{\text{segment}}-\mu_{\text{reference}}}{\sigma_{\text{reference}}}
 $$
 
-![图 11：稳定特征在不同时间段的均值漂移](figures/03_temporal/stable_feature_drift_heatmap.png)
+![图 17：稳定特征在不同时间段的均值漂移](figures/03_temporal/stable_feature_drift_heatmap.png)
 
-<p align="center">图 11 稳定特征在不同时间段的均值漂移</p>
+<p align="center">图 17 稳定特征在不同时间段的均值漂移</p>
 
-图 11 显示，即使是跨 fold 稳定入选的特征，也存在最高约 1.15 个参考标准差的均值偏移。这类特征分布变化会影响 Pearson 排名、模型系数和树模型分裂行为，从而解释为什么同一模型结构在不同时间段上的表现会产生波动。
+图 17 显示，即使是跨 fold 稳定入选的特征，也存在最高约 1.15 个参考标准差的均值偏移。这类特征分布变化会影响 Pearson 排名、模型系数和树模型分裂行为，从而解释为什么同一模型结构在不同时间段上的表现会产生波动。
 
-### 10.4 Embargo 对照
+### 11.4 Embargo 对照
 
 为检查相邻样本是否导致过于乐观的验证估计，本文增加了一个轻量 embargo 对照。该实验只使用固定 $\alpha=1000$ 的 Ridge top50/top100/top300，不进行 LightGBM 网格或新的模型选择。对比设置为：
 
@@ -565,13 +639,13 @@ $$
 | top300 | 0.00 | 0.089505 | 1.151837 | 0.000000 |
 | top300 | 0.01 | 0.092602 | 1.142794 | 0.003097 |
 
-![图 12：固定 alpha Ridge 的 embargo 对照](figures/03_temporal/embargo_comparison.png)
+![图 18：固定 alpha Ridge 的 embargo 对照](figures/03_temporal/embargo_comparison.png)
 
-<p align="center">图 12 固定 alpha Ridge 的 embargo 对照</p>
+<p align="center">图 18 固定 alpha Ridge 的 embargo 对照</p>
 
 Embargo 后 top100 略降，但 top50 和 top300 反而上升。因此，当前证据不支持把验证不稳定简单归因于相邻时间样本泄露。更合理的解释是：不同 row-order segment 的目标分布、特征分布和有效信号强度同时发生变化，导致验证分数随时间段改变。
 
-### 10.5 Public/private divergence 的解释
+### 11.5 Public/private divergence 的解释
 
 主线实验中，public 和 private 分数出现了明显错位。整理 21 个代表性提交后，public/private 分数相关系数约为 0.679，说明二者不是完全无关，但也远非可靠的一一对应。以赛后复核的同一冻结 Beta7 最终文件为参照，有 8 个候选的 public 高于最终文件但 private 低于最终文件。
 
@@ -586,21 +660,21 @@ Embargo 后 top100 略降，但 top50 和 top300 反而上升。因此，当前�
 | Sprint-B mean | 0.06573 | 0.10376 | 7 | 6 |
 | Beta7 MLP logged | 0.06553 | 0.10550 | 8 | 2 |
 
-![图 13：Private 相对 public 分数差较大的提交](figures/03_temporal/public_private_gap_bar.png)
+![图 19：Private 相对 public 分数差较大的提交](figures/03_temporal/public_private_gap_bar.png)
 
-<p align="center">图 13 Private 相对 public 分数差较大的提交</p>
+<p align="center">图 19 Private 相对 public 分数差较大的提交</p>
 
 进一步地，本文使用整理后的最终 leaderboard 数据检查全体队伍的 public/private 关系。该表包含 1091 个队伍；剔除 4 行 `publicScore=-1/privateScore=-1` 的异常分数记录后，有效 score 行为 1087 行，public/private score 相关系数为 0.786；public/private rank 相关系数为 0.771。也就是说，分数整体仍同向，但排序会出现明显重排。public 前 20 名队伍的平均 private rank 为 228.85，其中 13 个队伍的 private rank 低于第 100 名；private 第一名的 public rank 为第 37 名。该结果支持“public 分数不能直接代表 private 泛化”的判断，但不等价于证明 public split 或 private split 对应某个具体市场阶段。
 
-![图 14：最终榜单 public/private 分数关系](figures/03_temporal/leaderboard_score_scatter.png)
+![图 20：最终榜单 public/private 分数关系](figures/03_temporal/leaderboard_score_scatter.png)
 
-<p align="center">图 14 最终榜单 public/private 分数关系</p>
+<p align="center">图 20 最终榜单 public/private 分数关系</p>
 
-图 14 中，`Not_Null` 是最终榜单中的公开行，public/private 为 `0.08451/0.06553`，提交次数为 12。赛后复核的 Beta7 最终文件 public/private 为 `0.06547/0.11043`，不在官方最终排名中；若按分数静态插入整理后的榜单，其 public 约第 514，private 约第 6。这个对照不能写作官方排名，但能说明同一模型在两个隐藏 split 上可能呈现完全不同的相对位置。
+图 20 中，`Not_Null` 是最终榜单中的公开行，public/private 为 `0.08451/0.06553`，提交次数为 12。赛后复核的 Beta7 最终文件 public/private 为 `0.06547/0.11043`，不在官方最终排名中；若按分数静态插入整理后的榜单，其 public 约第 514，private 约第 6。这个对照不能写作官方排名，但能说明同一模型在两个隐藏 split 上可能呈现完全不同的相对位置。
 
-![图 15：最终榜单 public/private 排名关系](figures/03_temporal/leaderboard_rank_scatter.png)
+![图 21：最终榜单 public/private 排名关系](figures/03_temporal/leaderboard_rank_scatter.png)
 
-<p align="center">图 15 最终榜单 public/private 排名关系</p>
+<p align="center">图 21 最终榜单 public/private 排名关系</p>
 
 这种现象可以从三个层面解释。第一，Kaggle public 和 private 是两个不同隐藏 split；若两个 split 对应不同时间段或不同分布，则 public 排名和 private 排名自然可能不一致。第二，public leaderboard 可被多次提交间接适配，后期候选容易奖励 public-specific 的细微信号；本项目通过 Kaggle CLI 可见赛后提交记录共 50 次，而最终榜单中的 `Not_Null` 行只对应赛前/赛中记录的 12 次提交。第三，本文中 heavy MLP、wide interaction、AE-heavy 等候选多次出现 public 或 holdout 提升但 private 下降，说明更强、更重的局部信号可能只适合某个测试子分布，而不一定适合 private split。
 
@@ -608,9 +682,9 @@ Embargo 后 top100 略降，但 top50 和 top300 反而上升。因此，当前�
 
 ---
 
-## 11. 扩展任务 3：预测信号解释
+## 12. 扩展任务 3：预测信号解释
 
-### 11.1 重构验证预测与分析口径
+### 12.1 重构验证预测与分析口径
 
 扩展任务 3 的目标是把最终预测值解释为可理解的排序信号，而不是重新选择模型。分析对象仍为冻结 Beta7 公式：
 
@@ -632,7 +706,7 @@ final = 0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026
 
 重构结果与历史记录一致，说明后续解释使用的是最终冻结公式对应的验证集预测。该分析只使用 holdout 标签进行事后解释，不参与训练、调参或模型选择。
 
-### 11.2 Top-middle-bottom 分组解释
+### 12.2 Top-middle-bottom 分组解释
 
 将 holdout 样本按最终预测值从低到高排序，定义 bottom 10%、middle 80% 和 top 10% 三组。三组的平均预测值和平均真实目标如下：
 
@@ -642,59 +716,60 @@ final = 0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026
 | middle 80% | 84143 | -0.057816 | 0.076691 |
 | top 10% | 10517 | 0.380940 | 0.296690 |
 
-![图 16：不同预测强度组的平均真实目标](figures/04_signal/top_middle_bottom_target_mean.png)
+![图 22：不同预测强度组的平均真实目标](figures/04_signal/top_middle_bottom_target_mean.png)
 
-<p align="center">图 16 不同预测强度组的平均真实目标</p>
+<p align="center">图 22 不同预测强度组的平均真实目标</p>
 
 结果显示，最高预测组的平均真实目标显著高于最低预测组，top-minus-bottom target spread 为 `0.426147`。这说明最终预测值虽然无法精确预测单个样本，但在样本排序层面确实包含有效信息。
 
-### 11.3 Decile 排序曲线
+### 12.3 Decile 排序曲线
 
 进一步将预测值划分为 10 个 deciles，计算每个 decile 的平均真实目标。最低两个 deciles 的平均目标为负，随后随预测分位整体上升，最高 decile 的平均目标达到 `0.296690`。
 
-![图 17：不同预测 decile 的平均真实目标](figures/04_signal/decile_target_mean.png)
+![图 23：不同预测 decile 的平均真实目标](figures/04_signal/decile_target_mean.png)
 
-<p align="center">图 17 不同预测 decile 的平均真实目标</p>
+<p align="center">图 23 不同预测 decile 的平均真实目标</p>
 
 最终预测与真实目标的 Pearson correlation 为 `0.121517`，Spearman rank correlation 为 `0.135729`。Spearman 为正且 decile 曲线整体抬升，说明官方 Pearson 分数背后也对应一定排序能力。这一点对课程报告和展示较重要：模型输出不是只在数值相关性上有效，也能把样本大致分成更高目标和更低目标的群体。
 
-### 11.4 方向一致性与理论 top-bottom 诊断
+### 12.4 方向一致性与理论 top-bottom 诊断
 
 本文进一步计算预测值符号与真实目标符号是否一致。整体 sign agreement 为 `53.41%`，top/bottom 10% 强信号组为 `55.56%`，高于中间 80% 的 `52.87%`。
 
-![图 18：不同信号强度下的方向一致率](figures/04_signal/directional_accuracy_summary.png)
+![图 24：不同信号强度下的方向一致率](figures/04_signal/directional_accuracy_summary.png)
 
-<p align="center">图 18 不同信号强度下的方向一致率</p>
+<p align="center">图 24 不同信号强度下的方向一致率</p>
 
 方向一致率只用于解释预测信号的方向含义，不等同于可执行策略效果。特别是，本任务没有建模交易成本、滑点、延迟、仓位约束、换手率或风险控制，因此不能把该指标解释为投资表现。
 
-![图 19：预测信号解释汇总](figures/04_signal/signal_interpretation_summary.png)
+![图 25：预测信号解释汇总](figures/04_signal/signal_interpretation_summary.png)
 
-<p align="center">图 19 预测信号解释汇总</p>
+<p align="center">图 25 预测信号解释汇总</p>
 
 作为 no-cost diagnostic，若把 top 10% 看作理论高预测组、bottom 10% 看作理论低预测组，两组平均目标差为 `0.426147`。该数值只说明预测排序和目标均值之间存在差异，不构成任何可执行交易结论。
 
 ---
 
-## 12. 总结
+## 13. 总结
 
 本文围绕 Kaggle DRW Crypto Market Prediction 主任务，构建了一个从强线性基线到多信号融合的完整预测系统。实验表明，在高维匿名金融特征场景下，Ridge 等简单线性模型在经过严格特征筛选后非常强；复杂模型并不能直接替代线性模型，而应作为低权重互补信号加入。
 
 本文的主要发现包括：
 
 1. Pearson/Spearman top-k Ridge 是稳定强基线；
-2. SHAP-stable XGBoost 可提供小幅树模型补充；
-3. symbolic interaction features 是最大的结构性增益来源；
-4. AutoEncoder 表征在当前实现下效果有限，仅 supervised AE8 有极小收益；
-5. supervised MLP 可提供非线性补充，但存在 seed sensitivity；
-6. public/private divergence 明显，模型选择不能只追 public 或 holdout；
-7. 时间稳定性和分布漂移解释了验证分数随 row-order segment 改变的现象；
-8. 最终预测值具备可解释的排序含义，高预测组平均真实目标明显高于低预测组；
-9. 最终有效策略是多类互补信号的小权重保守融合。
+2. 高维匿名特征存在明显冗余，Pearson top200 在压缩约 74.5% 特征后仍优于 full-feature Ridge；
+3. SHAP-stable XGBoost 可提供小幅树模型补充；
+4. symbolic interaction features 是最大的结构性增益来源；
+5. AutoEncoder 表征在当前实现下效果有限，仅 supervised AE8 有极小收益；
+6. supervised MLP 可提供非线性补充，但存在 seed sensitivity；
+7. public/private divergence 明显，模型选择不能只追 public 或 holdout；
+8. 时间稳定性和分布漂移解释了验证分数随 row-order segment 改变的现象；
+9. 最终预测值具备可解释的排序含义，高预测组平均真实目标明显高于低预测组；
+10. 最终有效策略是多类互补信号的小权重保守融合。
 
-![图 20：不同信号族的转移效果总结](figures/01_main/signal_family_summary.png)
+![图 26：不同信号族的转移效果总结](figures/01_main/signal_family_summary.png)
 
-<p align="center">图 20 不同信号族的转移效果总结</p>
+<p align="center">图 26 不同信号族的转移效果总结</p>
 
 **最终冻结 Beta7 文件的最佳观测 private score 为 0.11043。** 该结果来自赛后复核提交，因此本文不声称官方排名；若按整理后的最终榜单分数静态插入，private 约落在第 6 位。该结果说明，本文方法虽然未完全复现第一名方案，但已经在隐藏测试集上表现出较强泛化能力。后续若继续扩展，可重点研究更系统的 feature recycling、更复杂但可控的 symbolic regression，以及更稳定的 supervised representation learning。
 
@@ -711,16 +786,25 @@ final = 0.925 * beta6_2_current_best + 0.075 * wide_adamw_lr001_seed2026
 | 图 5 | `figures/01_main/public_private_scatter.png` | 展示 public/private divergence |
 | 图 6 | `figures/01_main/component_correlation_heatmap.png` | 展示组件预测相关性 |
 | 图 7 | `figures/01_main/holdout_private_delta.png` | 展示本地提升与 private 提升不一致 |
-| 图 8 | `figures/03_temporal/rolling_pearson_by_scheme.png` | 展示 rolling validation 中各特征方案的波动 |
-| 图 9 | `figures/03_temporal/target_distribution_by_fold.png` | 展示验证时间段目标分布漂移 |
-| 图 10 | `figures/03_temporal/feature_overlap_summary.png` | 展示 rolling folds 间特征选择重叠度 |
-| 图 11 | `figures/03_temporal/stable_feature_drift_heatmap.png` | 展示稳定特征均值漂移 |
-| 图 12 | `figures/03_temporal/embargo_comparison.png` | 展示固定 alpha Ridge 的 embargo 对照 |
-| 图 13 | `figures/03_temporal/public_private_gap_bar.png` | 展示 private 相对 public 分数差 |
-| 图 14 | `figures/03_temporal/leaderboard_score_scatter.png` | 展示最终榜单 public/private 分数关系 |
-| 图 15 | `figures/03_temporal/leaderboard_rank_scatter.png` | 展示最终榜单 public/private 排名关系 |
-| 图 16 | `figures/04_signal/top_middle_bottom_target_mean.png` | 展示不同预测强度组的平均真实目标 |
-| 图 17 | `figures/04_signal/decile_target_mean.png` | 展示预测 decile 与平均真实目标关系 |
-| 图 18 | `figures/04_signal/directional_accuracy_summary.png` | 展示不同信号强度下的方向一致率 |
-| 图 19 | `figures/04_signal/signal_interpretation_summary.png` | 汇总预测信号解释结果 |
-| 图 20 | `figures/01_main/signal_family_summary.png` | 总结各信号族成败 |
+| 图 8 | `figures/02_feature_dimensionality/correlation_distribution.png` | 展示匿名特征相关性分布 |
+| 图 9 | `figures/02_feature_dimensionality/cluster_size_distribution.png` | 展示相关性聚类簇大小分布 |
+| 图 10 | `figures/02_feature_dimensionality/dimension_vs_pearson.png` | 展示维度数量与 holdout Pearson 的关系 |
+| 图 11 | `figures/02_feature_dimensionality/method_comparison_bar.png` | 对比各筛选/降维方法的最佳结果 |
+| 图 12 | `figures/02_feature_dimensionality/model_driven_topk_comparison.png` | 对比相关性筛选与模型驱动筛选 |
+| 图 13 | `figures/02_feature_dimensionality/compression_tradeoff_frontier.png` | 展示压缩率与预测能力权衡 |
+| 图 14 | `figures/03_temporal/rolling_pearson_by_scheme.png` | 展示 rolling validation 中各特征方案的波动 |
+| 图 15 | `figures/03_temporal/target_distribution_by_fold.png` | 展示验证时间段目标分布漂移 |
+| 图 16 | `figures/03_temporal/feature_overlap_summary.png` | 展示 rolling folds 间特征选择重叠度 |
+| 图 17 | `figures/03_temporal/stable_feature_drift_heatmap.png` | 展示稳定特征均值漂移 |
+| 图 18 | `figures/03_temporal/embargo_comparison.png` | 展示固定 alpha Ridge 的 embargo 对照 |
+| 图 19 | `figures/03_temporal/public_private_gap_bar.png` | 展示 private 相对 public 分数差 |
+| 图 20 | `figures/03_temporal/leaderboard_score_scatter.png` | 展示最终榜单 public/private 分数关系 |
+| 图 21 | `figures/03_temporal/leaderboard_rank_scatter.png` | 展示最终榜单 public/private 排名关系 |
+| 图 22 | `figures/04_signal/top_middle_bottom_target_mean.png` | 展示不同预测强度组的平均真实目标 |
+| 图 23 | `figures/04_signal/decile_target_mean.png` | 展示预测 decile 与平均真实目标关系 |
+| 图 24 | `figures/04_signal/directional_accuracy_summary.png` | 展示不同信号强度下的方向一致率 |
+| 图 25 | `figures/04_signal/signal_interpretation_summary.png` | 汇总预测信号解释结果 |
+| 图 26 | `figures/01_main/signal_family_summary.png` | 总结各信号族成败 |
+
+
+
