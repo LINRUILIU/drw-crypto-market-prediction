@@ -9,6 +9,7 @@ configs/                 Experiment configuration files, grouped by task number
 data/raw/                Kaggle input files, not committed
 data/processed/          Derived intermediate data, not committed
 docs/                    Report notes and audit records
+reports/report.md        Final Markdown report
 reports/figures/         Stable figures used by the report and PPT
 runs/01_main/            Main prediction task outputs
 runs/02_feature/         Feature selection and dimensionality outputs
@@ -30,6 +31,10 @@ data/raw/sample_submission.csv
 ```
 
 CSV files with the same base names are also supported. The baseline runner will auto-detect common file names.
+
+## Final Report
+
+The polished Markdown report is `reports/report.md`. It references stable figures under `reports/figures/` and supporting evidence under `docs/`.
 
 ## Main Baseline
 

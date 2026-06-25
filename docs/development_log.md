@@ -8,11 +8,7 @@
   - high-dimensional feature selection and dimensionality reduction;
   - temporal stability and market state analysis;
   - predictive signal interpretation.
-- Created four checkpoint files:
-  - `todo_01_main_prediction.md`
-  - `todo_02_feature_selection_dimensionality.md`
-  - `todo_03_temporal_stability.md`
-  - `todo_04_signal_interpretation.md`
+- Created four checkpoint todo files for development-time task tracking. These were removed from the final deliverable cleanup after their conclusions were folded into the report and development log.
 
 ### Directory Structure
 
@@ -25,11 +21,12 @@ src/drw_crypto/              Shared reusable code
 scripts/                     Command-line entry points
 configs/01_*                 Main-task experiment configs
 runs/01_main/                Main-task experiment outputs
-runs/02_feature/             Feature-selection outputs, to be added
-runs/03_temporal/            Temporal-stability outputs, to be added
-runs/04_signal/              Signal-interpretation outputs, to be added
+runs/02_feature/             Feature-selection outputs
+runs/03_temporal/            Temporal-stability outputs
+runs/04_signal/              Signal-interpretation outputs
 submissions/01_main/         Kaggle submission files
-docs/                        Environment notes, audit notes, result logs
+docs/                        Environment notes, audit notes, references, result logs
+reports/report.md            Final Markdown report
 reports/figures/             Stable report and PPT figures
 ```
 
@@ -90,9 +87,8 @@ Reusable modules:
   - weighted Ridge + LightGBM ensemble
   - submission generation
 
-Main configs:
+Main config:
 
-- `configs/01_main_baseline_smoke.yaml`
 - `configs/01_main_baseline_full.yaml`
 
 ### Validation Protocol

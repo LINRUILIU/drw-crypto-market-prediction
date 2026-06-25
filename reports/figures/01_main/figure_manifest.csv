@@ -1,9 +1,9 @@
 file,title,source,purpose
-score_ladder.png,Private score ladder,docs/main_baseline_results.md,Show how each successful signal family improved the selected private score.
-public_private_scatter.png,Public/private divergence,Kaggle submission history summarized in docs/main_baseline_results.md,Show that higher public scores often did not imply higher private scores.
-final_pipeline.png,Final ensemble pipeline,docs/main_report_outline.md,Summarize the selected model as layered complementary signals.
+score_ladder.png,Private score ladder,docs/development_log.md,Show how each successful signal family improved the selected private score.
+public_private_scatter.png,Public/private divergence,Kaggle submission history summarized in docs/development_log.md and docs/latest_submissions.png,Show that higher public scores often did not imply higher private scores.
+final_pipeline.png,Final ensemble pipeline,reports/report.md,Summarize the selected model as layered complementary signals.
 feature_funnel.png,Feature engineering funnel,runs/01_main/beta5_interactions/,Show the compression and expansion path from raw features to structured inputs.
 interaction_operator_distribution.png,Interaction operator distribution,runs/01_main/beta5_interactions/selected_interaction_definitions.csv,Show which symbolic operators survived selection.
 component_correlation_heatmap.png,Component prediction correlation heatmap,runs/01_main/*/valid_predictions/,Show that useful components are correlated but not identical.
 holdout_private_delta.png,Holdout/private delta comparison,runs/01_main/*/candidate metrics and Kaggle submissions,Show why local improvements were not always trusted during development-time model selection.
-signal_family_summary.png,Signal family summary,docs/main_task_retrospective.md,"Summarize selected, weak, failed, and public-trap directions."
+signal_family_summary.png,Signal family summary,reports/report.md,"Summarize selected, weak, failed, and public-trap directions."

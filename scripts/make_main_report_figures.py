@@ -56,7 +56,7 @@ def plot_score_ladder(manifest: list[dict[str, str]]) -> None:
     savefig(
         "score_ladder.png",
         "Private score ladder",
-        "docs/main_baseline_results.md",
+        "docs/development_log.md",
         "Show how each successful signal family improved the selected private score.",
         manifest,
     )
@@ -116,7 +116,7 @@ def plot_public_private(manifest: list[dict[str, str]]) -> None:
     savefig(
         "public_private_scatter.png",
         "Public/private divergence",
-        "Kaggle submission history summarized in docs/main_baseline_results.md",
+        "Kaggle submission history summarized in docs/development_log.md and docs/latest_submissions.png",
         "Show that higher public scores often did not imply higher private scores.",
         manifest,
     )
@@ -162,7 +162,7 @@ def plot_final_pipeline(manifest: list[dict[str, str]]) -> None:
     savefig(
         "final_pipeline.png",
         "Final ensemble pipeline",
-        "docs/main_report_outline.md",
+        "reports/report.md",
         "Summarize the selected model as layered complementary signals.",
         manifest,
     )
@@ -314,7 +314,7 @@ def plot_signal_family_summary(manifest: list[dict[str, str]]) -> None:
     savefig(
         "signal_family_summary.png",
         "Signal family summary",
-        "docs/main_task_retrospective.md",
+        "reports/report.md",
         "Summarize selected, weak, failed, and public-trap directions.",
         manifest,
     )
