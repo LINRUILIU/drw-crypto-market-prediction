@@ -1,23 +1,19 @@
 # Environment
 
-The project uses the shared science environment managed under `D:\PythonEnvs`.
+Use a dedicated Python environment with the dependencies from `requirements.txt`.
 
 Do not install project dependencies into the system Python environment. Do not create an in-project `.venv` unless the environment policy changes.
 
+After activating the environment, install dependencies from the repository root:
+
 ```powershell
-D:\PythonEnvs\envs\py313-science\Scripts\python.exe -m pip install -r requirements.txt
+python.exe -m pip install -r requirements.txt
 ```
 
 Run project scripts through the same interpreter:
 
 ```powershell
-D:\PythonEnvs\envs\py313-science\Scripts\python.exe scripts/run_main_baseline.py --config configs/01_main_baseline_full.yaml
-```
-
-Current environment path:
-
-```text
-D:\PythonEnvs\envs\py313-science
+python.exe scripts/run_main_baseline.py --config configs/01_main_baseline_full.yaml
 ```
 
 Verified core packages:
