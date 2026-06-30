@@ -491,7 +491,7 @@ component correlation heatmap 用于观察不同信号族预测之间的相关�
 
 ### 9.3 与第一名方案的差距
 
-本文参考了第一名方案中的若干方法级思想，包括 correlation clustering、SHAP-stable feature selection、symbolic interactions、AE features 和 MLP signals。根据第一名公开 writeup 及评论区说明，其核心流程包括：使用 `1-|\rho|` 作为距离对原始特征聚类，在 threshold 0.6 下得到约 60 个 medoid representatives；再删除与目标几乎无关的特征，保留约 40 个特征；使用 6 组 purged group time series split 和 XGBoost TreeSHAP 选择跨 fold 稳定出现的特征；进一步构造二阶、三阶 symbolic combinations，并进行 feature recycling；最终将特征输入 AutoEncoder 合成 8 个 deep features，并以三层 MLP 作为主要模型 [[3]](#ref-3)。
+本文参考了第一名方案中的若干方法级思想，包括 correlation clustering、SHAP-stable feature selection、symbolic interactions、AE features 和 MLP signals。根据第一名公开 writeup 及评论区说明，其核心流程包括：使用 $1-|\rho|$ 作为距离对原始特征聚类，在 threshold 0.6 下得到约 60 个 medoid representatives；再删除与目标几乎无关的特征，保留约 40 个特征；使用 6 组 purged group time series split 和 XGBoost TreeSHAP 选择跨 fold 稳定出现的特征；进一步构造二阶、三阶 symbolic combinations，并进行 feature recycling；最终将特征输入 AutoEncoder 合成 8 个 deep features，并以三层 MLP 作为主要模型 [[3]](#ref-3)。
 
 本文已经复现了上述路线中的主要方法方向，但没有完全复现第一名的最终效果。差距主要体现在以下方面：
 
@@ -509,7 +509,7 @@ component correlation heatmap 用于观察不同信号族预测之间的相关�
 
 ### 10.1 问题定义与边界
 
-扩展任务 1 回答本文的 RQ2：在大量匿名、高相关、可能冗余的特征存在时，如何通过特征筛选或降维，在减少维度和保持预测能力之间取得平衡。
+扩展任务 1 回答的问题是：在大量匿名、高相关、可能冗余的特征存在时，如何通过特征筛选或降维，在减少维度和保持预测能力之间取得平衡。
 
 本扩展任务不参与最终 Kaggle 模型选择，也不替换第 7 节中的冻结 Beta7 最终文件。这里的目标是分析高维匿名特征空间的冗余结构，并比较不同压缩策略在特征数量、holdout Pearson、RMSE、训练成本和解释性之间的权衡。所有筛选、PCA、聚类、ElasticNet、LightGBM importance 和 SHAP ranking 均只在 chronological outer train split 上拟合；outer holdout 仅用于最终评估。
 
