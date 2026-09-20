@@ -12,7 +12,9 @@ ID_CANDIDATES = ("id", "ID", "Id", "row_id", "rowid", "sample_id")
 
 
 def infer_target_column(train_df: pd.DataFrame, test_df: pd.DataFrame | None, configured: str | None) -> str:
-    if configured and configured in train_df.columns:
+    if configured:
+        if configured not in train_df.columns:
+            raise ValueError(f"Configured target column {configured!r} was not found.")
         return configured
 
     for candidate in TARGET_CANDIDATES:
@@ -36,16 +38,23 @@ def infer_id_column(
     target_col: str,
     configured: str | None,
 ) -> str | None:
-    if configured and configured in train_df.columns:
+    available = set(train_df.columns)
+    if test_df is not None:
+        available.update(test_df.columns)
+    if configured:
+        if configured == target_col or (test_df is not None and configured not in available):
+            raise ValueError(f"Configured ID column {configured!r} was not found or is the target.")
+        # Some runners load test data only after training; defer existence checks
+        # until that input is available to make_submission.
         return configured
 
     for candidate in ID_CANDIDATES:
-        if candidate in train_df.columns and candidate != target_col:
+        if candidate in available and candidate != target_col:
             return candidate
 
     if sample_submission is not None and test_df is not None and len(sample_submission.columns) >= 2:
         first_col = str(sample_submission.columns[0])
-        if first_col in train_df.columns and first_col in test_df.columns and first_col != target_col:
+        if first_col in test_df.columns and first_col != target_col:
             return first_col
 
     return None
@@ -84,7 +93,8 @@ class TabularPreprocessor:
     standardize: bool = True
 
     def fit(self, df: pd.DataFrame, missing_fill: str = "median", standardize: bool = True) -> "TabularPreprocessor":
-        self.standardize = standardize
+        if df.empty:
+            raise ValueError("Cannot fit preprocessing statistics on an empty training set.")
         frame = self._numeric_frame(df)
 
         if missing_fill == "median":
@@ -96,12 +106,18 @@ class TabularPreprocessor:
         else:
             raise ValueError(f"Unsupported missing_fill: {missing_fill}")
 
-        self.fill_values = fill_values.fillna(0.0).astype("float32")
-        filled = frame.fillna(self.fill_values)
-
-        self.means = filled.mean(axis=0).astype("float32")
-        scales = filled.std(axis=0, ddof=0).replace(0.0, 1.0).fillna(1.0)
-        self.scales = scales.astype("float32")
+        with np.errstate(over="ignore", invalid="ignore"):
+            fill_values = fill_values.fillna(0.0).astype("float32")
+            filled = frame.fillna(fill_values)
+            means = filled.mean(axis=0).astype("float32")
+            scales = filled.std(axis=0, ddof=0).replace(0.0, 1.0).fillna(1.0).astype("float32")
+        if (
+            not all(np.isfinite(values.to_numpy()).all() for values in (fill_values, means, scales))
+            or (scales <= 0).any()
+        ):
+            raise ValueError("Preprocessing statistics are not representable as finite float32 values.")
+        self.standardize = standardize
+        self.fill_values, self.means, self.scales = fill_values, means, scales
         return self
 
     def transform(self, df: pd.DataFrame) -> np.ndarray:
@@ -109,12 +125,19 @@ class TabularPreprocessor:
             raise RuntimeError("TabularPreprocessor must be fitted before transform().")
 
         frame = self._numeric_frame(df).fillna(self.fill_values)
-        x = frame.to_numpy(dtype=np.float32, copy=True)
-        if self.standardize:
-            x -= self.means.to_numpy(dtype=np.float32)
-            x /= self.scales.to_numpy(dtype=np.float32)
+        with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+            x = frame.to_numpy(dtype=np.float32, copy=True)
+            if self.standardize:
+                x -= self.means.to_numpy(dtype=np.float32)
+                x /= self.scales.to_numpy(dtype=np.float32)
+        if not np.isfinite(x).all():
+            raise ValueError("Preprocessing produced non-finite float32 values.")
         return x
 
     def _numeric_frame(self, df: pd.DataFrame) -> pd.DataFrame:
+        if not self.feature_cols or len(set(self.feature_cols)) != len(self.feature_cols):
+            raise ValueError("Feature columns must be non-empty and unique.")
+        if not df.columns.is_unique:
+            raise ValueError("Input data has duplicate column names.")
         return df.loc[:, self.feature_cols].replace([np.inf, -np.inf], np.nan)
 

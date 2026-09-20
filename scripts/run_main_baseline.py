@@ -29,6 +29,7 @@ from drw_crypto.io import (  # noqa: E402
 )
 from drw_crypto.metrics import pearson_corr, rmse  # noqa: E402
 from drw_crypto.models import NumpyRidgeRegressor  # noqa: E402
+from drw_crypto.pipeline import make_submission  # noqa: E402
 from drw_crypto.preprocessing import (  # noqa: E402
     TabularPreprocessor,
     infer_feature_columns,
@@ -39,7 +40,7 @@ from drw_crypto.preprocessing import (  # noqa: E402
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run main DRW crypto baseline models.")
-    parser.add_argument("--config", default="configs/main_baseline.yaml", help="Path to YAML config.")
+    parser.add_argument("--config", default="configs/01_main_baseline_full.yaml", help="Path to YAML config.")
     parser.add_argument("--max-train-rows", type=int, default=None, help="Optional tail sample for quick tests.")
     parser.add_argument("--no-final", action="store_true", help="Skip fitting final models and submission output.")
     parser.add_argument(
@@ -95,32 +96,6 @@ def save_valid_predictions(path: Path, y_true: np.ndarray, y_pred: np.ndarray) -
             "prediction": y_pred,
         }
     ).to_csv(path, index=False)
-
-
-def make_submission(
-    sample_submission: pd.DataFrame | None,
-    test_df: pd.DataFrame,
-    pred: np.ndarray,
-    prediction_col: str,
-    id_col: str | None,
-) -> pd.DataFrame:
-    if sample_submission is not None:
-        if len(sample_submission) != len(pred):
-            raise ValueError(
-                f"Sample submission has {len(sample_submission)} rows, but prediction has {len(pred)} rows."
-            )
-        submission = sample_submission.copy()
-        if prediction_col not in submission.columns:
-            raise ValueError(
-                f"Prediction column {prediction_col!r} is not in sample submission columns: "
-                f"{list(submission.columns)}"
-            )
-        submission[prediction_col] = pred
-        return submission
-
-    if id_col and id_col in test_df.columns:
-        return pd.DataFrame({id_col: test_df[id_col].to_numpy(), prediction_col: pred})
-    return pd.DataFrame({"row_id": np.arange(len(pred), dtype=np.int64), prediction_col: pred})
 
 
 def train_ridge_search(

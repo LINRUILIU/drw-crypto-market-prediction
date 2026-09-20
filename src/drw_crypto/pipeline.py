@@ -10,7 +10,7 @@ import pandas as pd
 from drw_crypto.io import write_lines
 from drw_crypto.metrics import pearson_corr, rmse
 from drw_crypto.models import NumpyRidgeRegressor
-from drw_crypto.preprocessing import TabularPreprocessor
+from drw_crypto.preprocessing import ID_CANDIDATES, TabularPreprocessor
 
 
 def split_time_ordered(df: pd.DataFrame, validation_fraction: float) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -45,17 +45,84 @@ def make_submission(
     prediction_col: str,
     id_col: str | None,
 ) -> pd.DataFrame:
+    """Validate predictions and preserve the row order used to generate them.
+
+    When both inputs contain IDs, their order must match; this function never
+    silently reorders predictions. ID-free test data uses positional alignment.
+    """
+    values = np.asarray(pred)
+    if values.ndim != 1 or len(values) != len(test_df):
+        raise ValueError("Predictions must be one-dimensional and match the test row count.")
+    if (
+        not np.issubdtype(values.dtype, np.number)
+        or np.iscomplexobj(values)
+        or not np.isfinite(values).all()
+    ):
+        raise ValueError("Predictions must contain only finite real numbers.")
+    if not test_df.columns.is_unique:
+        raise ValueError("Test data has duplicate column names.")
+    if prediction_col == id_col or (
+        prediction_col in ID_CANDIDATES
+        and (
+            prediction_col in test_df.columns
+            or (sample_submission is not None and prediction_col in sample_submission.columns)
+        )
+    ):
+        raise ValueError("The prediction column must not overwrite the ID column.")
+
     if sample_submission is not None:
-        if len(sample_submission) != len(pred):
+        if not sample_submission.columns.is_unique:
+            raise ValueError("Sample submission has duplicate column names.")
+        if len(sample_submission) != len(values):
             raise ValueError("Prediction length does not match sample submission length.")
-        submission = sample_submission.copy()
-        if prediction_col not in submission.columns:
+        if prediction_col not in sample_submission.columns:
             raise ValueError(f"Prediction column {prediction_col!r} is not in sample submission.")
-        submission[prediction_col] = pred
+
+    if id_col is None:
+        candidates = [
+            col for col in ID_CANDIDATES
+            if col != prediction_col and (
+                col in test_df.columns
+                or (sample_submission is not None and col in sample_submission.columns)
+            )
+        ]
+        if len(candidates) > 1:
+            raise ValueError("Multiple ID columns found; specify id_col explicitly.")
+        if candidates:
+            id_col = candidates[0]
+        elif sample_submission is not None and len(sample_submission.columns) == 2:
+            candidate = next(col for col in sample_submission.columns if col != prediction_col)
+            if candidate in test_df.columns:
+                id_col = candidate
+    if id_col == prediction_col:
+        raise ValueError("The prediction column must not overwrite the ID column.")
+
+    test_ids = template_ids = None
+    if id_col is not None:
+        for label, frame in (("Test data", test_df), ("Sample submission", sample_submission)):
+            if frame is None or id_col not in frame.columns:
+                continue
+            ids = pd.Index(frame[id_col])
+            if ids.hasnans or not ids.is_unique:
+                raise ValueError(f"{label} IDs must be unique and non-missing.")
+            if label == "Test data":
+                test_ids = ids
+            else:
+                template_ids = ids
+        if test_ids is None and template_ids is None:
+            raise ValueError(f"ID column {id_col!r} was not found in either input.")
+        if test_ids is not None and template_ids is not None and not test_ids.equals(template_ids):
+            raise ValueError("Sample submission IDs must match test data in the same order.")
+
+    if sample_submission is not None:
+        submission = sample_submission.copy()
+        submission[prediction_col] = values
         return submission
-    if id_col and id_col in test_df.columns:
-        return pd.DataFrame({id_col: test_df[id_col].to_numpy(), prediction_col: pred})
-    return pd.DataFrame({"row_id": np.arange(len(pred), dtype=np.int64), prediction_col: pred})
+    if test_ids is not None:
+        return pd.DataFrame({id_col: test_ids.to_numpy(), prediction_col: values})
+    if prediction_col == "row_id":
+        raise ValueError("The prediction column must not overwrite the generated row ID.")
+    return pd.DataFrame({"row_id": np.arange(len(values), dtype=np.int64), prediction_col: values})
 
 
 def save_valid_prediction(path: Path, y_true: np.ndarray, pred: np.ndarray) -> None:
