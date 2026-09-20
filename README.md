@@ -57,7 +57,7 @@ This trains Ridge, LightGBM, and their weighted ensemble on train-only Pearson t
 ## Data Quality Checks
 
 ```powershell
-python -m pip install numpy pandas PyYAML matplotlib
+python -m pip install -r requirements-test.txt
 python -m unittest discover -s tests -v
 ```
 

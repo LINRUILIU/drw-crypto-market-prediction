@@ -57,7 +57,7 @@ reported metrics are tuning results, not a new independent test score.
 ## Lightweight verification
 
 ```sh
-python -m pip install numpy pandas PyYAML matplotlib
+python -m pip install -r requirements-test.txt
 python -m unittest discover -s tests -v
 ```
 

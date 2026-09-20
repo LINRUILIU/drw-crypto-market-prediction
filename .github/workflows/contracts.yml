@@ -19,6 +19,6 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Install lightweight test dependencies
-        run: python -m pip install numpy pandas PyYAML matplotlib
+        run: python -m pip install -r requirements-test.txt
       - name: Validate data contracts and synthetic pipeline
         run: python -m unittest discover -s tests -v
