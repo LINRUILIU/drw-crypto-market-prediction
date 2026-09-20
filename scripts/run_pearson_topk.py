@@ -30,6 +30,7 @@ from drw_crypto.io import (  # noqa: E402
 )
 from drw_crypto.metrics import pearson_corr, rmse  # noqa: E402
 from drw_crypto.models import NumpyRidgeRegressor  # noqa: E402
+from drw_crypto.pipeline import make_submission  # noqa: E402
 from drw_crypto.preprocessing import (  # noqa: E402
     TabularPreprocessor,
     infer_feature_columns,
@@ -165,24 +166,6 @@ def save_valid_prediction(path: Path, y_true: np.ndarray, y_pred: np.ndarray) ->
             "prediction": y_pred,
         }
     ).to_csv(path, index=False)
-
-
-def make_submission(
-    sample_submission: pd.DataFrame | None,
-    test_df: pd.DataFrame,
-    pred: np.ndarray,
-    prediction_col: str,
-    id_col: str | None,
-) -> pd.DataFrame:
-    if sample_submission is not None:
-        if len(sample_submission) != len(pred):
-            raise ValueError("Prediction length does not match sample submission length.")
-        submission = sample_submission.copy()
-        submission[prediction_col] = pred
-        return submission
-    if id_col and id_col in test_df.columns:
-        return pd.DataFrame({id_col: test_df[id_col].to_numpy(), prediction_col: pred})
-    return pd.DataFrame({"row_id": np.arange(len(pred), dtype=np.int64), prediction_col: pred})
 
 
 def fit_ridge(alpha: float, x_train: np.ndarray, y_train: np.ndarray, x_test: np.ndarray) -> np.ndarray:

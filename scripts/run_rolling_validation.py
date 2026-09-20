@@ -24,6 +24,7 @@ from drw_crypto.io import TRAIN_CANDIDATES, ensure_dir, find_first_existing, rea
 from drw_crypto.metrics import pearson_corr, rmse  # noqa: E402
 from drw_crypto.models import NumpyRidgeRegressor  # noqa: E402
 from drw_crypto.preprocessing import TabularPreprocessor, infer_feature_columns, infer_id_column, infer_target_column  # noqa: E402
+from drw_crypto.validation import rolling_time_window_indices  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -37,15 +38,6 @@ def parse_args() -> argparse.Namespace:
 def load_config(path: str | Path) -> dict[str, Any]:
     with Path(path).open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
-
-
-def slice_by_fraction(df: pd.DataFrame, start: float, end: float) -> pd.DataFrame:
-    n_rows = len(df)
-    start_idx = int(n_rows * start)
-    end_idx = int(n_rows * end)
-    if start_idx < 0 or end_idx > n_rows or start_idx >= end_idx:
-        raise ValueError(f"Invalid fraction slice: start={start}, end={end}, rows={n_rows}")
-    return df.iloc[start_idx:end_idx]
 
 
 def describe_array(values: np.ndarray, prefix: str) -> dict[str, float]:
@@ -346,11 +338,16 @@ def main() -> int:
 
     for fold in fold_cfg["definitions"]:
         print(f"\n=== Rolling fold: {fold['name']} ===")
-        train_part = slice_by_fraction(train_df, float(fold["train_start"]), float(fold["train_end"]))
-        valid_part = slice_by_fraction(train_df, float(fold["valid_start"]), float(fold["valid_end"]))
-        embargo_rows = int(fold_cfg.get("embargo_rows", 0))
-        if embargo_rows > 0 and len(train_part) > embargo_rows:
-            train_part = train_part.iloc[:-embargo_rows]
+        train_indices, valid_indices = rolling_time_window_indices(
+            len(train_df),
+            train_start=float(fold["train_start"]),
+            train_end=float(fold["train_end"]),
+            valid_start=float(fold["valid_start"]),
+            valid_end=float(fold["valid_end"]),
+            embargo_rows=fold_cfg.get("embargo_rows", 0),
+        )
+        train_part = train_df.iloc[train_indices]
+        valid_part = train_df.iloc[valid_indices]
 
         y_train = train_part[target_col].to_numpy(dtype=np.float64)
         y_valid = valid_part[target_col].to_numpy(dtype=np.float64)

@@ -53,3 +53,16 @@ python.exe scripts/run_pearson_topk.py --config configs/01_main_pearson_topk.yam
 ```
 
 This trains Ridge, LightGBM, and their weighted ensemble on train-only Pearson top-k feature sets.
+
+## Data Quality Checks
+
+```powershell
+python -m pip install -r requirements-test.txt
+python -m unittest discover -s tests -v
+```
+
+These lightweight tests exercise preprocessing boundaries, submission row/ID
+checks, rolling-window validation and a synthetic Ridge run. They require no
+Kaggle files or GPU. See [data contracts and evaluation boundaries](docs/data-contracts.md)
+for the ID-free dataset assumption and the distinction between historical
+two-sided group diagnostics and forward-only rolling windows.

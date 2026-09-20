@@ -27,6 +27,7 @@ from drw_crypto.io import (  # noqa: E402
 )
 from drw_crypto.metrics import pearson_corr, rmse  # noqa: E402
 from drw_crypto.models import NumpyRidgeRegressor  # noqa: E402
+from drw_crypto.pipeline import make_submission  # noqa: E402
 from drw_crypto.preprocessing import TabularPreprocessor, infer_id_column, infer_target_column  # noqa: E402
 
 
@@ -61,24 +62,6 @@ def choose_prediction_column(sample_submission: pd.DataFrame | None, configured:
     if "prediction" in sample_submission.columns:
         return "prediction"
     return str(sample_submission.columns[-1])
-
-
-def make_submission(
-    sample_submission: pd.DataFrame | None,
-    test_df: pd.DataFrame,
-    pred: np.ndarray,
-    prediction_col: str,
-    id_col: str | None,
-) -> pd.DataFrame:
-    if sample_submission is not None:
-        submission = sample_submission.copy()
-        if prediction_col not in submission.columns:
-            raise ValueError(f"Prediction column {prediction_col!r} is not in sample submission.")
-        submission[prediction_col] = pred
-        return submission
-    if id_col and id_col in test_df.columns:
-        return pd.DataFrame({id_col: test_df[id_col].to_numpy(), prediction_col: pred})
-    return pd.DataFrame({"row_id": np.arange(len(pred), dtype=np.int64), prediction_col: pred})
 
 
 def ensure_ridge_submission(
